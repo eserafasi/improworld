@@ -63,7 +63,7 @@
     }
 
     .hero__heading {
-      font-size: clamp(2.5rem, 5vw, 3.2rem);
+      font-size: clamp(2.25rem, 5vw, 3.2rem);
       letter-spacing: -0.03em;
       line-height: 1.1;
       max-width: 16ch;
@@ -71,7 +71,7 @@
 
     .hero__description {
       color: rgba(16, 24, 40, 0.72);
-      font-size: 1.1rem;
+      font-size: 1rem;
       max-width: 48ch;
     }
 
@@ -98,7 +98,7 @@
     }
 
     .metric__value {
-      font-size: 1.75rem;
+      font-size: 1.6rem;
       font-weight: 700;
       color: var(--primary);
       transition: font-size 0.25s ease;
@@ -106,7 +106,7 @@
 
     .metric__label {
       color: var(--muted);
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       transition: font-size 0.25s ease;
     }
 
@@ -121,6 +121,81 @@
       margin: -40px auto 60px;
       padding: 0 20px 60px;
       width: 100%;
+    }
+
+    @media (max-width: 768px) {
+      .hero {
+        padding: 48px 16px 28px;
+      }
+
+      .hero__inner {
+        grid-template-columns: 1fr;
+        gap: 18px;
+      }
+
+      .hero__heading {
+        font-size: 1.9rem;
+        line-height: 1.15;
+        max-width: 100%;
+      }
+
+      .hero__description {
+        font-size: 0.95rem;
+        line-height: 1.4;
+        max-width: 40ch;
+      }
+
+      .hero__metrics {
+        justify-self: stretch;
+        max-width: none;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .metric {
+        padding: 10px 12px;
+        gap: 2px;
+      }
+
+      .metric__value {
+        font-size: 1.3rem;
+      }
+
+      .metric__label {
+        font-size: 0.72rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero {
+        padding: 40px 14px 24px;
+      }
+
+      .hero__heading {
+        font-size: 1.6rem;
+        line-height: 1.1;
+      }
+
+      .hero__description {
+        font-size: 0.85rem;
+        max-width: 32ch;
+      }
+
+      .hero__metrics {
+        gap: 8px;
+      }
+
+      .metric {
+        padding: 8px 10px;
+      }
+
+      .metric__value {
+        font-size: 1.15rem;
+      }
+
+      .metric__label {
+        font-size: 0.68rem;
+      }
     }
 
     .filters-card {
