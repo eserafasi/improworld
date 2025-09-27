@@ -225,13 +225,24 @@
     }
 
     .agenda {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 24px;
+      column-width: 320px;
+      column-gap: 24px;
+      width: 100%;
     }
 
     .agenda__list {
       display: contents;
+    }
+
+    .agenda > article,
+    .agenda__list > article,
+    .agenda > .skeleton-card,
+    .agenda__list > .skeleton-card,
+    .card,
+    .skeleton-card {
+      break-inside: avoid;
+      margin-bottom: 24px;
+      width: 100%;
     }
 
     .card {
