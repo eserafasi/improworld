@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>algunas preguntas existenciales</title>
+  <style>
+    :root {
+      --ink: #101828;
+      --muted: #475467;
+      --bg: #f5f3ff;
+      --card: #ffffff;
+      --primary: #7c3aed;
+      --primary-soft: rgba(124, 58, 237, 0.14);
+      --accent: #f97316;
+      --accent-soft: rgba(249, 115, 22, 0.12);
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08);
+      --shadow-lg: 0 30px 60px rgba(79, 70, 229, 0.18);
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --radius-pill: 999px;
+      --max-width: 1080px;
+      --transition: all 0.3s ease;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: linear-gradient(180deg, rgba(124, 58, 237, 0.16) 0%, rgba(244, 243, 255, 0.9) 35%, #ffffff 100%);
+      min-height: 100vh;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      font-family: inherit;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    p {
+      margin: 0;
+      line-height: 1.7;
+      color: rgba(16, 24, 40, 0.86);
+    }
+
+    .page {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .hero {
+      padding: clamp(72px, 12vw, 120px) 20px 56px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(120% 120% at 50% 0%, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0) 55%);
+      pointer-events: none;
+    }
+
+    .hero__inner {
+      position: relative;
+      max-width: var(--max-width);
+      margin: 0 auto;
+      display: grid;
+      gap: 36px;
+    }
+
+    .hero__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 18px;
+      border-radius: var(--radius-pill);
+      background: rgba(124, 58, 237, 0.12);
+      color: var(--primary);
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      width: fit-content;
+      box-shadow: inset 0 0 0 1px rgba(124, 58, 237, 0.16);
+    }
+
+    .hero__title {
+      font-size: clamp(2.8rem, 6vw, 3.8rem);
+      letter-spacing: -0.03em;
+      max-width: 20ch;
+    }
+
+    .hero__subtitle {
+      font-size: clamp(1.05rem, 2.6vw, 1.35rem);
+      color: rgba(16, 24, 40, 0.72);
+      max-width: 45ch;
+    }
+
+    .content {
+      flex: 1;
+      padding: 0 20px 80px;
+    }
+
+    .content__inner {
+      max-width: var(--max-width);
+      margin: -32px auto 0;
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      padding: clamp(36px, 7vw, 64px);
+      box-shadow: var(--shadow-lg);
+      display: grid;
+      gap: 32px;
+      border: 1px solid rgba(124, 58, 237, 0.16);
+    }
+
+    .intro {
+      display: grid;
+      gap: 16px;
+    }
+
+    .intro p {
+      font-size: 1.05rem;
+      color: rgba(16, 24, 40, 0.75);
+    }
+
+    .faq-list {
+      display: grid;
+      gap: 18px;
+    }
+
+    details {
+      border-radius: var(--radius-md);
+      padding: 22px 26px;
+      background: rgba(124, 58, 237, 0.06);
+      border: 1px solid rgba(124, 58, 237, 0.14);
+      transition: var(--transition);
+      position: relative;
+    }
+
+    details[open] {
+      background: rgba(124, 58, 237, 0.14);
+      box-shadow: var(--shadow-sm);
+    }
+
+    summary {
+      list-style: none;
+      cursor: pointer;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      font-weight: 600;
+      color: var(--primary);
+      font-size: 1.1rem;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    summary::before {
+      content: "¿";
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: var(--primary);
+      color: white;
+      font-size: 1rem;
+      flex-shrink: 0;
+      transition: var(--transition);
+    }
+
+    details[open] summary::before {
+      transform: rotate(-8deg) scale(1.05);
+      background: #5b21b6;
+    }
+
+    details p {
+      margin-top: 18px;
+      font-size: 1.02rem;
+      color: rgba(16, 24, 40, 0.88);
+    }
+
+    .closing-note {
+      padding: 32px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(120deg, var(--primary-soft), rgba(14, 165, 233, 0.12));
+      border: 1px solid rgba(124, 58, 237, 0.18);
+      text-align: center;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: rgba(16, 24, 40, 0.85);
+    }
+
+    @media (max-width: 640px) {
+      .content__inner {
+        margin-top: -20px;
+        padding: 28px;
+      }
+
+      details {
+        padding: 18px 20px;
+      }
+
+      summary {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <div class="hero__inner">
+        <span class="hero__badge">Impro FAQ</span>
+        <h1 class="hero__title">algunas preguntas existenciales</h1>
+        <p class="hero__subtitle">
+          Explora la filosofía viva de la impro. Cada respuesta destila el espíritu de una práctica que no se ensaya:
+          se recuerda.
+        </p>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="content__inner">
+        <section class="intro">
+          <h2>Impro en palabras que se sienten</h2>
+          <p>
+            La improvisación no es un truco escénico. Es una tecnología del alma que despierta memorias dormidas y
+            restituye la confianza en lo espontáneo. Este FAQ reúne las preguntas esenciales que recibimos en nuestros
+            encuentros, respondidas desde la intuición y la experiencia.
+          </p>
+        </section>
+
+        <section class="faq-list" aria-label="Preguntas frecuentes sobre improvisación">
+          <details open>
+            <summary>¿QUÉ ES IMPRO?</summary>
+            <p>
+              ¿Y si la verdad del momento no pudiera ser ensayada? Impro es la danza entre el vacío y la forma, donde
+              cada gesto nace sin pasado ni guion. No es actuación. Es recuerdo vivo.
+            </p>
+          </details>
+
+          <details>
+            <summary>¿Improvisar es inventar?</summary>
+            <p>
+              No. Improvisar es recordar lo que siempre estuvo allí, esperando ser dicho. El inconsciente no crea al
+              azar: revela.
+            </p>
+          </details>
+
+          <details>
+            <summary>¿Quién guía la escena?</summary>
+            <p>
+              La relación. La escucha. El sí. Cuando soltamos el control, el universo empieza a hablar.
+            </p>
+          </details>
+
+          <details>
+            <summary>¿Por qué fallamos al intentar ser espontáneos?</summary>
+            <p>
+              Porque fuimos entrenados para reprimir, no para expresar. Impro es la desobediencia creativa del alma. Es
+              la reactivación del niño que fuiste antes de saber que había error.
+            </p>
+          </details>
+
+          <details>
+            <summary>¿Impro es juego?</summary>
+            <p>
+              Sí. Pero no un juego sin consecuencias. Es un juego sagrado, donde arriesgarse es amar, y equivocarse es
+              descubrir.
+            </p>
+          </details>
+
+          <details>
+            <summary>¿Impro se aprende?</summary>
+            <p>
+              Impro se recuerda. La técnica no te enseña a crear—te desbloquea. Y el desbloqueo no es cerebral, es
+              energético. Se respira.
+            </p>
+          </details>
+
+          <details>
+            <summary>¿Y si soy tímido?</summary>
+            <p>
+              La timidez no es ausencia de expresión, es exceso de autoobservación. Impro te devuelve al presente, donde
+              no hay espacio para el juicio, solo para el impulso.
+            </p>
+          </details>
+
+          <details>
+            <summary>¿Qué tiene que ver esto con el arte?</summary>
+            <p>
+              Todo. Porque el arte no es producir, es revelar. Impro no es una herramienta escénica. Es una vía de
+              transformación.
+            </p>
+          </details>
+
+          <details>
+            <summary>¿Qué ocurre cuando improviso de verdad?</summary>
+            <p>
+              El tiempo colapsa. La identidad se diluye. Lo que eres, se expresa sin interferencia. Impro es un portal:
+              atraviesas el miedo y al otro lado está el asombro.
+            </p>
+          </details>
+
+          <details>
+            <summary>¿Y si el teatro no fuera solo para actores?</summary>
+            <p>
+              Entonces todos podríamos volver a sentir. Impro no es elitista, es tribal. Es el lenguaje original del
+              humano en conexión.
+            </p>
+          </details>
+
+          <details>
+            <summary>¿Cuál es el propósito de la impro?</summary>
+            <p>
+              Reconectar con lo vivo. Derribar las máscaras del ego. Activar el campo creativo colectivo. Impro no es
+              para brillar. Es para resonar.
+            </p>
+          </details>
+
+          <details>
+            <summary>¿Impro es espiritual?</summary>
+            <p>
+              Es más que eso. Es una tecnología del alma encarnada en el cuerpo. Un recuerdo de que todo lo que necesitas
+              está ya en ti—esperando ser escuchado.
+            </p>
+          </details>
+        </section>
+
+        <div class="closing-note">
+          Impro no se promete: se encarna en cada respiración compartida. Ven a recordarla con nosotres.
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
