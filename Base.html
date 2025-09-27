@@ -752,31 +752,105 @@
     }
 
     @media (max-width: 640px) {
+      .hero {
+        padding: 36px 16px 20px;
+      }
+
       .wrap {
-        margin-top: -60px;
+        margin-top: -40px;
       }
 
       .hero__inner {
         grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .hero__logo {
+        gap: 8px;
+      }
+
+      .hero__logo img {
+        height: clamp(36px, 9vw, 56px);
+      }
+
+      .hero__heading {
+        font-size: 1.85rem;
+        gap: 6px;
+      }
+
+      .hero__description {
+        font-size: 0.85rem;
+        line-height: 1.45;
+        margin-top: 6px;
       }
 
       .hero__metrics {
         justify-self: stretch;
         max-width: none;
-        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        display: flex;
         gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 4px;
         transform: translateY(0);
       }
 
+      .hero__metrics::-webkit-scrollbar {
+        display: none;
+      }
+
       .metric {
-        padding: 10px 12px;
+        flex: 1 0 160px;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 8px 10px;
       }
 
       .metric__value {
-        font-size: 1.25rem;
+        font-size: 1.05rem;
       }
 
       .metric__label {
+        font-size: 0.65rem;
+        white-space: nowrap;
+      }
+
+      .filters-card {
+        padding: 16px;
+        gap: 14px;
+      }
+
+      .filters-card__header {
+        gap: 8px;
+      }
+
+      .filters-card__title {
+        font-size: 1rem;
+      }
+
+      .filters-card__title span {
+        width: 28px;
+        height: 28px;
+        font-size: 0.95rem;
+      }
+
+      .filters-card__meta {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+      }
+
+      .filter-summary {
+        gap: 6px;
+      }
+
+      .filter-summary__count {
+        font-size: 0.78rem;
+      }
+
+      .chip {
+        padding: 4px 8px;
         font-size: 0.72rem;
       }
 
@@ -784,25 +858,18 @@
         grid-template-columns: 1fr;
       }
 
-      .filters-card__meta {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
       .filters-toggle {
         justify-content: center;
+        font-size: 0.78rem;
+        padding: 6px 10px;
       }
 
       .filters label {
-        font-size: 0.8rem;
+        font-size: 0.78rem;
       }
 
       .actions {
         flex-direction: column;
-      }
-
-      .hero__heading {
-        font-size: 2.25rem;
       }
     }
   </style>
