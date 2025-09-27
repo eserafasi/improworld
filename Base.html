@@ -67,6 +67,34 @@
       letter-spacing: -0.03em;
       line-height: 1.1;
       max-width: 16ch;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .hero__logo {
+      display: flex;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .hero__logo img {
+      height: clamp(48px, 10vw, 92px);
+      width: auto;
+      display: block;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
     }
 
     .hero__description {
@@ -646,7 +674,13 @@
   <header class="hero">
     <div class="hero__inner">
       <div>
-        <h1 class="hero__heading">Agenda ImproWorld</h1>
+        <h1 class="hero__heading">
+          <span class="sr-only">Agenda ImproWorld</span>
+          <span class="hero__logo" aria-hidden="true">
+            <img src="https://drive.google.com/uc?export=view&id=1l_hsaNH2OXG6ZiF5ervFpOvtcaGLMiiQ" alt="">
+            <img src="https://drive.google.com/uc?export=view&id=1RSrq-315cEHzVa0LelzEKfassWhtK_Nu" alt="">
+          </span>
+        </h1>
         <p class="hero__description">
           Encuentra las próximas funciones, talleres y experiencias de improvisación en toda la región.
           Filtra por país, ciudad o compañía y mantente al día con la comunidad.
