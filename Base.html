@@ -1347,7 +1347,46 @@ const app = createApp({
       try {
         const response = await fetch(WEBAPP_URL);
         const data = await response.json();
-        list.value = data.map(norm).filter((ev) => ev.estado !== "Despublicado");
+        const toTimestamp = (ev) => {
+          if (!ev.fechaRaw) return Number.POSITIVE_INFINITY;
+          const time = new Date(ev.fechaRaw).getTime();
+          return Number.isNaN(time) ? Number.POSITIVE_INFINITY : time;
+        };
+
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+
+        const rankingKey = (event) => {
+          const time = toTimestamp(event);
+          if (!Number.isFinite(time)) {
+            return { bucket: 2, value: Number.POSITIVE_INFINITY };
+          }
+
+          const delta = time - todayStart.getTime();
+
+          if (delta >= 0) {
+            return { bucket: 0, value: delta };
+          }
+
+          return { bucket: 1, value: Math.abs(delta) };
+        };
+        list.value = data
+          .map(norm)
+          .filter((ev) => ev.estado !== "Despublicado")
+          .sort((a, b) => {
+            const rankA = rankingKey(a);
+            const rankB = rankingKey(b);
+
+            if (rankA.bucket !== rankB.bucket) {
+              return rankA.bucket - rankB.bucket;
+            }
+
+            if (rankA.value !== rankB.value) {
+              return rankA.value - rankB.value;
+            }
+
+            return a.nombre.localeCompare(b.nombre, "es");
+          });
       } catch (err) {
         console.error("Error al cargar la agenda", err);
         list.value = [];
