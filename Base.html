@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Agenda de Eventos</title>
+  <style>
+    :root{
+      --vermas:#aa33ee;   /* Ver más */
+      --boleto:#ffcc55;   /* Boletería */
+      --ink:#222;
+      --muted:#6b7280;
+      --bg:#fff;
+      --card:#fff;
+      --ring:#e5e7eb;
+    }
+    body{font-family:Arial,Helvetica,sans-serif;color:var(--ink)}
+    .wrap{max-width:1200px;margin:0 auto;padding:10px}
+    .filters{
+      display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;margin:10px 0 20px
+    }
+    .filters select,.filters input{padding:8px 10px;border:1px solid var(--ring);border-radius:8px;min-width:180px}
+    .filters input[type="text"]{min-width:260px}
+    .agenda{
+      display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px
+    }
+    .card{
+      border:1px solid var(--ring);border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);
+      overflow:hidden;background:var(--card);display:flex;flex-direction:column;transition:transform .2s
+    }
+    .card:hover{transform:translateY(-2px)}
+    .thumb{width:100%;aspect-ratio:1/1;background:#f3f4f6;overflow:hidden;position:relative}
+    .content{padding:14px;display:flex;flex-direction:column;flex:1}
+    h3{margin:0 0 6px;font-size:18px;line-height:1.25;color:var(--ink)}
+    .meta{color:var(--muted);font-size:14px;margin:2px 0}
+    .actions{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
+    .btn{
+      border:none;border-radius:8px;padding:8px 10px;
+      cursor:pointer;font-weight:600;font-size:14px;text-align:center;text-decoration:none;flex:1
+    }
+    .btn:hover{filter:brightness(.95)}
+    .btn-vermas{background:var(--vermas);color:#fff}
+    .btn-boleto{background:var(--boleto);color:#000}
+
+    /* Modal */
+    .modal{display:none;position:fixed;z-index:1000;inset:0;background:rgba(0,0,0,.6);
+      justify-content:center;align-items:center;padding:16px}
+    .modal-content{background:#fff;border-radius:12px;max-width:720px;width:100%;max-height:90vh;overflow:auto;
+      box-shadow:0 10px 30px rgba(0,0,0,.25);display:flex;flex-direction:column}
+    .modal-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--ring)}
+    .modal-body{padding:16px;flex:1}
+    .modal-footer{padding:12px 16px;border-top:1px solid var(--ring);display:flex;gap:10px}
+    .close{background:transparent;border:none;font-size:24px;cursor:pointer}
+    .modal-hero{width:100%;aspect-ratio:1/1;background:#f3f4f6;border-radius:10px;overflow:hidden;margin-bottom:12px;position:relative}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .grid p{margin:4px 0}
+    @media (max-width:700px){
+      .grid{grid-template-columns:1fr}
+      .actions{margin-top:18px} /* más aire en móvil */
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="filters">
+    <select id="fPais"><option value="">Todos los países</option></select>
+    <select id="fCiudad"><option value="">Todas las ciudades</option></select>
+    <select id="fCompania"><option value="">Todas las compañías</option></select>
+    <input type="date" id="fFecha">
+    <input type="text" id="fSearch" placeholder="Buscar...">
+  </div>
+  <div class="agenda" id="agenda"></div>
+</div>
+
+<!-- Modal -->
+<div id="modal" class="modal" role="dialog" aria-modal="true">
+  <div class="modal-content">
+    <div class="modal-header">
+      <strong id="mTitle">Detalle</strong>
+      <button class="close" onclick="closeModal()" aria-label="Cerrar">&times;</button>
+    </div>
+    <div class="modal-body" id="mBody"></div>
+    <div class="modal-footer" id="mFooter"></div>
+  </div>
+</div>
+
+<script>
+const WEBAPP_URL="https://script.google.com/macros/s/AKfycbwoCLUfEiRjnmzumQ-Qs82vLUMpfTWHuemY8W6NODHVhGskbdQQHh-rIHKJUpS0cPCSxQ/exec";
+let raw=[],list=[];
+
+/* Normaliza texto */
+function normalizeText(t){
+  return t? t.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase():"";
+}
+
+/* Helpers */
+function val(x){return(x===undefined||x===null)?"":String(x).trim();}
+function formatFecha(v){
+  if(!v)return"";
+  const d=new Date(v);
+  if(isNaN(d))return v;
+  return d.toLocaleDateString("es-ES",{day:"numeric",month:"short",year:"numeric"});
+}
+function norm(ev){
+  return{
+    nombre:val(ev.NombreFormato)||val(ev["Nombre de la Obra"])||"Evento sin nombre",
+    formato:val(ev.TipoFormato),
+    fecha:formatFecha(ev.FechaFuncion),
+    fechaRaw:ev.FechaFuncion,
+    hora:val(ev.HoraFuncionTexto)||val(ev.HoraFuncion),
+    apertura:val(ev.AperturaPuertasTexto)||val(ev.AperturaPuertas),
+    pais:val(ev.Pais)||val(ev["País"]),
+    ciudad:val(ev.Ciudad),
+    lugar:val(ev.Lugar),
+    compania:val(ev.Compania)||val(ev["Compañía"]),
+    director:val(ev.Director),
+    sinopsis:val(ev.Sinopsis),
+    igUser:val(ev.Instagram).replace(/^https?:\/\/(www\.)?instagram\.com\//i,"").replace(/\/.*$/,"").replace(/^@/,""),
+    boleteria:val(ev.Boleteria),
+    video:val(ev.VideoURL),
+    piezaCands:driveImageCandidates(val(ev.PiezaPromocional)),
+    estado:val(ev.Estado)||"Publicado"
+  };
+}
+
+/* Load */
+async function load(){
+  const r=await fetch(WEBAPP_URL);
+  raw=await r.json();
+  list=raw.map(norm).filter(e=>e.estado!=="Despublicado");
+  fillFilters(list);render(list);
+}
+
+/* Filtros */
+function fillFilters(arr){
+  const paises=[...new Set(arr.map(e=>e.pais).filter(Boolean))].sort();
+  const ciudadesOriginal=[...new Map(arr.map(e=>[normalizeText(e.ciudad),e.ciudad])).values()].sort();
+  const companias=[...new Set(arr.map(e=>e.compania).filter(Boolean))].sort();
+
+  paises.forEach(v=>{const o=document.createElement("option");o.value=normalizeText(v);o.textContent=v;fPais.appendChild(o);});
+  ciudadesOriginal.forEach(v=>{const o=document.createElement("option");o.value=normalizeText(v);o.textContent=v;fCiudad.appendChild(o);});
+  companias.forEach(v=>{const o=document.createElement("option");o.value=normalizeText(v);o.textContent=v;fCompania.appendChild(o);});
+}
+function applyFilters(){
+  const q=normalizeText(fSearch.value);
+  const p=fPais.value,c=fCiudad.value,co=fCompania.value,f=fFecha.value;
+  const out=list.filter(e=>{
+    const okQ=!q||normalizeText(JSON.stringify(e)).includes(q);
+    const okP=!p||normalizeText(e.pais)===p;
+    const okC=!c||normalizeText(e.ciudad)===c;
+    const okCo=!co||normalizeText(e.compania)===co;
+    const okF=!f|| new Date(e.fechaRaw).toISOString().split("T")[0]===f;
+    return okQ&&okP&&okC&&okCo&&okF;
+  });
+  render(out);
+}
+
+/* Render tarjetas */
+function render(arr){
+  agenda.innerHTML="";
+  if(!arr.length){agenda.innerHTML="<p>No hay eventos.</p>";return;}
+  arr.forEach((e,idx)=>{
+    const card=document.createElement("div");card.className="card";
+    const thumb=document.createElement("div");thumb.className="thumb";
+    thumb.appendChild(createImgWithFallback(e.piezaCands));
+    const content=document.createElement("div");content.className="content";
+    content.innerHTML=`
+      <h3>${e.nombre}</h3>
+      <p class="meta"><b>Fecha:</b> ${e.fecha||"-"}</p>
+      <p class="meta"><b>Hora:</b> ${e.hora||"-"} &nbsp; <b>Puertas:</b> ${e.apertura||"-"}</p>
+      <p class="meta"><b>Lugar:</b> ${e.lugar||"-"}</p>
+      <div class="actions">
+        <button class="btn btn-vermas" onclick="openModal(${idx})">Ver más</button>
+        ${e.boleteria?`<a href="${e.boleteria}" target="_blank" class="btn btn-boleto">Boletería</a>`:""}
+      </div>`;
+    card.appendChild(thumb);card.appendChild(content);agenda.appendChild(card);
+  });
+}
+
+/* Modal */
+function openModal(idx){
+  const e=list[idx];mTitle.textContent=e.nombre;
+  const hero=document.createElement("div");hero.className="modal-hero";hero.appendChild(createImgWithFallback(e.piezaCands));
+  const details=`
+    <div style="margin-bottom:8px;color:#6b7280"><b>Formato:</b> ${e.formato||"-"}</div>
+    <div class="grid">
+      <p><b>País:</b> ${e.pais||"-"}</p>
+      <p><b>Ciudad:</b> ${e.ciudad||"-"}</p>
+      <p><b>Compañía:</b> ${e.compania||"-"}</p>
+      <p><b>Director:</b> ${e.director||"-"}</p>
+      <p><b>Lugar:</b> ${e.lugar||"-"}</p>
+      <p><b>Fecha:</b> ${e.fecha||"-"}</p>
+      <p><b>Hora función:</b> ${e.hora||"-"}</p>
+      <p><b>Apertura:</b> ${e.apertura||"-"}</p>
+      <p><b>Instagram:</b> ${e.igUser?`<a href="https://instagram.com/${e.igUser}" target="_blank">@${e.igUser}</a>`:"-"}</p>
+      <p><b>Video:</b> ${e.video?`<a href="${e.video}" target="_blank">Ver video</a>`:"-"}</p>
+      <p><b>Sinopsis:</b> ${e.sinopsis||"-"}</p>
+    </div>`;
+  mBody.innerHTML="";mBody.appendChild(hero);const more=document.createElement("div");more.innerHTML=details;mBody.appendChild(more);
+  mFooter.innerHTML=e.boleteria?`<a href="${e.boleteria}" target="_blank" class="btn btn-boleto">Comprar boletos</a>`:"";
+  modal.style.display="flex";
+}
+function closeModal(){modal.style.display="none";}
+
+/* Imagen helpers */
+function extractDriveId(u){if(!u)return"";let m;if((m=u.match(/[?&]id=([-\w]+)/)))return m[1];if((m=u.match(/\/d\/([-\w]+)/)))return m[1];return"";}
+function driveImageCandidates(u){
+  const id=extractDriveId(u);
+  return id?[`https://drive.google.com/uc?export=view&id=${id}`,`https://drive.google.com/thumbnail?id=${id}&sz=w1200`,`https://lh3.googleusercontent.com/d/${id}=w1200`]: (u?[u]:[]);
+}
+function createImgWithFallback(cands){
+  const img=document.createElement("img");
+  img.style.width="100%";
+  img.style.height="100%";
+  img.style.objectFit="cover";
+  img.loading="lazy";
+  let i=0;
+  const tryNext=()=>{if(i>=cands.length){img.onerror=null;img.src="https://via.placeholder.com/800?text=Sin+imagen";return;}img.src=cands[i++];};
+  img.onerror=tryNext;
+  tryNext();
+  return img;
+}
+
+/* Eventos */
+[fSearch,fPais,fCiudad,fCompania,fFecha].forEach(el=>el.addEventListener("change",applyFilters));
+fSearch.addEventListener("input",applyFilters);
+window.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
+
+/* Go */
+load();
+</script>
+</body>
+</html>
