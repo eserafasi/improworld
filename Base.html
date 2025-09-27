@@ -1103,6 +1103,7 @@ function driveImageCandidates(u) {
 
 function createImgWithFallback(cands) {
   const img = document.createElement("img");
+  img.dataset.vImgFallback = "true";
   img.loading = "lazy";
   img.decoding = "async";
   let i = 0;
@@ -1190,7 +1191,7 @@ function norm(ev) {
 
 const { createApp, reactive, ref, computed, onMounted, onBeforeUnmount } = Vue;
 
-createApp({
+const app = createApp({
   setup() {
     const loading = ref(true);
     const list = ref([]);
@@ -1362,20 +1363,57 @@ createApp({
       filtersToggleLabel
     };
   }
-})
-  .directive("img-fallback", {
-    mounted(el, binding) {
-      el.innerHTML = "";
-      el.style.removeProperty("--img-aspect");
-      el.appendChild(createImgWithFallback(binding.value || []));
-    },
-    updated(el, binding) {
-      el.innerHTML = "";
-      el.style.removeProperty("--img-aspect");
-      el.appendChild(createImgWithFallback(binding.value || []));
+});
+
+function normalizeCandidates(value) {
+  if (Array.isArray(value)) {
+    return value
+      .map((src) => (src == null ? "" : String(src).trim()))
+      .filter(Boolean);
+  }
+  if (value == null) return [];
+  const trimmed = String(value).trim();
+  return trimmed ? [trimmed] : [];
+}
+
+function candidatesEqual(a, b) {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i += 1) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
+
+function setImageCandidates(el, candidates) {
+  el.style.removeProperty("--img-aspect");
+  const nextImg = createImgWithFallback(candidates);
+  const currentImg = el.querySelector("img[data-v-img-fallback]");
+  if (currentImg) {
+    currentImg.replaceWith(nextImg);
+  } else {
+    el.insertBefore(nextImg, el.firstChild || null);
+  }
+  el.__imgFallbackCandidates = candidates.slice();
+}
+
+app.directive("img-fallback", {
+  mounted(el, binding) {
+    const candidates = normalizeCandidates(binding.value);
+    setImageCandidates(el, candidates);
+  },
+  updated(el, binding) {
+    const previous = Array.isArray(el.__imgFallbackCandidates)
+      ? el.__imgFallbackCandidates
+      : [];
+    const next = normalizeCandidates(binding.value);
+    if (candidatesEqual(previous, next)) {
+      return;
     }
-  })
-  .mount("#app");
+    setImageCandidates(el, next);
+  }
+});
+
+app.mount("#app");
 </script>
 </body>
 </html>
