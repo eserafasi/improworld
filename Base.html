@@ -140,20 +140,26 @@
 
     @media (min-width: 901px) {
       .hero__metrics {
-        transform: translateY(-30px);
+        transform: none;
       }
     }
 
     .wrap {
       max-width: var(--max-width);
-      margin: -40px auto 60px;
+      margin: 40px auto 60px;
       padding: 0 20px 60px;
       width: 100%;
+      flex: 1 0 auto;
+    }
+
+    .hero--footer {
+      margin-top: auto;
+      padding: 56px 20px 80px;
     }
 
     @media (max-width: 768px) {
-      .hero {
-        padding: 48px 16px 28px;
+      .hero--footer {
+        padding: 40px 16px 60px;
       }
 
       .hero__inner {
@@ -195,8 +201,8 @@
     }
 
     @media (max-width: 480px) {
-      .hero {
-        padding: 40px 14px 24px;
+      .hero--footer {
+        padding: 28px 14px 40px;
       }
 
       .hero__heading {
@@ -733,10 +739,6 @@
     }
 
     @media (max-width: 900px) {
-      .hero {
-        padding-top: 56px;
-      }
-
       .filters-card {
         padding: 22px;
       }
@@ -752,12 +754,13 @@
     }
 
     @media (max-width: 640px) {
-      .hero {
-        padding: 36px 16px 20px;
+      .hero--footer {
+        padding: 32px 16px 48px;
       }
 
       .wrap {
-        margin-top: -40px;
+        margin: 24px auto 48px;
+        padding: 0 16px 48px;
       }
 
       .hero__inner {
@@ -876,38 +879,6 @@
 </head>
 <body>
 <div id="app" class="page">
-  <header class="hero">
-    <div class="hero__inner">
-      <div>
-        <h1 class="hero__heading">
-          <span class="sr-only">Agenda ImproWorld</span>
-          <span class="hero__logo" aria-hidden="true">
-            <img src="https://drive.google.com/uc?export=view&id=1l_hsaNH2OXG6ZiF5ervFpOvtcaGLMiiQ" alt="">
-            <img src="https://drive.google.com/uc?export=view&id=1RSrq-315cEHzVa0LelzEKfassWhtK_Nu" alt="">
-          </span>
-        </h1>
-        <p class="hero__description">
-          Encuentra las próximas funciones, talleres y experiencias de improvisación en toda la región.
-          Filtra por país, ciudad o compañía y mantente al día con la comunidad.
-        </p>
-      </div>
-      <div class="hero__metrics">
-        <article class="metric">
-          <span class="metric__value">{{ totalEvents }}</span>
-          <span class="metric__label">Eventos activos en ImproWorld</span>
-        </article>
-        <article class="metric">
-          <span class="metric__value">{{ totalCountries }}</span>
-          <span class="metric__label">Países representados</span>
-        </article>
-        <article class="metric">
-          <span class="metric__value">{{ thisMonthEvents }}</span>
-          <span class="metric__label">Eventos este mes</span>
-        </article>
-      </div>
-    </div>
-  </header>
-
   <main class="wrap">
     <section class="filters-card" :class="{ 'is-collapsed': !filtersExpanded }">
       <header class="filters-card__header">
@@ -1017,6 +988,38 @@
       </div>
     </section>
   </main>
+
+  <footer class="hero hero--footer">
+    <div class="hero__inner">
+      <div>
+        <h1 class="hero__heading">
+          <span class="sr-only">Agenda ImproWorld</span>
+          <span class="hero__logo" aria-hidden="true">
+            <img src="https://drive.google.com/uc?export=view&id=1l_hsaNH2OXG6ZiF5ervFpOvtcaGLMiiQ" alt="">
+            <img src="https://drive.google.com/uc?export=view&id=1RSrq-315cEHzVa0LelzEKfassWhtK_Nu" alt="">
+          </span>
+        </h1>
+        <p class="hero__description">
+          Encuentra las próximas funciones, talleres y experiencias de improvisación en toda la región.
+          Filtra por país, ciudad o compañía y mantente al día con la comunidad.
+        </p>
+      </div>
+      <div class="hero__metrics">
+        <article class="metric">
+          <span class="metric__value">{{ totalEvents }}</span>
+          <span class="metric__label">Eventos activos en ImproWorld</span>
+        </article>
+        <article class="metric">
+          <span class="metric__value">{{ totalCountries }}</span>
+          <span class="metric__label">Países representados</span>
+        </article>
+        <article class="metric">
+          <span class="metric__value">{{ thisMonthEvents }}</span>
+          <span class="metric__label">Eventos este mes</span>
+        </article>
+      </div>
+    </div>
+  </footer>
 
   <transition name="fade">
     <div v-if="showModal" class="modal" role="dialog" aria-modal="true" @click.self="closeModal">
@@ -1203,7 +1206,7 @@ createApp({
     });
     const showModal = ref(false);
     const activeEvent = ref(null);
-    const filtersExpanded = ref(true);
+    const filtersExpanded = ref(false);
 
     const toggleFilters = () => {
       filtersExpanded.value = !filtersExpanded.value;
@@ -1329,7 +1332,7 @@ createApp({
     onMounted(() => {
       loadData();
       if (typeof window !== "undefined") {
-        filtersExpanded.value = window.innerWidth >= 900;
+        filtersExpanded.value = false;
         window.addEventListener("keydown", keyboardHandler);
       }
     });
