@@ -906,10 +906,6 @@
 <body>
 <div id="app" class="page">
   <main class="wrap">
-    <p class="hero__description hero__description--top">
-      Encuentra las próximas funciones, talleres y experiencias de improvisación en toda la región.
-      Filtra por país, ciudad o compañía y mantente al día con la comunidad.
-    </p>
     <section class="filters-card" :class="{ 'is-collapsed': !filtersExpanded }">
       <header class="filters-card__header">
         <h2 class="filters-card__title"><span>🎟️</span> Filtrar agenda</h2>
@@ -1045,14 +1041,14 @@
         </article>
       </div>
     </div>
-  </footer>
+  </footer> 
 
   <transition name="fade">
     <div v-if="showModal" class="modal" role="dialog" aria-modal="true" @click.self="closeModal">
       <article class="modal__dialog">
         <header class="modal__header">
           <h3 class="modal__title">{{ activeEvent ? activeEvent.nombre : '' }}</h3>
-          <button class="modal__close" @click="closeModal" aria-label="Cerrar">&times;</button>
+          <button class="modal__close" @click="closeModal" aria-label="Volver">&times;</button>
         </header>
         <div class="modal__body">
           <div class="modal-hero" v-img-fallback="activeEvent ? activeEvent.piezaCands : []"></div>
@@ -1087,7 +1083,7 @@
         </div>
         <footer class="modal__footer">
           <a v-if="activeEvent && activeEvent.boleteria" :href="activeEvent.boleteria" target="_blank" rel="noopener" class="btn btn-primary">Comprar boletos</a>
-          <button class="btn btn-secondary" type="button" @click="closeModal">Cerrar</button>
+          <button class="btn btn-secondary" type="button" @click="closeModal">Volver</button>
         </footer>
       </article>
     </div>
