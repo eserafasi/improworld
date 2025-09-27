@@ -1053,6 +1053,9 @@
         <div class="modal__body">
           <div class="modal-hero" v-img-fallback="activeEvent ? activeEvent.piezaCands : []"></div>
           <div class="modal-grid" v-if="activeEvent">
+            <p style="grid-column: 1 / -1;">
+              <strong>Sinopsis:</strong> {{ activeEvent.sinopsis || '—' }}
+            </p>
             <p><strong>Formato:</strong> {{ activeEvent.formato || '—' }}</p>
             <p><strong>País:</strong> {{ activeEvent.pais || '—' }}</p>
             <p><strong>Ciudad:</strong> {{ activeEvent.ciudad || '—' }}</p>
@@ -1075,9 +1078,6 @@
                 <a :href="activeEvent.video" target="_blank" rel="noopener">Ver video</a>
               </template>
               <template v-else>—</template>
-            </p>
-            <p style="grid-column: 1 / -1;">
-              <strong>Sinopsis:</strong> {{ activeEvent.sinopsis || '—' }}
             </p>
           </div>
         </div>
