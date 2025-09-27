@@ -123,6 +123,15 @@
       display: grid;
       gap: 20px;
       margin-bottom: 36px;
+      transition: var(--transition);
+    }
+
+    .filters-card.is-collapsed {
+      padding-bottom: 22px;
+    }
+
+    .filters-card.is-collapsed .filters {
+      display: none;
     }
 
     .filters-card__header {
@@ -152,6 +161,15 @@
       justify-content: center;
       font-weight: 600;
       font-size: 1.1rem;
+    }
+
+    .filters-card__meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 12px;
+      align-items: center;
+      justify-content: flex-end;
+      margin-left: auto;
     }
 
     .filters {
@@ -222,6 +240,37 @@
       padding: 0;
       font-size: 1rem;
       line-height: 1;
+    }
+
+    .filters-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(124, 58, 237, 0.18);
+      background: rgba(124, 58, 237, 0.08);
+      color: var(--primary);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .filters-toggle:hover,
+    .filters-toggle:focus-visible {
+      background: rgba(124, 58, 237, 0.16);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.18);
+    }
+
+    .filters-toggle__icon {
+      display: inline-flex;
+      transition: transform 0.2s ease;
+    }
+
+    .filters-card.is-collapsed .filters-toggle__icon {
+      transform: rotate(-90deg);
     }
 
     .agenda {
@@ -580,6 +629,11 @@
         padding: 22px;
       }
 
+      .filters-card__meta {
+        width: 100%;
+        justify-content: space-between;
+      }
+
       .modal__body {
         padding: 20px;
       }
@@ -602,6 +656,15 @@
 
       .filters {
         grid-template-columns: 1fr;
+      }
+
+      .filters-card__meta {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .filters-toggle {
+        justify-content: center;
       }
 
       .filters label {
@@ -647,20 +710,32 @@
   </header>
 
   <main class="wrap">
-    <section class="filters-card">
+    <section class="filters-card" :class="{ 'is-collapsed': !filtersExpanded }">
       <header class="filters-card__header">
         <h2 class="filters-card__title"><span>🎟️</span> Filtrar agenda</h2>
-        <div class="filter-summary">
-          <span class="filter-summary__count">{{ resultsLabel }}</span>
-          <template v-for="chip in activeFilters" :key="chip.key">
-            <span class="chip">
-              {{ chip.label }}: {{ chip.value }}
-              <button type="button" @click="removeFilter(chip.key)" aria-label="Quitar filtro">&times;</button>
-            </span>
-          </template>
+        <div class="filters-card__meta">
+          <div class="filter-summary">
+            <span class="filter-summary__count">{{ resultsLabel }}</span>
+            <template v-for="chip in activeFilters" :key="chip.key">
+              <span class="chip">
+                {{ chip.label }}: {{ chip.value }}
+                <button type="button" @click="removeFilter(chip.key)" aria-label="Quitar filtro">&times;</button>
+              </span>
+            </template>
+          </div>
+          <button
+            type="button"
+            class="filters-toggle"
+            @click="toggleFilters"
+            :aria-expanded="filtersExpanded"
+            aria-controls="filters-panel"
+          >
+            <span class="filters-toggle__icon" aria-hidden="true">▾</span>
+            {{ filtersToggleLabel }}
+          </button>
         </div>
       </header>
-      <div class="filters">
+      <div class="filters" id="filters-panel" :aria-hidden="!filtersExpanded">
         <label for="fPais">
           País
           <select id="fPais" v-model="filters.pais">
@@ -929,6 +1004,15 @@ createApp({
     });
     const showModal = ref(false);
     const activeEvent = ref(null);
+    const filtersExpanded = ref(true);
+
+    const toggleFilters = () => {
+      filtersExpanded.value = !filtersExpanded.value;
+    };
+
+    const filtersToggleLabel = computed(() =>
+      filtersExpanded.value ? "Ocultar filtros" : "Mostrar filtros"
+    );
 
     const closeModal = () => {
       showModal.value = false;
@@ -1045,11 +1129,16 @@ createApp({
 
     onMounted(() => {
       loadData();
-      window.addEventListener("keydown", keyboardHandler);
+      if (typeof window !== "undefined") {
+        filtersExpanded.value = window.innerWidth >= 900;
+        window.addEventListener("keydown", keyboardHandler);
+      }
     });
 
     onBeforeUnmount(() => {
-      window.removeEventListener("keydown", keyboardHandler);
+      if (typeof window !== "undefined") {
+        window.removeEventListener("keydown", keyboardHandler);
+      }
     });
 
     return {
@@ -1068,7 +1157,10 @@ createApp({
       openModal,
       closeModal,
       showModal,
-      activeEvent
+      activeEvent,
+      filtersExpanded,
+      toggleFilters,
+      filtersToggleLabel
     };
   }
 })
