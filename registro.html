@@ -1,128 +1,351 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Registro de Evento</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro de Obras</title>
   <style>
     :root {
-      --primary: #1976d2;
-      --primary-dark: #1565c0;
-      --error: #d32f2f;
-      --success: #388e3c;
+      --ink: #101828;
+      --muted: #667085;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --ring: #e2e8f0;
+      --primary: #7c3aed;
+      --primary-soft: #ede9fe;
+      --accent: #f59e0b;
+      --accent-soft: rgba(245, 158, 11, 0.14);
+      --success: #22c55e;
+      --error: #ef4444;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08);
+      --shadow-md: 0 18px 40px rgba(124, 58, 237, 0.14);
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+      --transition: all 0.24s ease;
+      --max-width: 1040px;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
     }
 
     body {
-      font-family: "Roboto", Arial, sans-serif;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, #faf5ff 0%, #f8fafc 40%, #ffffff 100%);
+      color: var(--ink);
       margin: 0;
-      padding: 20px;
-      background: #f5f5f5;
+      line-height: 1.6;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
     }
 
-    .card {
-      background: #fff;
-      max-width: 600px;
-      margin: auto;
-      padding: 20px 25px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      font-weight: 700;
+      letter-spacing: -0.01em;
     }
 
-    h2 {
-      text-align: center;
+    .page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .hero {
+      padding: clamp(64px, 12vw, 96px) 20px 48px;
+      background: radial-gradient(120% 120% at 50% 0%, rgba(124, 58, 237, 0.18) 0%, rgba(124, 58, 237, 0) 60%),
+        linear-gradient(140deg, rgba(124, 58, 237, 0.16) 10%, rgba(59, 130, 246, 0.08) 100%);
+    }
+
+    .hero__inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      display: grid;
+      gap: clamp(24px, 4vw, 48px);
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .hero__heading {
+      display: grid;
+      gap: 18px;
+      color: var(--ink);
+    }
+
+    .hero__heading h1 {
+      font-size: clamp(1rem, 2.4vw, 1.1rem);
+      line-height: 1.6;
+    }
+
+    .hero__kicker {
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-weight: 600;
+      color: rgba(124, 58, 237, 0.9);
+    }
+
+    .hero__description {
+      max-width: none;
+      color: rgba(16, 24, 40, 0.72);
+      font-size: clamp(1rem, 2.4vw, 1.1rem);
+      text-align: justify;
+    }
+
+    main {
+      flex: 1;
+      padding: 0 20px 64px;
+    }
+
+    .form-shell {
+      max-width: var(--max-width);
+      margin: -36px auto 0;
+    }
+
+    .form-card {
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      padding: clamp(28px, 5vw, 48px);
+      box-shadow: var(--shadow-md);
+      border: 1px solid rgba(124, 58, 237, 0.12);
+      display: grid;
+      gap: clamp(24px, 4vw, 36px);
+    }
+
+    .form-card header {
+      display: grid;
+      gap: 12px;
+    }
+
+    .form-card h2 {
+      font-size: clamp(1.8rem, 4vw, 2.4rem);
       color: var(--primary);
-      margin-bottom: 20px;
     }
 
-    .form-group {
-      margin-bottom: 16px;
+    .form-card p {
+      margin: 0;
+      color: rgba(16, 24, 40, 0.7);
+      font-size: 1rem;
     }
 
-    label {
-      font-weight: bold;
-      display: block;
+    form {
+      display: grid;
+      gap: 28px;
+    }
+
+    fieldset {
+      border: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 18px;
+    }
+
+    fieldset legend {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: rgba(16, 24, 40, 0.86);
       margin-bottom: 6px;
     }
 
-    input, textarea, select {
+    .form-grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    @media (min-width: 720px) {
+      .form-grid[data-columns="2"] {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      font-weight: 600;
+      color: rgba(16, 24, 40, 0.88);
+      font-size: 0.95rem;
+    }
+
+    input,
+    textarea,
+    select {
       width: 100%;
-      padding: 12px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 14px;
-      transition: border-color 0.2s, box-shadow 0.2s;
+      border: 1px solid var(--ring);
+      border-radius: 12px;
+      padding: 13px 14px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      background: rgba(248, 250, 252, 0.7);
+      color: inherit;
+      transition: var(--transition);
+      box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
     }
 
-    input:focus, textarea:focus, select:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 6px rgba(25, 118, 210, 0.25);
-      outline: none;
+    textarea {
+      resize: vertical;
+      min-height: 100px;
     }
 
-    input.error, textarea.error, select.error {
-      border-color: var(--error);
-      background: #ffebee;
+    input:focus-visible,
+    textarea:focus-visible,
+    select:focus-visible {
+      outline: 3px solid rgba(124, 58, 237, 0.2);
+      border-color: rgba(124, 58, 237, 0.5);
+      background: #fff;
+    }
+
+    input.error,
+    textarea.error,
+    select.error {
+      border-color: rgba(239, 68, 68, 0.7);
+      background: rgba(254, 226, 226, 0.6);
+      box-shadow: inset 0 1px 2px rgba(239, 68, 68, 0.12);
     }
 
     small.error-message {
       color: var(--error);
-      font-size: 12px;
+      font-size: 0.8rem;
+      font-weight: 500;
       display: none;
-      margin-top: 4px;
     }
 
-    button {
-      width: 100%;
-      padding: 14px;
+    .inline-hint {
+      font-size: 0.8rem;
+      color: rgba(16, 24, 40, 0.55);
+      font-weight: 500;
+    }
+
+    .form-footer {
+      display: grid;
+      gap: 18px;
+      font-size: 0.9rem;
+      color: rgba(16, 24, 40, 0.62);
+    }
+
+    .impact-stats {
+      margin: 48px auto 0;
+      max-width: var(--max-width);
+      display: grid;
+      gap: 18px;
+    }
+
+    .impact-stats__heading {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: rgba(16, 24, 40, 0.7);
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+    }
+
+    .impact-stats__grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+    }
+
+    .stat {
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(16px);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      border: 1px solid rgba(124, 58, 237, 0.14);
+      box-shadow: var(--shadow-sm);
+      display: grid;
+      gap: 4px;
+    }
+
+    .stat__value {
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .stat__label {
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    button[type="submit"] {
+      border: none;
+      border-radius: 999px;
+      padding: 14px 22px;
+      font-size: 1rem;
+      font-weight: 600;
       background: var(--primary);
       color: #fff;
-      border: none;
-      border-radius: 6px;
-      font-size: 16px;
       cursor: pointer;
-      transition: background 0.2s;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      box-shadow: 0 16px 32px rgba(124, 58, 237, 0.25);
     }
 
-    button:hover:not(:disabled) {
-      background: var(--primary-dark);
+    button[type="submit"]:hover:not(:disabled) {
+      transform: translateY(-1px);
+      background: #6d28d9;
+      box-shadow: 0 18px 36px rgba(124, 58, 237, 0.3);
     }
 
-    button:disabled {
-      background: #90caf9;
+    button[type="submit"]:focus-visible {
+      outline: 3px solid rgba(124, 58, 237, 0.28);
+      outline-offset: 2px;
+    }
+
+    button[type="submit"]:disabled {
+      background: rgba(124, 58, 237, 0.35);
+      box-shadow: none;
       cursor: not-allowed;
+      transform: none;
     }
 
     .spinner {
       width: 18px;
       height: 18px;
-      border: 3px solid #fff;
-      border-top: 3px solid transparent;
       border-radius: 50%;
+      border: 3px solid rgba(255, 255, 255, 0.7);
+      border-top-color: transparent;
       animation: spin 1s linear infinite;
       display: none;
     }
 
+    .button-text {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
     @keyframes spin {
-      to { transform: rotate(360deg); }
+      to {
+        transform: rotate(360deg);
+      }
     }
 
     .toast {
       position: fixed;
       bottom: 20px;
       right: 20px;
-      background: #323232;
+      background: #101828;
       color: #fff;
-      padding: 12px 18px;
-      border-radius: 6px;
-      font-size: 14px;
+      padding: 14px 18px;
+      border-radius: 14px;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
       opacity: 0;
       transform: translateY(20px);
-      transition: all 0.4s ease;
+      pointer-events: none;
+      box-shadow: 0 18px 40px rgba(16, 24, 40, 0.18);
+      transition: opacity 0.35s ease, transform 0.35s ease;
       z-index: 9999;
     }
 
@@ -131,125 +354,219 @@
       transform: translateY(0);
     }
 
-    @media (max-width: 600px) {
-      body { padding: 10px; }
-      .card { padding: 15px 18px; }
-      button { font-size: 15px; }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 640px) {
+      main {
+        padding: 0 16px 48px;
+      }
+
+      .toast {
+        left: 16px;
+        right: 16px;
+        bottom: 16px;
+        justify-content: center;
+        text-align: center;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h2>Registro de Evento</h2>
-    <form id="eventoForm" novalidate>
-      
-      <div class="form-group">
-        <label for="NombreFormato">Nombre del Formato</label>
-        <input type="text" id="NombreFormato" name="NombreFormato" required>
-        <small class="error-message">Este campo es obligatorio.</small>
+  <div class="page">
+    <header class="hero">
+      <div class="hero__inner">
+        <div class="hero__heading">
+          <span class="hero__kicker">ImproWorld</span>
+          <h1>Registro de obras y funciones</h1>
+          <p class="hero__description">
+            Comparte los detalles clave de tu show para sumarlo a la agenda de ImproWorld. Toda la información se usa
+            para difundir tu evento y facilitar la coordinación con el equipo.
+          </p>
+        </div>
       </div>
+    </header>
 
-      <div class="form-group">
-        <label for="TipoFormato">Tipo de Formato</label>
-        <select id="TipoFormato" name="TipoFormato" required>
-          <option value="">-- Seleccione --</option>
-          <option value="Long Form">Long Form</option>
-          <option value="Short Form">Short Form</option>
-          <option value="Deportivo">Deportivo</option>
-        </select>
-        <small class="error-message">Debe seleccionar un tipo.</small>
+    <main>
+      <div class="form-shell">
+        <section class="form-card" aria-labelledby="form-title">
+          <header>
+            <h2 id="form-title">Cuéntanos sobre tu obra</h2>
+            <p>Completa cada sección con información precisa. Puedes actualizar los datos luego escribiéndonos al correo del equipo.</p>
+          </header>
+
+          <form id="obraForm" novalidate>
+            <fieldset>
+              <legend>Información general</legend>
+              <div class="form-grid" data-columns="2">
+                <label for="NombreFormato">
+                  Nombre del formato o de la obra
+                  <input type="text" id="NombreFormato" name="NombreFormato" required autocomplete="off" placeholder="Ej. Noche de impro larga" />
+                  <small class="error-message">Este campo es obligatorio.</small>
+                </label>
+                <label for="TipoFormato">
+                  Tipo de formato
+                  <select id="TipoFormato" name="TipoFormato" required>
+                    <option value="">Selecciona una opción</option>
+                    <option value="Long Form">Long Form</option>
+                    <option value="Short Form">Short Form</option>
+                    <option value="Deportivo">Deportivo</option>
+                    <option value="Match">Match</option>
+                    <option value="Varieté">Varieté</option>
+                    <option value="Otro">Otro</option>
+                  </select>
+                  <small class="error-message">Debes seleccionar un tipo.</small>
+                </label>
+              </div>
+              <div class="form-grid" data-columns="2">
+                <label for="FechaFuncion">
+                  Fecha de la función
+                  <input type="date" id="FechaFuncion" name="FechaFuncion" required />
+                  <small class="error-message">Debes ingresar la fecha.</small>
+                </label>
+                <label for="HoraFuncion">
+                  Hora de la función
+                  <input type="time" id="HoraFuncion" name="HoraFuncion" required />
+                  <small class="error-message">Debes ingresar la hora.</small>
+                </label>
+              </div>
+              <div class="form-grid" data-columns="2">
+                <label for="AperturaPuertas">
+                  Apertura de puertas
+                  <input type="time" id="AperturaPuertas" name="AperturaPuertas" />
+                  <span class="inline-hint">Opcional</span>
+                </label>
+                <label for="Pais">
+                  País
+                  <input type="text" id="Pais" name="País" required placeholder="Ej. Chile" />
+                  <small class="error-message">Debes ingresar el país.</small>
+                </label>
+              </div>
+              <div class="form-grid" data-columns="2">
+                <label for="Ciudad">
+                  Ciudad
+                  <input type="text" id="Ciudad" name="Ciudad" required placeholder="Ej. Santiago" />
+                  <small class="error-message">Debes ingresar la ciudad.</small>
+                </label>
+                <label for="Director">
+                  Dirección o coordinación artística
+                  <input type="text" id="Director" name="Director" placeholder="Nombre de quien coordina" />
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend>Detalles para difusión</legend>
+              <div class="form-grid">
+                <label for="Sinopsis">
+                  Sinopsis o descripción breve
+                  <textarea id="Sinopsis" name="Sinopsis" rows="4" placeholder="¿De qué trata tu show? Incluye lo que lo hace especial."></textarea>
+                </label>
+              </div>
+              <div class="form-grid" data-columns="2">
+                <label for="Compania">
+                  Compañía o elenco
+                  <input type="text" id="Compania" name="Compañía" placeholder="Nombre de la compañía" />
+                </label>
+                <label for="Instagram">
+                  Instagram (solo usuario, sin @)
+                  <input type="text" id="Instagram" name="Instagram" placeholder="impro_world" />
+                </label>
+              </div>
+              <div class="form-grid" data-columns="2">
+                <label for="Boleteria">
+                  Boletería (URL)
+                  <input type="url" id="Boleteria" name="Boleteria" pattern="https?://.+" placeholder="https://" />
+                  <small class="error-message">Debes ingresar una URL válida.</small>
+                </label>
+                <label for="VideoURL">
+                  Video promocional (URL de YouTube)
+                  <input type="url" id="VideoURL" name="VideoURL" pattern="https?://.+" placeholder="https://youtu.be/..." />
+                  <small class="error-message">Debes ingresar una URL válida.</small>
+                </label>
+              </div>
+              <div class="form-grid">
+                <label for="PiezaPromocional">
+                  Pieza promocional (imagen)
+                  <input type="file" id="PiezaPromocional" name="PiezaPromocional" accept="image/*" />
+                  <span class="inline-hint">Adjunta un afiche en formato JPG o PNG de hasta 5 MB.</span>
+                </label>
+              </div>
+            </fieldset>
+
+            <div class="form-footer">
+              <p>Al enviar este formulario confirmas que la información es correcta y autorizas a ImproWorld a usarla para
+                la difusión del evento.</p>
+              <button type="submit" id="submitBtn">
+                <span class="button-text" id="btnText">Enviar registro</span>
+                <span class="spinner" id="spinner" aria-hidden="true"></span>
+              </button>
+              <p class="inline-hint">¿Necesitas ayuda? Escríbenos a <a href="mailto:agenda@improworld.com">agenda@improworld.com</a>.</p>
+            </div>
+          </form>
+        </section>
+        <section class="impact-stats" aria-labelledby="impact-stats-title">
+          <span class="impact-stats__heading" id="impact-stats-title">¿Por qué compartir tu obra?</span>
+          <div class="impact-stats__grid">
+            <div class="stat">
+              <span class="stat__value">5&nbsp;min</span>
+              <span class="stat__label">Tiempo estimado de registro</span>
+            </div>
+            <div class="stat">
+              <span class="stat__value">24&nbsp;h</span>
+              <span class="stat__label">Tiempo máximo de confirmación</span>
+            </div>
+            <div class="stat">
+              <span class="stat__value">+1K</span>
+              <span class="stat__label">Personas alcanzadas en agenda</span>
+            </div>
+          </div>
+        </section>
       </div>
-
-      <div class="form-group">
-        <label for="FechaFuncion">Fecha de la Función</label>
-        <input type="date" id="FechaFuncion" name="FechaFuncion" required>
-        <small class="error-message">Debe ingresar la fecha.</small>
-      </div>
-
-      <div class="form-group">
-        <label for="HoraFuncion">Hora de la Función</label>
-        <input type="time" id="HoraFuncion" name="HoraFuncion" required>
-        <small class="error-message">Debe ingresar la hora.</small>
-      </div>
-
-      <div class="form-group">
-        <label for="AperturaPuertas">Apertura de Puertas</label>
-        <input type="time" id="AperturaPuertas" name="AperturaPuertas">
-      </div>
-
-      <div class="form-group">
-        <label for="País">País</label>
-        <input type="text" id="País" name="País" required>
-        <small class="error-message">Debe ingresar el país.</small>
-      </div>
-
-      <div class="form-group">
-        <label for="Ciudad">Ciudad</label>
-        <input type="text" id="Ciudad" name="Ciudad" required>
-        <small class="error-message">Debe ingresar la ciudad.</small>
-      </div>
-
-      <div class="form-group">
-        <label for="Sinopsis">Sinopsis</label>
-        <textarea id="Sinopsis" name="Sinopsis" rows="3"></textarea>
-      </div>
-
-      <div class="form-group">
-        <label for="Director">Director</label>
-        <input type="text" id="Director" name="Director">
-      </div>
-
-      <div class="form-group">
-        <label for="Compañía">Compañía</label>
-        <input type="text" id="Compañía" name="Compañía">
-      </div>
-
-      <div class="form-group">
-        <label for="Instagram">Instagram (solo usuario, sin @)</label>
-        <input type="text" id="Instagram" name="Instagram">
-      </div>
-
-      <div class="form-group">
-        <label for="Boleteria">Boletería (URL)</label>
-        <input type="url" id="Boleteria" name="Boleteria" pattern="https?://.+">
-        <small class="error-message">Debe ser una URL válida.</small>
-      </div>
-
-      <div class="form-group">
-        <label for="VideoURL">Video Promocional (URL YouTube)</label>
-        <input type="url" id="VideoURL" name="VideoURL" pattern="https?://.+">
-        <small class="error-message">Debe ser una URL válida.</small>
-      </div>
-
-      <div class="form-group">
-        <label for="PiezaPromocional">Pieza Promocional (imagen)</label>
-        <input type="file" id="PiezaPromocional" name="PiezaPromocional" accept="image/*">
-      </div>
-
-      <button type="submit" id="submitBtn">
-        <span id="btnText">Enviar</span>
-        <div class="spinner" id="spinner"></div>
-      </button>
-    </form>
+    </main>
   </div>
 
-  <!-- Toast flotante -->
-  <div class="toast" id="toast"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="sr-only" aria-live="assertive" id="srAlert"></div>
 
   <script>
     const scriptURL = "https://script.google.com/macros/s/AKfycbwoCLUfEiRjnmzumQ-Qs82vLUMpfTWHuemY8W6NODHVhGskbdQQHh-rIHKJUpS0cPCSxQ/exec";
 
-    const form = document.getElementById("eventoForm");
+    const form = document.getElementById("obraForm");
     const submitBtn = document.getElementById("submitBtn");
     const spinner = document.getElementById("spinner");
     const btnText = document.getElementById("btnText");
     const toast = document.getElementById("toast");
+    const srAlert = document.getElementById("srAlert");
 
-    form.addEventListener("submit", async function(e) {
-      e.preventDefault();
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
       clearValidation();
 
-      if (!validateForm()) return;
+      if (!validateForm()) {
+        announce("Formulario incompleto. Revisa los campos marcados en rojo.");
+        return;
+      }
 
       toggleLoading(true);
 
@@ -259,7 +576,7 @@
       const file = form.PiezaPromocional.files[0];
       if (file) {
         const reader = new FileReader();
-        reader.onloadend = async function() {
+        reader.onloadend = async () => {
           const base64String = reader.result.split(",")[1];
           data.PiezaPromocional = base64String;
           data.PiezaPromocionalName = file.name;
@@ -273,71 +590,95 @@
         };
         reader.readAsDataURL(file);
       } else {
-        formData.forEach((value, key) => { data[key] = value; });
+        formData.forEach((value, key) => {
+          data[key] = value;
+        });
         await enviarDatos(data);
       }
     });
 
     function clearValidation() {
-      form.querySelectorAll(".error-message").forEach(el => el.style.display = "none");
-      form.querySelectorAll(".error").forEach(el => el.classList.remove("error"));
+      form.querySelectorAll(".error-message").forEach((el) => {
+        el.style.display = "none";
+      });
+      form.querySelectorAll(".error").forEach((el) => {
+        el.classList.remove("error");
+      });
     }
 
     function validateForm() {
       let valid = true;
-      form.querySelectorAll("[required]").forEach(input => {
+
+      form.querySelectorAll("[required]").forEach((input) => {
         if (!input.value.trim()) {
-          input.classList.add("error");
-          input.parentElement.querySelector(".error-message").style.display = "block";
+          markAsInvalid(input, "Este campo es obligatorio.");
           valid = false;
         }
       });
-      form.querySelectorAll("input[type='url']").forEach(input => {
+
+      form.querySelectorAll("input[type='url']").forEach((input) => {
         if (input.value && !input.validity.valid) {
-          input.classList.add("error");
-          input.parentElement.querySelector(".error-message").style.display = "block";
+          markAsInvalid(input, "Debes ingresar una URL válida.");
           valid = false;
         }
       });
+
       return valid;
+    }
+
+    function markAsInvalid(input, message) {
+      input.classList.add("error");
+      const messageEl = input.parentElement.querySelector(".error-message");
+      if (messageEl) {
+        messageEl.textContent = message;
+        messageEl.style.display = "block";
+      }
     }
 
     function toggleLoading(isLoading) {
       if (isLoading) {
         submitBtn.disabled = true;
         btnText.textContent = "Enviando...";
-        spinner.style.display = "inline-block";
+        spinner.style.display = "inline-flex";
       } else {
         submitBtn.disabled = false;
-        btnText.textContent = "Enviar";
+        btnText.textContent = "Enviar registro";
         spinner.style.display = "none";
       }
     }
 
-    function showToast(message, type="success") {
+    function showToast(message, type = "success") {
       toast.textContent = message;
-      toast.style.background = type === "success" ? "#388e3c" : "#d32f2f";
+      toast.style.background = type === "success" ? "#16a34a" : "#ef4444";
       toast.classList.add("show");
+      announce(message);
       setTimeout(() => {
         toast.classList.remove("show");
       }, 5000);
+    }
+
+    function announce(message) {
+      srAlert.textContent = "";
+      window.requestAnimationFrame(() => {
+        srAlert.textContent = message;
+      });
     }
 
     async function enviarDatos(data) {
       try {
         const response = await fetch(scriptURL, {
           method: "POST",
-          body: new URLSearchParams(data)
+          body: new URLSearchParams(data),
         });
         const result = await response.json();
         if (result.status === "success") {
           form.reset();
-          showToast("✅ Evento registrado con éxito", "success");
+          showToast("✅ Registro enviado con éxito", "success");
         } else {
-          showToast("❌ " + result.message, "error");
+          showToast(`❌ ${result.message || "No pudimos guardar tu registro."}`, "error");
         }
       } catch (error) {
-        showToast("❌ Error al enviar: " + error.message, "error");
+        showToast(`❌ Error al enviar: ${error.message}`, "error");
       } finally {
         toggleLoading(false);
       }
