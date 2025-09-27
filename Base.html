@@ -103,6 +103,14 @@
       max-width: 48ch;
     }
 
+    .hero__description--top {
+      max-width: none;
+      width: 100%;
+      text-align: center;
+      font-size: 1.05rem;
+      margin: 0 auto 32px;
+    }
+
     .hero__metrics {
       display: grid;
       grid-template-columns: repeat(3, minmax(110px, 1fr));
@@ -179,6 +187,12 @@
         max-width: 40ch;
       }
 
+      .hero__description--top {
+        font-size: 0.95rem;
+        line-height: 1.5;
+        margin-bottom: 24px;
+      }
+
       .hero__metrics {
         justify-self: stretch;
         max-width: none;
@@ -213,6 +227,12 @@
       .hero__description {
         font-size: 0.85rem;
         max-width: 32ch;
+      }
+
+      .hero__description--top {
+        font-size: 0.88rem;
+        line-height: 1.5;
+        margin-bottom: 20px;
       }
 
       .hero__metrics {
@@ -787,6 +807,12 @@
         margin-top: 6px;
       }
 
+      .hero__description--top {
+        font-size: 0.9rem;
+        line-height: 1.55;
+        margin-bottom: 20px;
+      }
+
       .hero__metrics {
         justify-self: stretch;
         max-width: none;
@@ -880,6 +906,10 @@
 <body>
 <div id="app" class="page">
   <main class="wrap">
+    <p class="hero__description hero__description--top">
+      Encuentra las próximas funciones, talleres y experiencias de improvisación en toda la región.
+      Filtra por país, ciudad o compañía y mantente al día con la comunidad.
+    </p>
     <section class="filters-card" :class="{ 'is-collapsed': !filtersExpanded }">
       <header class="filters-card__header">
         <h2 class="filters-card__title"><span>🎟️</span> Filtrar agenda</h2>
@@ -999,10 +1029,6 @@
             <img src="https://drive.google.com/uc?export=view&id=1RSrq-315cEHzVa0LelzEKfassWhtK_Nu" alt="">
           </span>
         </h1>
-        <p class="hero__description">
-          Encuentra las próximas funciones, talleres y experiencias de improvisación en toda la región.
-          Filtra por país, ciudad o compañía y mantente al día con la comunidad.
-        </p>
       </div>
       <div class="hero__metrics">
         <article class="metric">
