@@ -248,15 +248,19 @@
 
     .thumb {
       width: 100%;
-      aspect-ratio: 4 / 3;
+      aspect-ratio: var(--img-aspect, 4 / 3);
       background: linear-gradient(135deg, rgba(124, 58, 237, 0.12), rgba(14, 165, 233, 0.12));
       position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .thumb img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
+      display: block;
     }
 
     .thumb__overlay {
@@ -448,10 +452,21 @@
 
     .modal-hero {
       width: 100%;
-      aspect-ratio: 16 / 9;
+      aspect-ratio: var(--img-aspect, 16 / 9);
       border-radius: var(--radius-md);
       overflow: hidden;
       background: #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      max-height: min(70vh, 520px);
+    }
+
+    .modal-hero img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
     }
 
     .modal-grid {
@@ -788,13 +803,31 @@ function driveImageCandidates(u) {
 function createImgWithFallback(cands) {
   const img = document.createElement("img");
   img.loading = "lazy";
+  img.decoding = "async";
   let i = 0;
+  const resetAspect = () => {
+    if (img.parentElement) {
+      img.parentElement.style.removeProperty("--img-aspect");
+    }
+  };
+  img.addEventListener("load", () => {
+    if (!img.parentElement) return;
+    const { naturalWidth, naturalHeight } = img;
+    if (naturalWidth > 0 && naturalHeight > 0) {
+      const ratio = naturalWidth / naturalHeight;
+      if (isFinite(ratio) && ratio > 0) {
+        img.parentElement.style.setProperty("--img-aspect", ratio);
+      }
+    }
+  });
   const tryNext = () => {
     if (!Array.isArray(cands) || i >= cands.length) {
       img.onerror = null;
+      resetAspect();
       img.src = "https://via.placeholder.com/800?text=Sin+imagen";
       return;
     }
+    resetAspect();
     img.src = cands[i++];
   };
   img.onerror = tryNext;
@@ -1015,10 +1048,12 @@ createApp({
   .directive("img-fallback", {
     mounted(el, binding) {
       el.innerHTML = "";
+      el.style.removeProperty("--img-aspect");
       el.appendChild(createImgWithFallback(binding.value || []));
     },
     updated(el, binding) {
       el.innerHTML = "";
+      el.style.removeProperty("--img-aspect");
       el.appendChild(createImgWithFallback(binding.value || []));
     }
   })
