@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Registro de Evento</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    :root {
+      --primary: #1976d2;
+      --primary-dark: #1565c0;
+      --error: #d32f2f;
+      --success: #388e3c;
+    }
+
+    body {
+      font-family: "Roboto", Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    .card {
+      background: #fff;
+      max-width: 600px;
+      margin: auto;
+      padding: 20px 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      color: var(--primary);
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 6px rgba(25, 118, 210, 0.25);
+      outline: none;
+    }
+
+    input.error, textarea.error, select.error {
+      border-color: var(--error);
+      background: #ffebee;
+    }
+
+    small.error-message {
+      color: var(--error);
+      font-size: 12px;
+      display: none;
+      margin-top: 4px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    button:hover:not(:disabled) {
+      background: var(--primary-dark);
+    }
+
+    button:disabled {
+      background: #90caf9;
+      cursor: not-allowed;
+    }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 3px solid #fff;
+      border-top: 3px solid transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #323232;
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 6px;
+      font-size: 14px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.4s ease;
+      z-index: 9999;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 600px) {
+      body { padding: 10px; }
+      .card { padding: 15px 18px; }
+      button { font-size: 15px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Registro de Evento</h2>
+    <form id="eventoForm" novalidate>
+      
+      <div class="form-group">
+        <label for="NombreFormato">Nombre del Formato</label>
+        <input type="text" id="NombreFormato" name="NombreFormato" required>
+        <small class="error-message">Este campo es obligatorio.</small>
+      </div>
+
+      <div class="form-group">
+        <label for="TipoFormato">Tipo de Formato</label>
+        <select id="TipoFormato" name="TipoFormato" required>
+          <option value="">-- Seleccione --</option>
+          <option value="Long Form">Long Form</option>
+          <option value="Short Form">Short Form</option>
+          <option value="Deportivo">Deportivo</option>
+        </select>
+        <small class="error-message">Debe seleccionar un tipo.</small>
+      </div>
+
+      <div class="form-group">
+        <label for="FechaFuncion">Fecha de la Función</label>
+        <input type="date" id="FechaFuncion" name="FechaFuncion" required>
+        <small class="error-message">Debe ingresar la fecha.</small>
+      </div>
+
+      <div class="form-group">
+        <label for="HoraFuncion">Hora de la Función</label>
+        <input type="time" id="HoraFuncion" name="HoraFuncion" required>
+        <small class="error-message">Debe ingresar la hora.</small>
+      </div>
+
+      <div class="form-group">
+        <label for="AperturaPuertas">Apertura de Puertas</label>
+        <input type="time" id="AperturaPuertas" name="AperturaPuertas">
+      </div>
+
+      <div class="form-group">
+        <label for="País">País</label>
+        <input type="text" id="País" name="País" required>
+        <small class="error-message">Debe ingresar el país.</small>
+      </div>
+
+      <div class="form-group">
+        <label for="Ciudad">Ciudad</label>
+        <input type="text" id="Ciudad" name="Ciudad" required>
+        <small class="error-message">Debe ingresar la ciudad.</small>
+      </div>
+
+      <div class="form-group">
+        <label for="Sinopsis">Sinopsis</label>
+        <textarea id="Sinopsis" name="Sinopsis" rows="3"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="Director">Director</label>
+        <input type="text" id="Director" name="Director">
+      </div>
+
+      <div class="form-group">
+        <label for="Compañía">Compañía</label>
+        <input type="text" id="Compañía" name="Compañía">
+      </div>
+
+      <div class="form-group">
+        <label for="Instagram">Instagram (solo usuario, sin @)</label>
+        <input type="text" id="Instagram" name="Instagram">
+      </div>
+
+      <div class="form-group">
+        <label for="Boleteria">Boletería (URL)</label>
+        <input type="url" id="Boleteria" name="Boleteria" pattern="https?://.+">
+        <small class="error-message">Debe ser una URL válida.</small>
+      </div>
+
+      <div class="form-group">
+        <label for="VideoURL">Video Promocional (URL YouTube)</label>
+        <input type="url" id="VideoURL" name="VideoURL" pattern="https?://.+">
+        <small class="error-message">Debe ser una URL válida.</small>
+      </div>
+
+      <div class="form-group">
+        <label for="PiezaPromocional">Pieza Promocional (imagen)</label>
+        <input type="file" id="PiezaPromocional" name="PiezaPromocional" accept="image/*">
+      </div>
+
+      <button type="submit" id="submitBtn">
+        <span id="btnText">Enviar</span>
+        <div class="spinner" id="spinner"></div>
+      </button>
+    </form>
+  </div>
+
+  <!-- Toast flotante -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const scriptURL = "https://script.google.com/macros/s/AKfycbwoCLUfEiRjnmzumQ-Qs82vLUMpfTWHuemY8W6NODHVhGskbdQQHh-rIHKJUpS0cPCSxQ/exec";
+
+    const form = document.getElementById("eventoForm");
+    const submitBtn = document.getElementById("submitBtn");
+    const spinner = document.getElementById("spinner");
+    const btnText = document.getElementById("btnText");
+    const toast = document.getElementById("toast");
+
+    form.addEventListener("submit", async function(e) {
+      e.preventDefault();
+      clearValidation();
+
+      if (!validateForm()) return;
+
+      toggleLoading(true);
+
+      const formData = new FormData(form);
+      const data = {};
+
+      const file = form.PiezaPromocional.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onloadend = async function() {
+          const base64String = reader.result.split(",")[1];
+          data.PiezaPromocional = base64String;
+          data.PiezaPromocionalName = file.name;
+          data.PiezaPromocionalType = file.type;
+
+          formData.forEach((value, key) => {
+            if (key !== "PiezaPromocional") data[key] = value;
+          });
+
+          await enviarDatos(data);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        formData.forEach((value, key) => { data[key] = value; });
+        await enviarDatos(data);
+      }
+    });
+
+    function clearValidation() {
+      form.querySelectorAll(".error-message").forEach(el => el.style.display = "none");
+      form.querySelectorAll(".error").forEach(el => el.classList.remove("error"));
+    }
+
+    function validateForm() {
+      let valid = true;
+      form.querySelectorAll("[required]").forEach(input => {
+        if (!input.value.trim()) {
+          input.classList.add("error");
+          input.parentElement.querySelector(".error-message").style.display = "block";
+          valid = false;
+        }
+      });
+      form.querySelectorAll("input[type='url']").forEach(input => {
+        if (input.value && !input.validity.valid) {
+          input.classList.add("error");
+          input.parentElement.querySelector(".error-message").style.display = "block";
+          valid = false;
+        }
+      });
+      return valid;
+    }
+
+    function toggleLoading(isLoading) {
+      if (isLoading) {
+        submitBtn.disabled = true;
+        btnText.textContent = "Enviando...";
+        spinner.style.display = "inline-block";
+      } else {
+        submitBtn.disabled = false;
+        btnText.textContent = "Enviar";
+        spinner.style.display = "none";
+      }
+    }
+
+    function showToast(message, type="success") {
+      toast.textContent = message;
+      toast.style.background = type === "success" ? "#388e3c" : "#d32f2f";
+      toast.classList.add("show");
+      setTimeout(() => {
+        toast.classList.remove("show");
+      }, 5000);
+    }
+
+    async function enviarDatos(data) {
+      try {
+        const response = await fetch(scriptURL, {
+          method: "POST",
+          body: new URLSearchParams(data)
+        });
+        const result = await response.json();
+        if (result.status === "success") {
+          form.reset();
+          showToast("✅ Evento registrado con éxito", "success");
+        } else {
+          showToast("❌ " + result.message, "error");
+        }
+      } catch (error) {
+        showToast("❌ Error al enviar: " + error.message, "error");
+      } finally {
+        toggleLoading(false);
+      }
+    }
+  </script>
+</body>
+</html>
