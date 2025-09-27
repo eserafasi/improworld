@@ -82,6 +82,7 @@
       justify-self: end;
       width: 100%;
       max-width: 420px;
+      transition: transform 0.25s ease;
     }
 
     .metric {
@@ -100,11 +101,19 @@
       font-size: 1.75rem;
       font-weight: 700;
       color: var(--primary);
+      transition: font-size 0.25s ease;
     }
 
     .metric__label {
       color: var(--muted);
       font-size: 0.85rem;
+      transition: font-size 0.25s ease;
+    }
+
+    @media (min-width: 901px) {
+      .hero__metrics {
+        transform: translateY(-30px);
+      }
     }
 
     .wrap {
@@ -597,7 +606,21 @@
       .hero__metrics {
         justify-self: stretch;
         max-width: none;
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 8px;
+        transform: translateY(0);
+      }
+
+      .metric {
+        padding: 10px 12px;
+      }
+
+      .metric__value {
+        font-size: 1.25rem;
+      }
+
+      .metric__label {
+        font-size: 0.72rem;
       }
 
       .filters {
