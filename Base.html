@@ -1342,7 +1342,19 @@ createApp({
       try {
         const response = await fetch(WEBAPP_URL);
         const data = await response.json();
-        list.value = data.map(norm).filter((ev) => ev.estado !== "Despublicado");
+        const toTimestamp = (ev) => {
+          if (!ev.fechaRaw) return Number.POSITIVE_INFINITY;
+          const time = new Date(ev.fechaRaw).getTime();
+          return Number.isNaN(time) ? Number.POSITIVE_INFINITY : time;
+        };
+        list.value = data
+          .map(norm)
+          .filter((ev) => ev.estado !== "Despublicado")
+          .sort((a, b) => {
+            const timeDiff = toTimestamp(a) - toTimestamp(b);
+            if (timeDiff !== 0) return timeDiff;
+            return a.nombre.localeCompare(b.nombre, "es");
+          });
       } catch (err) {
         console.error("Error al cargar la agenda", err);
         list.value = [];
