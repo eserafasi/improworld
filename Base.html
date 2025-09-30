@@ -1190,6 +1190,7 @@ function norm(ev) {
     fecha: formatFecha(ev.FechaFuncion),
     fechaRaw: ev.FechaFuncion,
     fechaISO: "",
+    fechaTime: null,
     hora: val(ev.HoraFuncionTexto) || val(ev.HoraFuncion),
     apertura: val(ev.AperturaPuertasTexto) || val(ev.AperturaPuertas),
     pais: val(ev.Pais) || val(ev["País"]),
@@ -1206,8 +1207,15 @@ function norm(ev) {
   };
   base.fechaISO = base.fechaRaw ? (() => {
     const d = new Date(base.fechaRaw);
-    return isNaN(d) ? "" : d.toISOString().split("T")[0];
+    if (isNaN(d)) return "";
+    const time = new Date(d);
+    time.setHours(0, 0, 0, 0);
+    base.fechaTime = time.getTime();
+    return d.toISOString().split("T")[0];
   })() : "";
+  if (!base.fechaISO) {
+    base.fechaTime = null;
+  }
   base.searchText = normalizeText([
     base.nombre,
     base.formato,
@@ -1265,13 +1273,18 @@ createApp({
       const c = filters.ciudad;
       const co = filters.compania;
       const f = filters.fecha;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayTime = today.getTime();
       return list.value.filter((ev) => {
         const okQ = !q || ev.searchText.includes(q);
         const okP = !p || normalizeText(ev.pais) === p;
         const okC = !c || normalizeText(ev.ciudad) === c;
         const okCo = !co || normalizeText(ev.compania) === co;
         const okF = !f || ev.fechaISO === f;
-        return okQ && okP && okC && okCo && okF;
+        const isPastEvent = typeof ev.fechaTime === "number" && ev.fechaTime < todayTime;
+        const okPast = !isPastEvent || (f && ev.fechaISO === f);
+        return okQ && okP && okC && okCo && okF && okPast;
       });
     });
 
@@ -1352,11 +1365,9 @@ createApp({
       try {
         const response = await fetch(WEBAPP_URL);
         const data = await response.json();
-        const toTimestamp = (ev) => {
-          if (!ev.fechaRaw) return Number.POSITIVE_INFINITY;
-          const time = new Date(ev.fechaRaw).getTime();
-          return Number.isNaN(time) ? Number.POSITIVE_INFINITY : time;
-        };
+        const toTimestamp = (ev) => (
+          typeof ev.fechaTime === "number" ? ev.fechaTime : Number.POSITIVE_INFINITY
+        );
         list.value = data
           .map(norm)
           .filter((ev) => ev.estado !== "Despublicado")
