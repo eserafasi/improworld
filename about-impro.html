@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Impro!</title>
+  <style>
+    :root {
+      --ink: #101828;
+      --muted: #667085;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --ring: #e2e8f0;
+      --primary: #7c3aed;
+      --primary-soft: #ede9fe;
+      --accent: #f59e0b;
+      --accent-soft: rgba(245, 158, 11, 0.14);
+      --success: #22c55e;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08);
+      --shadow-md: 0 12px 32px rgba(79, 70, 229, 0.12);
+      --radius-lg: 18px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+      --max-width: 1080px;
+      --transition: all 0.25s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, #faf5ff 0%, #f8fafc 40%, #ffffff 100%);
+      color: var(--ink);
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    h1,
+    h2,
+    h3 {
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      margin: 0;
+      line-height: 1.2;
+    }
+
+    .page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .hero {
+      padding: 72px 20px 48px;
+      background: radial-gradient(120% 120% at 50% 0%, rgba(124, 58, 237, 0.16) 0%, rgba(124, 58, 237, 0) 60%),
+        linear-gradient(140deg, rgba(124, 58, 237, 0.16) 10%, rgba(59, 130, 246, 0.08) 100%);
+    }
+
+    .hero__inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      display: grid;
+      gap: 32px;
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .hero__heading {
+      font-size: clamp(2.4rem, 5vw, 3.4rem);
+      letter-spacing: -0.03em;
+      line-height: 1.08;
+      max-width: 20ch;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .hero__heading span {
+      color: rgba(16, 24, 40, 0.78);
+      font-size: clamp(1rem, 2vw, 1.15rem);
+      font-weight: 500;
+    }
+
+    .wrap {
+      max-width: var(--max-width);
+      margin: -32px auto 72px;
+      padding: 0 20px 60px;
+      width: 100%;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      padding: 40px 40px 48px;
+      box-shadow: var(--shadow-md);
+      border: 1px solid rgba(124, 58, 237, 0.12);
+      display: grid;
+      gap: 28px;
+    }
+
+    .intro {
+      font-size: 1.05rem;
+      color: rgba(16, 24, 40, 0.76);
+    }
+
+    section {
+      display: grid;
+      gap: 16px;
+    }
+
+    section > h2 {
+      font-size: 1.6rem;
+      color: var(--primary);
+    }
+
+    section > h3 {
+      font-size: 1.25rem;
+      color: var(--accent);
+    }
+
+    p {
+      margin: 0;
+      color: rgba(16, 24, 40, 0.86);
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 20px;
+      display: grid;
+      gap: 8px;
+      color: rgba(16, 24, 40, 0.86);
+    }
+
+    li strong {
+      color: var(--primary);
+    }
+
+    .highlight {
+      background: rgba(124, 58, 237, 0.1);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      border: 1px solid rgba(124, 58, 237, 0.24);
+      font-weight: 600;
+      color: rgba(16, 24, 40, 0.88);
+    }
+
+    blockquote {
+      margin: 0;
+      padding: 20px 24px;
+      border-left: 4px solid var(--primary);
+      background: rgba(124, 58, 237, 0.08);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      color: rgba(16, 24, 40, 0.78);
+      font-style: italic;
+    }
+
+    @media (max-width: 720px) {
+      .hero {
+        padding: 52px 16px 32px;
+      }
+
+      .wrap {
+        margin: -24px auto 56px;
+        padding: 0 16px 48px;
+      }
+
+      .card {
+        padding: 28px 24px 36px;
+        gap: 24px;
+      }
+
+      .intro {
+        font-size: 0.98rem;
+      }
+
+      section > h2 {
+        font-size: 1.45rem;
+      }
+
+      section > h3 {
+        font-size: 1.18rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <div class="hero__inner">
+        <div class="hero__heading">
+          <h1>Impro!</h1>
+          <span>Una guía técnica y profunda basada en las enseñanzas de Keith Johnstone.</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <article class="card">
+        <p class="intro">
+          A continuación encontrarás una descripción técnica, clara y profunda del arte de la improvisación teatral.
+          Este texto sintetiza sus principios fundamentales, estructuras, herramientas y propósito transformador, basado
+          en las enseñanzas de Keith Johnstone. Es una guía esencial para comprender la impro no solo como técnica
+          escénica, sino como una vía de desbloqueo creativo y presencia viva.
+        </p>
+
+        <section>
+          <h2>La Improvisación Teatral</h2>
+          <p>
+            La improvisación escénica —o “impro”— es una disciplina teatral en la que los intérpretes crean escenas,
+            personajes y narrativas en tiempo real, sin guion preestablecido. No se trata de una forma menor del teatro,
+            sino de una metodología completa con gramática, reglas y una filosofía de desbloqueo que permite acceder a
+            niveles profundos de creatividad y verdad escénica.
+          </p>
+        </section>
+
+        <section>
+          <h2>I. Fundamentos de la Impro</h2>
+          <div class="highlight">Improvisar no es inventar: es permitir.</div>
+          <p>
+            La impro parte de la premisa de que la creatividad humana está bloqueada, no ausente. Las estructuras
+            sociales, educativas y psicológicas inhiben la capacidad natural de respuesta espontánea. Por eso, la impro
+            es un sistema de liberación más que de instrucción.
+          </p>
+          <p>
+            Keith Johnstone define la improvisación como un conjunto de técnicas orientadas a eliminar los filtros del
+            juicio, el miedo al error y la necesidad de control. Su objetivo no es generar ideas nuevas, sino abrir
+            espacio para que emerjan las que ya existen en el subconsciente.
+          </p>
+        </section>
+
+        <section>
+          <h2>II. Elementos Estructurales</h2>
+          <ol>
+            <li>
+              <strong>Status</strong>
+              <p>
+                La impro no parte de una idea, sino de una relación. La dinámica de status (alto/bajo) entre los
+                personajes es la base dramática de toda escena. Entender el status relacional —más allá del rol social—
+                permite construir interacciones llenas de tensión, humor o transformación.
+              </p>
+            </li>
+            <li>
+              <strong>Oferta y Aceptación</strong>
+              <p>
+                Toda escena se basa en “ofertas” (propuestas escénicas) y su aceptación o negación. El principio técnico
+                es el “sí, y...” que permite que la narrativa avance sin bloquear el impulso del otro.
+              </p>
+            </li>
+            <li>
+              <strong>Escucha y Presencia</strong>
+              <p>
+                Escuchar en impro significa estar completamente disponible para el momento presente, sin anticipación ni
+                juicio. Esta escucha va más allá del oído: es energética, visual, física.
+              </p>
+            </li>
+            <li>
+              <strong>Narrativa espontánea</strong>
+              <p>
+                La impro trabaja con estructuras narrativas arquetípicas. Se enseña a reconocer el viaje del héroe, los
+                cambios de status, los puntos de giro, clímax y resolución en tiempo real. La historia emerge, pero
+                dentro de una intuición estructural.
+              </p>
+            </li>
+            <li>
+              <strong>Espontaneidad entrenada</strong>
+              <p>
+                Aunque parezca paradójico, la espontaneidad en impro es producto de un entrenamiento riguroso. La técnica
+                permite crear desde el impulso, sin necesidad de análisis consciente.
+              </p>
+            </li>
+            <li>
+              <strong>Juego y Regla</strong>
+              <p>
+                La impro utiliza formatos lúdicos que operan como contenedores estructurales. Desde juegos simples hasta
+                formas complejas como el “long form” o el “Theatre Sports”, el juego es el motor del riesgo creativo.
+              </p>
+            </li>
+            <li>
+              <strong>Máscara y Trance</strong>
+              <p>
+                El trabajo con máscaras (físicas o simbólicas) induce estados de trance escénico en los cuales el actor se
+                “quita de en medio” y permite que el personaje o la historia se expresen sin interferencia del ego.
+              </p>
+            </li>
+          </ol>
+        </section>
+
+        <section>
+          <h2>III. Herramientas Técnicas Principales</h2>
+          <ul>
+            <li>Técnicas de status (subir/bajar sin palabras)</li>
+            <li>Entrenamiento de la aceptación ("sí, y...")</li>
+            <li>Juegos narrativos: cuentos colectivos, relato compartido, giros narrativos</li>
+            <li>Construcción de personajes en 3 segundos</li>
+            <li>Impro con restricciones (espacios, emociones, palabras)</li>
+            <li>Improvisación con máscara neutra o expresiva</li>
+            <li>Técnicas de desbloqueo: asociación libre, impulso físico, vocalizaciones</li>
+            <li>Estructuras dramáticas emergentes (estructura de 3 actos, narrativa circular)</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>IV. Objetivos y Cambios que Produce</h2>
+          <ul>
+            <li>Reconectar con la espontaneidad original</li>
+            <li>Rehabilitar la confianza en el error como portal creativo</li>
+            <li>Fomentar la colaboración sin competencia</li>
+            <li>Desarrollar presencia escénica plena</li>
+            <li>Activar estados creativos colectivos (campo resonante)</li>
+            <li>Democratizar el arte escénico: todos pueden improvisar</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>V. La Impro como Tecnología del Ser</h2>
+          <p>
+            Más allá del escenario, la improvisación es una práctica de escucha expandida, respuesta inmediata, y
+            co-creación desde la verdad del momento. Se convierte en una herramienta de transformación individual y
+            colectiva, que entrena al cuerpo-mente a operar en estados de mayor presencia, fluidez y coherencia
+            expresiva.
+          </p>
+          <blockquote>
+            <p>Impro no es solo un estilo. Es un lenguaje.<br />Una forma de estar en escena.<br />Una forma de estar en el mundo.</p>
+          </blockquote>
+        </section>
+      </article>
+    </main>
+  </div>
+</body>
+</html>
