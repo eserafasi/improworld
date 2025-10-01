@@ -471,6 +471,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      cursor: pointer;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
     }
 
     .thumb img {
@@ -478,6 +480,17 @@
       height: 100%;
       object-fit: contain;
       display: block;
+    }
+
+    .thumb:hover {
+      transform: scale(1.01);
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.18);
+    }
+
+    .thumb:focus-visible {
+      outline: 3px solid var(--primary);
+      outline-offset: 2px;
+      box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.25);
     }
 
     .thumb__overlay {
@@ -1022,7 +1035,16 @@
         <template v-else>
           <transition-group name="scale" tag="div" class="agenda__list">
             <article v-for="event in filteredEvents" :key="event.id" class="card">
-              <div class="thumb" v-img-fallback="event.piezaCands">
+              <div
+                class="thumb"
+                v-img-fallback="event.piezaCands"
+                role="button"
+                tabindex="0"
+                :aria-label="'Ver más información sobre ' + (event.nombre || 'el evento')"
+                @click="openModal(event)"
+                @keydown.enter.prevent="openModal(event)"
+                @keydown.space.prevent="openModal(event)"
+              >
                 <div class="thumb__overlay">
                   <span class="badge badge--format" v-if="event.formato">{{ event.formato }}</span>
                   <span class="badge badge--country" v-if="event.pais">{{ event.pais }}</span>
