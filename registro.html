@@ -858,6 +858,114 @@
       categoryModalDismiss.addEventListener("click", closeCategoryModal);
     }
 
+    const MAX_IMAGE_DIMENSION = 1200;
+
+    function readFileAsDataURL(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function createImageElement(src) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = (err) => reject(err);
+        img.src = src;
+      });
+    }
+
+    function getScaledDimensions(width, height) {
+      if (width <= MAX_IMAGE_DIMENSION && height <= MAX_IMAGE_DIMENSION) {
+        return { width, height };
+      }
+      const ratio = Math.min(MAX_IMAGE_DIMENSION / width, MAX_IMAGE_DIMENSION / height);
+      return {
+        width: Math.round(width * ratio),
+        height: Math.round(height * ratio)
+      };
+    }
+
+    function canvasToBlob(canvas, type, quality) {
+      return new Promise((resolve) => {
+        canvas.toBlob((blob) => resolve(blob), type, quality);
+      });
+    }
+
+    function blobToBase64(blob) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(blob);
+      });
+    }
+
+    function replaceExtension(filename, newExtension) {
+      const baseName = filename.replace(/\.[^/.]+$/, "");
+      return `${baseName}.${newExtension}`;
+    }
+
+    async function generarImagenesPromocionales(file) {
+      const originalDataUrl = await readFileAsDataURL(file);
+      const originalBase64 = originalDataUrl.split(",")[1];
+
+      const img = await createImageElement(originalDataUrl);
+      const { width, height } = getScaledDimensions(img.width, img.height);
+
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, width, height);
+
+      const preferredFormats = ["image/avif", "image/webp"];
+      let optimizedBlob = null;
+      let optimizedType = null;
+
+      for (const type of preferredFormats) {
+        // Intentamos generar el blob en orden de preferencia.
+        // Si el navegador no soporta el formato, obtendremos null y continuaremos
+        // hacia la siguiente opción.
+        const candidate = await canvasToBlob(canvas, type, 0.82);
+        if (candidate) {
+          optimizedBlob = candidate;
+          optimizedType = type;
+          break;
+        }
+      }
+
+      if (!optimizedBlob) {
+        // Como último recurso, utilizamos el blob original
+        optimizedBlob = await canvasToBlob(canvas, "image/jpeg", 0.88);
+        optimizedType = optimizedBlob ? "image/jpeg" : file.type;
+      }
+
+      if (!optimizedBlob) {
+        throw new Error("No fue posible optimizar la imagen proporcionada.");
+      }
+
+      const optimizedDataUrl = await blobToBase64(optimizedBlob);
+      const optimizedBase64 = optimizedDataUrl.split(",")[1];
+      const optimizedName = optimizedType.includes("avif")
+        ? replaceExtension(file.name, "avif")
+        : optimizedType.includes("webp")
+          ? replaceExtension(file.name, "webp")
+          : replaceExtension(file.name, "jpg");
+
+      return {
+        originalBase64,
+        originalName: file.name,
+        originalType: file.type,
+        optimizedBase64,
+        optimizedName,
+        optimizedType
+      };
+    }
+
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
       clearValidation();
@@ -874,20 +982,26 @@
 
       const file = form.PiezaPromocional.files[0];
       if (file) {
-        const reader = new FileReader();
-        reader.onloadend = async () => {
-          const base64String = reader.result.split(",")[1];
-          data.PiezaPromocional = base64String;
-          data.PiezaPromocionalName = file.name;
-          data.PiezaPromocionalType = file.type;
+        try {
+          const processed = await generarImagenesPromocionales(file);
+          data.PiezaPromocional = processed.originalBase64;
+          data.PiezaPromocionalName = processed.originalName;
+          data.PiezaPromocionalType = processed.originalType;
+          data.PiezaPromocionalOptimizada = processed.optimizedBase64;
+          data.PiezaPromocionalOptimizadaName = processed.optimizedName;
+          data.PiezaPromocionalOptimizadaType = processed.optimizedType;
+        } catch (processingError) {
+          console.error(processingError);
+          toggleLoading(false);
+          showToast("❌ No pudimos procesar la imagen adjunta. Intenta con otro archivo.", "error");
+          return;
+        }
 
-          formData.forEach((value, key) => {
-            if (key !== "PiezaPromocional") data[key] = value;
-          });
+        formData.forEach((value, key) => {
+          if (key !== "PiezaPromocional") data[key] = value;
+        });
 
-          await enviarDatos(data);
-        };
-        reader.readAsDataURL(file);
+        await enviarDatos(data);
       } else {
         formData.forEach((value, key) => {
           data[key] = value;
