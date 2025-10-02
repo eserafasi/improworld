@@ -222,9 +222,9 @@
       box-shadow: 0 22px 48px rgba(15, 23, 42, 0.18);
       width: min(560px, 100%);
       max-height: min(620px, 100%);
-      overflow: hidden;
       display: grid;
       gap: 20px;
+      grid-template-rows: auto minmax(0, 1fr) auto;
     }
 
     .category-modal__header {
@@ -267,6 +267,8 @@
       padding-right: 6px;
       display: grid;
       gap: 16px;
+      max-height: clamp(240px, 50vh, 420px);
+      padding-bottom: 4px;
     }
 
     .category-card {
@@ -750,37 +752,32 @@
       {
         title: "Long Form",
         description:
-          "Historias improvisadas de larga duración que construyen una narrativa continua, exploran el desarrollo de personajes y trabajan atmósferas compartidas.",
-        examples: ["Harold", "Armando", "Formatos de una sola historia"],
+          "Historias improvisadas extensas centradas en una narrativa continua y el desarrollo de personajes.",
       },
       {
         title: "Short Form",
         description:
-          "Secuencia dinámica de juegos y escenas cortas con reglas claras. Favorece el humor, la agilidad y la participación del público.",
-        examples: ["Juegos estilo Whose Line", "Desafíos por consignas", "Miniescenas temáticas"],
+          "Secuencia ágil de juegos y escenas breves enfocada en el humor y la participación del público.",
       },
       {
         title: "Deportivo",
         description:
-          "Competiciones con estructura de torneo donde equipos de improvisadores suman puntos mediante desafíos escénicos evaluados por jueces o el público.",
-        examples: ["Theatresports", "Catch de impro", "Ligas de improvisación"],
+          "Competencias estructuradas donde equipos de improvisadores suman puntos mediante desafíos evaluados.",
       },
       {
         title: "Match",
         description:
-          "Dos equipos improvisan bajo la conducción de un árbitro que propone consignas, sanciona faltas y habilita al público a votar por cada escena.",
-        examples: ["Match de improvisación", "Match clásico canadiense"],
+          "Enfrentamiento entre dos equipos guiados por un árbitro que plantea consignas y habilita la votación del público.",
       },
       {
         title: "Varieté",
         description:
-          "Show misceláneo que combina improvisación con otros números en vivo: música, clown, stand up, experimentos interactivos u otras disciplinas escénicas.",
-        examples: ["Noche de números breves", "Formato cabaret", "Impro + música en vivo"],
+          "Show que integra improvisación con otras disciplinas en vivo dentro de una misma velada.",
       },
       {
         title: "Otro",
         description:
-          "Propuestas híbridas o en desarrollo que no encajan en las categorías anteriores. Úsala para experiencias nuevas, residencias o laboratorios.",
+          "Propuestas híbridas o en desarrollo que aún no encajan en las categorías anteriores.",
       },
     ];
 
@@ -789,18 +786,14 @@
     function renderCategoryDescriptions() {
       if (!categoryModalBody) return;
       categoryModalBody.innerHTML = categoryDescriptions
-        .map((category) => {
-          const examples = Array.isArray(category.examples) && category.examples.length
-            ? `<ul>${category.examples.map((item) => `<li>${item}</li>`).join("")}</ul>`
-            : "";
-          return `
+        .map(
+          (category) => `
             <article class="category-card">
               <h4>${category.title}</h4>
               <p>${category.description}</p>
-              ${examples}
             </article>
-          `;
-        })
+          `,
+        )
         .join("");
     }
 
