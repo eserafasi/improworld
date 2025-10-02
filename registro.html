@@ -150,6 +150,180 @@
       gap: 18px;
     }
 
+    .label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .info-button {
+      appearance: none;
+      border: none;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .info-button::before {
+      content: "i";
+      display: inline-flex;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+
+    .info-button:hover,
+    .info-button:focus-visible {
+      background: rgba(124, 58, 237, 0.18);
+      color: #4c1d95;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.14);
+    }
+
+    .category-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.32);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.24s ease, visibility 0.24s ease;
+    }
+
+    .category-modal.is-open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .category-modal__dialog {
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      padding: clamp(24px, 4vw, 36px);
+      box-shadow: 0 22px 48px rgba(15, 23, 42, 0.18);
+      width: min(560px, 100%);
+      max-height: min(620px, 100%);
+      overflow: hidden;
+      display: grid;
+      gap: 20px;
+    }
+
+    .category-modal__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .category-modal__title {
+      margin: 0;
+      font-size: 1.5rem;
+      color: var(--primary);
+    }
+
+    .category-modal__close {
+      appearance: none;
+      border: none;
+      background: rgba(124, 58, 237, 0.12);
+      color: var(--primary);
+      border-radius: 999px;
+      width: 36px;
+      height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .category-modal__close:hover,
+    .category-modal__close:focus-visible {
+      background: rgba(124, 58, 237, 0.2);
+      outline: none;
+    }
+
+    .category-modal__body {
+      overflow-y: auto;
+      padding-right: 6px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .category-card {
+      background: rgba(124, 58, 237, 0.08);
+      border: 1px solid rgba(124, 58, 237, 0.18);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .category-card h4 {
+      margin: 0;
+      font-size: 1.05rem;
+      color: rgba(76, 29, 149, 0.98);
+    }
+
+    .category-card p {
+      margin: 0;
+      color: rgba(16, 24, 40, 0.78);
+      font-size: 0.95rem;
+    }
+
+    .category-card ul {
+      margin: 0;
+      padding-left: 18px;
+      display: grid;
+      gap: 4px;
+      font-size: 0.9rem;
+      color: rgba(16, 24, 40, 0.72);
+    }
+
+    .category-modal__footer {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .category-modal__action {
+      appearance: none;
+      border: none;
+      border-radius: 999px;
+      background: var(--primary);
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 10px 20px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .category-modal__action:hover,
+    .category-modal__action:focus-visible {
+      background: #5b21b6;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+    }
+
     @media (min-width: 720px) {
       .form-grid[data-columns="2"] {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -416,7 +590,10 @@
                   <small class="error-message">Este campo es obligatorio.</small>
                 </label>
                 <label for="TipoFormato">
-                  Tipo de formato
+                  <span class="label-row">
+                    <span>Tipo de formato</span>
+                    <button type="button" class="info-button" id="categoryInfoBtn" aria-haspopup="dialog" aria-controls="categoryModal">Descripción categoría</button>
+                  </span>
                   <select id="TipoFormato" name="TipoFormato" required>
                     <option value="">Selecciona una opción</option>
                     <option value="Long Form">Long Form</option>
@@ -537,6 +714,19 @@
     </main>
   </div>
 
+  <div class="category-modal" id="categoryModal" role="dialog" aria-modal="true" aria-labelledby="categoryModalTitle" hidden>
+    <div class="category-modal__dialog" role="document">
+      <header class="category-modal__header">
+        <h3 class="category-modal__title" id="categoryModalTitle">Categorías del show</h3>
+        <button type="button" class="category-modal__close" id="categoryModalClose" aria-label="Cerrar ventana">&times;</button>
+      </header>
+      <div class="category-modal__body" id="categoryModalBody"></div>
+      <footer class="category-modal__footer">
+        <button type="button" class="category-modal__action" id="categoryModalDismiss">Entendido</button>
+      </footer>
+    </div>
+  </div>
+
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <div class="sr-only" aria-live="assertive" id="srAlert"></div>
 
@@ -549,6 +739,125 @@
     const btnText = document.getElementById("btnText");
     const toast = document.getElementById("toast");
     const srAlert = document.getElementById("srAlert");
+    const categoryInfoBtn = document.getElementById("categoryInfoBtn");
+    const categoryModal = document.getElementById("categoryModal");
+    const categoryModalBody = document.getElementById("categoryModalBody");
+    const categoryModalClose = document.getElementById("categoryModalClose");
+    const categoryModalDismiss = document.getElementById("categoryModalDismiss");
+
+    const categoryDescriptions = [
+      {
+        title: "Long Form",
+        description:
+          "Historias improvisadas de larga duración que construyen una narrativa continua, exploran el desarrollo de personajes y trabajan atmósferas compartidas.",
+        examples: ["Harold", "Armando", "Formatos de una sola historia"],
+      },
+      {
+        title: "Short Form",
+        description:
+          "Secuencia dinámica de juegos y escenas cortas con reglas claras. Favorece el humor, la agilidad y la participación del público.",
+        examples: ["Juegos estilo Whose Line", "Desafíos por consignas", "Miniescenas temáticas"],
+      },
+      {
+        title: "Deportivo",
+        description:
+          "Competiciones con estructura de torneo donde equipos de improvisadores suman puntos mediante desafíos escénicos evaluados por jueces o el público.",
+        examples: ["Theatresports", "Catch de impro", "Ligas de improvisación"],
+      },
+      {
+        title: "Match",
+        description:
+          "Dos equipos improvisan bajo la conducción de un árbitro que propone consignas, sanciona faltas y habilita al público a votar por cada escena.",
+        examples: ["Match de improvisación", "Match clásico canadiense"],
+      },
+      {
+        title: "Varieté",
+        description:
+          "Show misceláneo que combina improvisación con otros números en vivo: música, clown, stand up, experimentos interactivos u otras disciplinas escénicas.",
+        examples: ["Noche de números breves", "Formato cabaret", "Impro + música en vivo"],
+      },
+      {
+        title: "Otro",
+        description:
+          "Propuestas híbridas o en desarrollo que no encajan en las categorías anteriores. Úsala para experiencias nuevas, residencias o laboratorios.",
+      },
+    ];
+
+    let lastFocusedElement = null;
+
+    function renderCategoryDescriptions() {
+      if (!categoryModalBody) return;
+      categoryModalBody.innerHTML = categoryDescriptions
+        .map((category) => {
+          const examples = Array.isArray(category.examples) && category.examples.length
+            ? `<ul>${category.examples.map((item) => `<li>${item}</li>`).join("")}</ul>`
+            : "";
+          return `
+            <article class="category-card">
+              <h4>${category.title}</h4>
+              <p>${category.description}</p>
+              ${examples}
+            </article>
+          `;
+        })
+        .join("");
+    }
+
+    function openCategoryModal() {
+      if (!categoryModal) return;
+      lastFocusedElement = document.activeElement;
+      renderCategoryDescriptions();
+      categoryModal.hidden = false;
+      window.requestAnimationFrame(() => {
+        categoryModal.classList.add("is-open");
+      });
+      const focusTarget = categoryModalClose || categoryModalDismiss;
+      if (focusTarget) {
+        focusTarget.focus();
+      }
+      document.addEventListener("keydown", handleKeydown);
+    }
+
+    function closeCategoryModal() {
+      if (!categoryModal) return;
+      categoryModal.classList.remove("is-open");
+      const finish = () => {
+        categoryModal.hidden = true;
+      };
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        finish();
+      } else {
+        categoryModal.addEventListener("transitionend", finish, { once: true });
+      }
+      document.removeEventListener("keydown", handleKeydown);
+      if (lastFocusedElement && typeof lastFocusedElement.focus === "function") {
+        lastFocusedElement.focus();
+      }
+    }
+
+    function handleKeydown(event) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeCategoryModal();
+      }
+    }
+
+    if (categoryInfoBtn && categoryModal) {
+      categoryInfoBtn.addEventListener("click", openCategoryModal);
+      categoryModal.addEventListener("click", (event) => {
+        if (event.target === categoryModal) {
+          closeCategoryModal();
+        }
+      });
+    }
+
+    if (categoryModalClose) {
+      categoryModalClose.addEventListener("click", closeCategoryModal);
+    }
+
+    if (categoryModalDismiss) {
+      categoryModalDismiss.addEventListener("click", closeCategoryModal);
+    }
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
