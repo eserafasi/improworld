@@ -478,6 +478,22 @@
       width: 100%;
     }
 
+    @media (min-width: 980px) {
+      .agenda {
+        --agenda-card-max: max(180px, calc((100% - 80px) / 5));
+        justify-items: center;
+      }
+
+      .agenda > article,
+      .agenda__list > article,
+      .agenda > .skeleton-card,
+      .agenda__list > .skeleton-card,
+      .agenda .card,
+      .agenda .skeleton-card {
+        max-width: var(--agenda-card-max);
+      }
+    }
+
     .card {
       position: relative;
       border-radius: var(--radius-lg);
