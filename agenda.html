@@ -171,6 +171,174 @@
       flex: 1 0 auto;
     }
 
+    .subscribe-card {
+      position: relative;
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(59, 130, 246, 0.06));
+      border: 1px solid rgba(124, 58, 237, 0.14);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      padding: 28px;
+      margin-bottom: 32px;
+      display: grid;
+      gap: 20px;
+      overflow: hidden;
+    }
+
+    .subscribe-card__body {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .subscribe-card__title {
+      font-size: clamp(1.4rem, 2vw, 1.8rem);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .subscribe-card__description {
+      margin: 0;
+      color: rgba(16, 24, 40, 0.78);
+      max-width: 60ch;
+      line-height: 1.5;
+    }
+
+    .subscribe-card__cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      border-radius: 999px;
+      border: none;
+      padding: 12px 20px;
+      background: linear-gradient(135deg, #7c3aed, #6366f1);
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      box-shadow: var(--shadow-md);
+      transition: var(--transition);
+      flex: 0 0 auto;
+    }
+
+    .subscribe-card__cta:hover,
+    .subscribe-card__cta:focus-visible {
+      transform: translateY(-1px);
+      filter: brightness(1.03);
+      outline: none;
+      box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.2);
+    }
+
+    .subscribe-card__note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .subscribe-form {
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(124, 58, 237, 0.16);
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.06);
+      padding: 20px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .subscribe-form__grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .subscribe-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.9rem;
+      color: var(--muted);
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    .subscribe-field input,
+    .subscribe-field select {
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--ink);
+      background: rgba(248, 250, 252, 0.9);
+      transition: var(--transition);
+    }
+
+    .subscribe-field input:focus,
+    .subscribe-field select:focus {
+      outline: none;
+      border-color: rgba(124, 58, 237, 0.4);
+      box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.16);
+    }
+
+    .subscribe-checkboxes,
+    .subscribe-radios {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--ink);
+      text-transform: none;
+    }
+
+    .subscribe-checkboxes label,
+    .subscribe-radios label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .subscribe-field--full {
+      grid-column: 1 / -1;
+    }
+
+    .subscribe-form__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .subscribe-form__actions .btn {
+      flex: 0 0 auto;
+    }
+
+    .subscribe-feedback {
+      margin: 0;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .subscribe-feedback--success {
+      color: var(--success);
+    }
+
+    .subscribe-feedback--error {
+      color: #dc2626;
+    }
+
+    .subscribe-feedback.subscribe-feedback--error {
+      list-style: disc;
+      padding-left: 20px;
+    }
+
+    .subscribe-feedback__detail {
+      display: block;
+      margin-top: 4px;
+      color: rgba(16, 24, 40, 0.7);
+    }
+
     .hero--footer {
       margin-top: auto;
       padding: 56px 20px 80px;
@@ -620,165 +788,6 @@
       font-size: 1.1rem;
     }
 
-    .subscribe-card {
-      margin-top: 48px;
-      background: var(--card);
-      border-radius: var(--radius-lg);
-      padding: 32px;
-      box-shadow: var(--shadow-md);
-      border: 1px solid rgba(124, 58, 237, 0.12);
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 24px;
-      align-items: center;
-    }
-
-    .subscribe-card__content h2 {
-      font-size: clamp(1.8rem, 3vw, 2.2rem);
-      margin: 0;
-    }
-
-    .subscribe-card__content p {
-      margin: 0;
-      font-size: 1rem;
-      color: rgba(16, 24, 40, 0.7);
-    }
-
-    .subscribe-card__actions {
-      display: grid;
-      gap: 10px;
-      justify-items: start;
-    }
-
-    .subscribe-card__hint {
-      margin: 0;
-      font-size: 0.85rem;
-      color: var(--muted);
-    }
-
-    .modal--subscribe .modal__dialog {
-      max-width: 540px;
-    }
-
-    .subscribe-form {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-    }
-
-    .subscribe-form .modal__body {
-      flex: 1;
-    }
-
-    .subscribe-intro {
-      margin: 0 0 12px;
-      color: var(--muted);
-      font-size: 0.95rem;
-    }
-
-    .form-field {
-      display: grid;
-      gap: 6px;
-    }
-
-    .form-field label,
-    .form-field .form-label {
-      font-weight: 600;
-      font-size: 0.82rem;
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-
-    .form-field input,
-    .form-field select {
-      padding: 10px 12px;
-      border: 1px solid var(--ring);
-      border-radius: 12px;
-      font-size: 0.95rem;
-      color: var(--ink);
-      background: rgba(248, 250, 252, 0.9);
-      transition: var(--transition);
-    }
-
-    .form-field input:focus,
-    .form-field select:focus {
-      outline: none;
-      border-color: rgba(124, 58, 237, 0.4);
-      box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12);
-    }
-
-    .options-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .checkbox-option {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(124, 58, 237, 0.2);
-      background: rgba(124, 58, 237, 0.08);
-      font-weight: 600;
-      color: var(--primary);
-      cursor: pointer;
-      transition: var(--transition);
-    }
-
-    .checkbox-option:hover {
-      background: rgba(124, 58, 237, 0.16);
-    }
-
-    .checkbox-option input {
-      accent-color: var(--primary);
-    }
-
-    .checkbox-option input:focus-visible + span {
-      outline: 2px solid rgba(124, 58, 237, 0.5);
-      outline-offset: 2px;
-    }
-
-    .inline-error {
-      color: #dc2626;
-      font-size: 0.78rem;
-    }
-
-    .subscribe-feedback {
-      border-radius: var(--radius-sm);
-      padding: 12px 14px;
-      font-size: 0.9rem;
-    }
-
-    .subscribe-feedback.error {
-      background: rgba(239, 68, 68, 0.12);
-      color: #991b1b;
-      border: 1px solid rgba(239, 68, 68, 0.3);
-    }
-
-    .subscribe-success {
-      display: grid;
-      gap: 12px;
-    }
-
-    .subscribe-success h4 {
-      margin: 0;
-      font-size: 1.4rem;
-      color: var(--primary);
-    }
-
-    .subscribe-success p {
-      margin: 0;
-      font-size: 0.95rem;
-      color: var(--muted);
-    }
-
-    .subscribe-success__hint {
-      font-size: 0.85rem;
-    }
-
     .modal {
       position: fixed;
       inset: 0;
@@ -952,6 +961,15 @@
     }
 
     @media (max-width: 900px) {
+      .subscribe-card {
+        padding: 24px;
+      }
+
+      .subscribe-card__body {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
       .filters-card {
         padding: 22px;
       }
@@ -995,6 +1013,23 @@
     }
 
     @media (max-width: 640px) {
+      .subscribe-card {
+        padding: 20px;
+      }
+
+      .subscribe-card__cta {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .subscribe-form {
+        padding: 16px;
+      }
+
+      .subscribe-form__grid {
+        grid-template-columns: 1fr;
+      }
+
       .hero--footer {
         padding: 32px 16px 48px;
       }
@@ -1118,16 +1153,6 @@
         font-size: 0.78rem;
       }
 
-      .subscribe-card {
-        margin-top: 32px;
-        padding: 24px;
-        grid-template-columns: 1fr;
-      }
-
-      .subscribe-card__content h2 {
-        font-size: 1.6rem;
-      }
-
       .actions {
         flex-direction: column;
       }
@@ -1137,6 +1162,123 @@
 <body>
 <div id="app" class="page">
   <main class="wrap">
+    <section class="subscribe-card" aria-labelledby="subscribeTitle">
+      <div class="subscribe-card__body">
+        <div>
+          <h2 class="subscribe-card__title" id="subscribeTitle">Recibí la agenda ImproWorld</h2>
+          <p class="subscribe-card__description">
+            Elegí si querés un resumen semanal o mensual y el canal preferido entre correo y WhatsApp. Te enviaremos solo la información de la agenda, sin spam.
+          </p>
+        </div>
+        <button
+          type="button"
+          class="subscribe-card__cta"
+          @click="toggleSubscribe"
+          :aria-expanded="subscribeExpanded"
+          aria-controls="subscribe-form"
+        >
+          <span v-if="subscribeExpanded">Cerrar formulario</span>
+          <span v-else>Quiero recibir la agenda</span>
+        </button>
+      </div>
+      <transition name="fade">
+        <form
+          v-if="subscribeExpanded"
+          id="subscribe-form"
+          class="subscribe-form"
+          @submit.prevent="submitSubscription"
+        >
+          <div class="subscribe-form__grid">
+            <label class="subscribe-field" for="subscribeNombre">
+              Nombre (opcional)
+              <input
+                type="text"
+                id="subscribeNombre"
+                name="subscribeNombre"
+                autocomplete="name"
+                v-model="subscribeForm.nombre"
+              >
+            </label>
+            <label class="subscribe-field" for="subscribeEmail">
+              Correo electrónico
+              <input
+                type="email"
+                id="subscribeEmail"
+                name="subscribeEmail"
+                autocomplete="email"
+                placeholder="tu@email.com"
+                v-model="subscribeForm.email"
+                :required="subscribeForm.canales.mail"
+                :aria-required="subscribeForm.canales.mail"
+              >
+            </label>
+            <label class="subscribe-field" for="subscribeWhatsapp">
+              WhatsApp
+              <input
+                type="tel"
+                id="subscribeWhatsapp"
+                name="subscribeWhatsapp"
+                autocomplete="tel"
+                placeholder="+549..."
+                v-model="subscribeForm.whatsapp"
+                :required="subscribeForm.canales.whatsapp"
+                :aria-required="subscribeForm.canales.whatsapp"
+              >
+            </label>
+            <fieldset class="subscribe-field subscribe-field--full">
+              <legend>Canales</legend>
+              <div class="subscribe-checkboxes">
+                <label>
+                  <input type="checkbox" v-model="subscribeForm.canales.mail"> Correo electrónico
+                </label>
+                <label>
+                  <input type="checkbox" v-model="subscribeForm.canales.whatsapp"> WhatsApp
+                </label>
+              </div>
+            </fieldset>
+            <fieldset class="subscribe-field subscribe-field--full">
+              <legend>Frecuencia</legend>
+              <div class="subscribe-radios">
+                <label>
+                  <input type="radio" value="semanal" v-model="subscribeForm.frecuencia"> Semanal
+                </label>
+                <label>
+                  <input type="radio" value="mensual" v-model="subscribeForm.frecuencia"> Mensual
+                </label>
+              </div>
+            </fieldset>
+          </div>
+          <div class="subscribe-form__actions">
+            <button type="submit" class="btn btn-primary" :disabled="subscribeLoading">
+              <span v-if="subscribeLoading">Guardando…</span>
+              <span v-else>Guardar suscripción</span>
+            </button>
+            <button type="button" class="btn btn-secondary" @click="resetSubscribeForm" :disabled="subscribeLoading">
+              Limpiar
+            </button>
+          </div>
+          <ul v-if="subscribeErrors.length" class="subscribe-feedback subscribe-feedback--error">
+            <li v-for="(message, index) in subscribeErrors" :key="index">{{ message }}</li>
+          </ul>
+        </form>
+      </transition>
+      <p
+        v-if="subscribeStatus.message"
+        class="subscribe-feedback"
+        :class="{
+          'subscribe-feedback--success': subscribeStatus.type === 'success',
+          'subscribe-feedback--error': subscribeStatus.type === 'error'
+        }"
+      >
+        {{ subscribeStatus.message }}
+        <span v-if="subscribeStatus.type === 'success' && lastSubscriptionSummary" class="subscribe-feedback__detail">
+          {{ lastSubscriptionSummary }}
+        </span>
+      </p>
+      <p v-else class="subscribe-card__note">
+        Podés cambiar tus preferencias cuando quieras. Si preferís dejar de recibir la agenda, respondé al mensaje y te damos de baja.
+      </p>
+    </section>
     <section class="filters-card" :class="{ 'is-collapsed': !filtersExpanded }">
       <header class="filters-card__header">
         <h2 class="filters-card__title"><span>🎟️</span> Filtrar agenda</h2>
@@ -1253,20 +1395,6 @@
         </template>
       </div>
     </section>
-
-    <section class="subscribe-card" aria-labelledby="subscribeTitle">
-      <div class="subscribe-card__content">
-        <h2 id="subscribeTitle">Recibe la agenda en tu correo</h2>
-        <p>
-          Suscríbete para recibir un resumen semanal o mensual con las novedades de ImproWorld y elige cómo quieres que te
-          contactemos.
-        </p>
-      </div>
-      <div class="subscribe-card__actions">
-        <button type="button" class="btn btn-primary" @click="openSubscribeModal">Suscribirme gratis</button>
-        <p class="subscribe-card__hint">Puedes dejar de recibir la agenda cuando quieras.</p>
-      </div>
-    </section>
   </main>
 
   <footer class="hero hero--footer">
@@ -1291,125 +1419,7 @@
         </article>
       </div>
     </div>
-  </footer>
-
-  <transition name="fade">
-    <div
-      v-if="showSubscribeModal"
-      class="modal modal--subscribe"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="subscribeModalTitle"
-      @click.self="closeSubscribeModal"
-    >
-      <article class="modal__dialog">
-        <form class="subscribe-form" @submit.prevent="submitSubscription" novalidate>
-          <header class="modal__header">
-            <h3 class="modal__title" id="subscribeModalTitle">Suscríbete a la agenda</h3>
-            <button class="modal__close" type="button" @click="closeSubscribeModal" aria-label="Cerrar">&times;</button>
-          </header>
-          <div class="modal__body">
-            <template v-if="subscribeSuccess">
-              <div class="subscribe-success">
-                <h4>¡Listo! 🎉</h4>
-                <p>
-                  Guardamos tu suscripción. Te enviaremos la agenda {{ lastSubscriptionFrequency }} por
-                  {{ lastSubscriptionChannels }}.
-                </p>
-                <p class="subscribe-success__hint">
-                  ¿Quieres cambiar tus datos? Escríbenos a <a href="mailto:hola@impro.world">hola@impro.world</a> y lo
-                  ajustamos.
-                </p>
-              </div>
-            </template>
-            <template v-else>
-              <p class="subscribe-intro">
-                Elige la frecuencia y el canal para recibir un resumen curado de lo que ocurre en ImproWorld.
-              </p>
-              <div v-if="subscribeAlert" class="subscribe-feedback" :class="subscribeAlertType">
-                {{ subscribeAlert }}
-              </div>
-              <div class="form-field">
-                <label for="subscribeName">Nombre (opcional)</label>
-                <input
-                  id="subscribeName"
-                  type="text"
-                  v-model="subscribeForm.nombre"
-                  placeholder="Tu nombre"
-                  autocomplete="name"
-                >
-              </div>
-              <div class="form-field">
-                <label for="subscribeEmail">Correo electrónico</label>
-                <input
-                  id="subscribeEmail"
-                  type="email"
-                  v-model="subscribeForm.email"
-                  placeholder="tu@correo.com"
-                  autocomplete="email"
-                  :aria-invalid="subscribeErrors.email ? 'true' : 'false'"
-                  aria-describedby="subscribeEmailError"
-                >
-                <span v-if="subscribeErrors.email" class="inline-error" id="subscribeEmailError">
-                  {{ subscribeErrors.email }}
-                </span>
-              </div>
-              <div class="form-field">
-                <label for="subscribeFrequency">Frecuencia</label>
-                <select id="subscribeFrequency" v-model="subscribeForm.frecuencia">
-                  <option value="semanal">Semanal</option>
-                  <option value="mensual">Mensual</option>
-                </select>
-              </div>
-              <div class="form-field">
-                <span class="form-label" id="subscribeChannelsLabel">Canal preferido</span>
-                <div class="options-group" role="group" aria-labelledby="subscribeChannelsLabel">
-                  <label class="checkbox-option">
-                    <input type="checkbox" v-model="subscribeForm.canalMail">
-                    <span>Mail</span>
-                  </label>
-                  <label class="checkbox-option">
-                    <input type="checkbox" v-model="subscribeForm.canalWhatsapp">
-                    <span>WhatsApp</span>
-                  </label>
-                </div>
-                <span v-if="subscribeErrors.canales" class="inline-error">{{ subscribeErrors.canales }}</span>
-              </div>
-              <div class="form-field" v-if="subscribeForm.canalWhatsapp">
-                <label for="subscribeWhatsapp">Número de WhatsApp</label>
-                <input
-                  id="subscribeWhatsapp"
-                  type="tel"
-                  v-model="subscribeForm.whatsapp"
-                  placeholder="+56 9 1234 5678"
-                  autocomplete="tel"
-                  :aria-invalid="subscribeErrors.whatsapp ? 'true' : 'false'"
-                  aria-describedby="subscribeWhatsappError"
-                >
-                <span v-if="subscribeErrors.whatsapp" class="inline-error" id="subscribeWhatsappError">
-                  {{ subscribeErrors.whatsapp }}
-                </span>
-              </div>
-            </template>
-          </div>
-          <footer class="modal__footer">
-            <template v-if="subscribeSuccess">
-              <button type="button" class="btn btn-primary" @click="closeSubscribeModal">Cerrar</button>
-            </template>
-            <template v-else>
-              <button type="button" class="btn btn-secondary" @click="closeSubscribeModal" :disabled="subscribeLoading">
-                Cancelar
-              </button>
-              <button type="submit" class="btn btn-primary" :disabled="subscribeLoading">
-                <span v-if="subscribeLoading">Guardando…</span>
-                <span v-else>Suscribirme</span>
-              </button>
-            </template>
-          </footer>
-        </form>
-      </article>
-    </div>
-  </transition>
+  </footer> 
 
   <transition name="fade">
     <div v-if="showModal" class="modal" role="dialog" aria-modal="true" @click.self="closeModal">
@@ -1589,7 +1599,7 @@ function norm(ev) {
   return base;
 }
 
-const { createApp, reactive, ref, computed, onMounted, onBeforeUnmount, watch } = Vue;
+const { createApp, reactive, ref, computed, onMounted, onBeforeUnmount } = Vue;
 
 createApp({
   setup() {
@@ -1605,195 +1615,137 @@ createApp({
     const showModal = ref(false);
     const activeEvent = ref(null);
     const filtersExpanded = ref(false);
-    const showSubscribeModal = ref(false);
+    const subscribeExpanded = ref(false);
     const subscribeLoading = ref(false);
-    const subscribeSuccess = ref(false);
-    const subscribeAlert = ref("");
-    const subscribeAlertType = ref("error");
+    const subscribeErrors = ref([]);
+    const lastSubscription = ref(null);
+    const subscribeStatus = reactive({
+      type: "",
+      message: ""
+    });
     const subscribeForm = reactive({
       nombre: "",
       email: "",
+      whatsapp: "",
       frecuencia: "semanal",
-      canalMail: true,
-      canalWhatsapp: false,
-      whatsapp: ""
-    });
-    const subscribeErrors = reactive({
-      email: "",
-      canales: "",
-      whatsapp: ""
-    });
-    const lastSubscription = reactive({
-      frecuencia: "semanal",
-      canales: []
+      canales: {
+        mail: true,
+        whatsapp: false
+      }
     });
 
-    const resetSubscribeErrors = () => {
-      subscribeErrors.email = "";
-      subscribeErrors.canales = "";
-      subscribeErrors.whatsapp = "";
+    const toggleSubscribe = () => {
+      subscribeExpanded.value = !subscribeExpanded.value;
+      if (subscribeExpanded.value) {
+        subscribeStatus.type = "";
+        subscribeStatus.message = "";
+      } else {
+        subscribeErrors.value = [];
+      }
     };
 
     const resetSubscribeForm = () => {
       subscribeForm.nombre = "";
       subscribeForm.email = "";
-      subscribeForm.frecuencia = "semanal";
-      subscribeForm.canalMail = true;
-      subscribeForm.canalWhatsapp = false;
       subscribeForm.whatsapp = "";
-    };
-
-    const resetSubscribeState = () => {
-      resetSubscribeForm();
-      resetSubscribeErrors();
-      subscribeAlert.value = "";
-      subscribeAlertType.value = "error";
-      subscribeSuccess.value = false;
-      subscribeLoading.value = false;
-    };
-
-    const openSubscribeModal = () => {
-      resetSubscribeState();
-      showSubscribeModal.value = true;
-    };
-
-    const closeSubscribeModal = () => {
-      if (subscribeLoading.value) return;
-      showSubscribeModal.value = false;
-    };
-
-    const lastSubscriptionFrequency = computed(() =>
-      lastSubscription.frecuencia === "mensual" ? "cada mes" : "cada semana"
-    );
-
-    const lastSubscriptionChannels = computed(() => {
-      if (lastSubscription.canales.length === 2) {
-        return `${lastSubscription.canales[0]} y ${lastSubscription.canales[1]}`;
-      }
-      if (lastSubscription.canales.length === 1) {
-        return lastSubscription.canales[0];
-      }
-      return "Mail";
-    });
-
-    const validateSubscribeForm = () => {
-      resetSubscribeErrors();
-      let valid = true;
-      const email = subscribeForm.email.trim();
-      if (!email) {
-        subscribeErrors.email = "Ingresa tu correo electrónico.";
-        valid = false;
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        subscribeErrors.email = "Revisa el formato de tu correo.";
-        valid = false;
-      }
-
-      const hasMail = !!subscribeForm.canalMail;
-      const hasWhatsapp = !!subscribeForm.canalWhatsapp;
-      if (!hasMail && !hasWhatsapp) {
-        subscribeErrors.canales = "Selecciona al menos un canal.";
-        valid = false;
-      }
-
-      if (hasWhatsapp) {
-        const phone = subscribeForm.whatsapp.trim();
-        if (!phone) {
-          subscribeErrors.whatsapp = "Comparte tu número de WhatsApp.";
-          valid = false;
-        }
-      }
-
-      return valid;
+      subscribeForm.frecuencia = "semanal";
+      subscribeForm.canales.mail = true;
+      subscribeForm.canales.whatsapp = false;
+      subscribeErrors.value = [];
     };
 
     const submitSubscription = async () => {
-      if (subscribeLoading.value) return;
-      subscribeAlert.value = "";
-      if (!validateSubscribeForm()) {
+      subscribeErrors.value = [];
+      subscribeStatus.type = "";
+      subscribeStatus.message = "";
+
+      const channels = [];
+      if (subscribeForm.canales.mail) channels.push("Correo");
+      if (subscribeForm.canales.whatsapp) channels.push("WhatsApp");
+
+      const email = subscribeForm.email.trim();
+      const phone = subscribeForm.whatsapp.trim();
+      const name = subscribeForm.nombre.trim();
+
+      if (!channels.length) {
+        subscribeErrors.value.push("Seleccioná al menos un canal para recibir la agenda.");
+      }
+      if (subscribeForm.canales.mail && !email) {
+        subscribeErrors.value.push("Ingresá un correo electrónico para recibir la agenda por mail.");
+      }
+      if (subscribeForm.canales.whatsapp && !phone) {
+        subscribeErrors.value.push("Ingresá tu número de WhatsApp para recibir la agenda por ese canal.");
+      }
+
+      if (subscribeErrors.value.length) {
         return;
       }
-      subscribeLoading.value = true;
-      try {
-        const email = subscribeForm.email.trim();
-        const whatsapp = subscribeForm.canalWhatsapp ? subscribeForm.whatsapp.trim() : "";
-        const canales = [];
-        if (subscribeForm.canalMail) canales.push("Mail");
-        if (subscribeForm.canalWhatsapp) canales.push("WhatsApp");
-        const payload = new URLSearchParams();
-        payload.append("Formulario", "Suscripción Agenda");
-        payload.append("Nombre", subscribeForm.nombre.trim());
-        payload.append("Email", email);
-        payload.append("Frecuencia", subscribeForm.frecuencia === "mensual" ? "Mensual" : "Semanal");
-        payload.append("CanalMail", subscribeForm.canalMail ? "Mail" : "");
-        payload.append("CanalWhatsapp", subscribeForm.canalWhatsapp ? "WhatsApp" : "");
-        payload.append("CanalPreferido", canales.join(", "));
-        payload.append("Whatsapp", whatsapp);
-        payload.append("Origen", "Agenda ImproWorld");
-        payload.append("TablaDestino", "Suscripciones Agenda");
 
+      subscribeLoading.value = true;
+
+      const payload = new URLSearchParams();
+      payload.append("Formulario", "SuscripcionAgenda");
+      payload.append("Frecuencia", subscribeForm.frecuencia === "mensual" ? "Mensual" : "Semanal");
+      payload.append("Canales", channels.join(", "));
+      if (name) payload.append("Nombre", name);
+      if (email) payload.append("Email", email);
+      if (phone) payload.append("Whatsapp", phone);
+      payload.append("Fuente", "agenda.html");
+
+      const fallbackMessage = "No pudimos guardar tu suscripción. Intenta nuevamente.";
+
+      try {
         const response = await fetch(WEBAPP_URL, {
           method: "POST",
           body: payload
         });
-        const result = await response.json();
-        if (result.status === "success") {
-          lastSubscription.frecuencia = subscribeForm.frecuencia;
-          lastSubscription.canales = canales.slice();
-          subscribeSuccess.value = true;
-          resetSubscribeForm();
-        } else {
-          subscribeAlertType.value = "error";
-          subscribeAlert.value = result.message || "No pudimos registrar tu suscripción. Intenta nuevamente.";
+
+        let result = null;
+        const contentType = response.headers.get("content-type") || "";
+        if (contentType.includes("application/json")) {
+          result = await response.json();
         }
-      } catch (err) {
-        subscribeAlertType.value = "error";
-        subscribeAlert.value = `Error al guardar tu suscripción: ${err.message}`;
+
+        if (!response.ok) {
+          const message = result && result.message ? result.message : fallbackMessage;
+          throw new Error(message);
+        }
+
+        if (result && result.status && result.status !== "success") {
+          throw new Error(result.message || fallbackMessage);
+        }
+
+        subscribeStatus.type = "success";
+        subscribeStatus.message = "¡Listo! Registramos tu suscripción.";
+        lastSubscription.value = {
+          frecuencia: subscribeForm.frecuencia,
+          canales: channels.slice(),
+          email,
+          whatsapp: phone
+        };
+        resetSubscribeForm();
+        subscribeExpanded.value = false;
+      } catch (error) {
+        subscribeStatus.type = "error";
+        subscribeStatus.message = error && error.message
+          ? error.message
+          : fallbackMessage;
       } finally {
         subscribeLoading.value = false;
       }
     };
 
-    watch(() => subscribeForm.email, () => {
-      if (subscribeErrors.email && subscribeForm.email.trim()) {
-        subscribeErrors.email = "";
-      }
-      if (subscribeAlert.value) {
-        subscribeAlert.value = "";
-      }
-    });
-
-    watch(
-      () => [subscribeForm.canalMail, subscribeForm.canalWhatsapp],
-      ([mail, whatsapp]) => {
-        if (subscribeErrors.canales && (mail || whatsapp)) {
-          subscribeErrors.canales = "";
-        }
-        if (subscribeAlert.value) {
-          subscribeAlert.value = "";
-        }
-      }
-    );
-
-    watch(() => subscribeForm.canalWhatsapp, (value) => {
-      if (!value) {
-        subscribeForm.whatsapp = "";
-        subscribeErrors.whatsapp = "";
-      }
-      if (subscribeErrors.canales && (subscribeForm.canalMail || value)) {
-        subscribeErrors.canales = "";
-      }
-      if (subscribeAlert.value) {
-        subscribeAlert.value = "";
-      }
-    });
-
-    watch(() => subscribeForm.whatsapp, () => {
-      if (subscribeErrors.whatsapp && subscribeForm.whatsapp.trim()) {
-        subscribeErrors.whatsapp = "";
-      }
-      if (subscribeAlert.value) {
-        subscribeAlert.value = "";
-      }
+    const lastSubscriptionSummary = computed(() => {
+      if (!lastSubscription.value) return "";
+      const canales = Array.isArray(lastSubscription.value.canales)
+        ? lastSubscription.value.canales.map((canal) => canal.toLowerCase() === "correo" ? "correo electrónico" : canal)
+        : [];
+      if (!canales.length) return "";
+      const frecuenciaTexto = lastSubscription.value.frecuencia === "mensual" ? "cada mes" : "cada semana";
+      const canalesTexto = canales.length === 1
+        ? canales[0]
+        : canales.slice(0, -1).join(", ") + " y " + canales[canales.length - 1];
+      return `Te enviaremos la agenda ${frecuenciaTexto} por ${canalesTexto}.`;
     });
 
     const toggleFilters = () => {
@@ -1811,13 +1763,7 @@ createApp({
 
     const keyboardHandler = (e) => {
       if (e.key === "Escape") {
-        if (showSubscribeModal.value) {
-          closeSubscribeModal();
-          return;
-        }
-        if (showModal.value) {
-          closeModal();
-        }
+        closeModal();
       }
     };
 
@@ -1972,18 +1918,15 @@ createApp({
       filtersExpanded,
       toggleFilters,
       filtersToggleLabel,
-      openSubscribeModal,
-      closeSubscribeModal,
-      showSubscribeModal,
+      subscribeExpanded,
       subscribeForm,
+      subscribeStatus,
       subscribeErrors,
       subscribeLoading,
-      subscribeSuccess,
+      toggleSubscribe,
       submitSubscription,
-      subscribeAlert,
-      subscribeAlertType,
-      lastSubscriptionFrequency,
-      lastSubscriptionChannels
+      resetSubscribeForm,
+      lastSubscriptionSummary
     };
   }
 })
