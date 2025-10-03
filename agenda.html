@@ -1162,6 +1162,122 @@
 <body>
 <div id="app" class="page">
   <main class="wrap">
+    <section class="filters-card" :class="{ 'is-collapsed': !filtersExpanded }">
+      <header class="filters-card__header">
+        <h2 class="filters-card__title"><span>🎟️</span> Filtrar agenda</h2>
+        <div class="filters-card__meta">
+          <div class="filter-summary">
+            <span class="filter-summary__count">{{ resultsLabel }}</span>
+            <template v-for="chip in activeFilters" :key="chip.key">
+              <span class="chip">
+                {{ chip.label }}: {{ chip.value }}
+                <button type="button" @click="removeFilter(chip.key)" aria-label="Quitar filtro">&times;</button>
+              </span>
+            </template>
+          </div>
+          <button
+            type="button"
+            class="filters-toggle"
+            @click="toggleFilters"
+            :aria-expanded="filtersExpanded"
+            aria-controls="filters-panel"
+          >
+            <span class="filters-toggle__icon" aria-hidden="true">▾</span>
+            {{ filtersToggleLabel }}
+          </button>
+        </div>
+      </header>
+      <div class="filters" id="filters-panel" :aria-hidden="!filtersExpanded">
+        <label for="fPais">
+          País
+          <select id="fPais" v-model="filters.pais">
+            <option value="">Todos los países</option>
+            <option v-for="opt in paisOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+          </select>
+        </label>
+        <label for="fCiudad">
+          Ciudad
+          <select id="fCiudad" v-model="filters.ciudad">
+            <option value="">Todas las ciudades</option>
+            <option v-for="opt in ciudadOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+          </select>
+        </label>
+        <label for="fCompania">
+          Compañía
+          <select id="fCompania" v-model="filters.compania">
+            <option value="">Todas las compañías</option>
+            <option v-for="opt in companiaOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+          </select>
+        </label>
+        <label for="fFecha">
+          Fecha
+          <input id="fFecha" type="date" v-model="filters.fecha">
+        </label>
+        <label for="fSearch">
+          Búsqueda
+          <input id="fSearch" type="text" v-model="filters.search" placeholder="Buscar por título, lugar o compañía">
+        </label>
+      </div>
+    </section>
+
+    <section>
+      <div class="agenda" id="agenda">
+        <template v-if="loading">
+          <article v-for="n in 6" :key="n" class="skeleton-card">
+            <div class="skeleton-thumb"></div>
+            <div class="skeleton-body">
+              <span class="skeleton-line"></span>
+              <span class="skeleton-line"></span>
+              <span class="skeleton-line short"></span>
+            </div>
+          </article>
+        </template>
+        <template v-else>
+          <transition-group name="scale" tag="div" class="agenda__list">
+            <article v-for="event in filteredEvents" :key="event.id" class="card">
+              <div
+                class="thumb"
+                v-img-fallback="event.piezaCands"
+                role="button"
+                tabindex="0"
+                :aria-label="'Ver más información sobre ' + (event.nombre || 'el evento')"
+                @click="openModal(event)"
+                @keydown.enter.prevent="openModal(event)"
+                @keydown.space.prevent="openModal(event)"
+              >
+                <div class="thumb__overlay">
+                  <span class="badge badge--format" v-if="event.formato">{{ event.formato }}</span>
+                  <span class="badge badge--country" v-if="event.pais">{{ event.pais }}</span>
+                </div>
+              </div>
+              <div class="content">
+                <h3>{{ event.nombre }}</h3>
+                <p class="meta">
+                  <strong>Fecha</strong>
+                  <span>{{ event.fecha || 'Por confirmar' }}</span>
+                </p>
+                <p class="meta">
+                  <strong>Hora</strong>
+                  <span>{{ event.hora || 'Por definir' }}</span>
+                </p>
+                <p class="meta">
+                  <strong>Lugar</strong>
+                  <span>{{ event.lugar || 'Pronto' }}</span>
+                </p>
+                <div class="actions">
+                  <button type="button" class="btn btn-primary" @click="openModal(event)">Ver más</button>
+                  <a v-if="event.boleteria" :href="event.boleteria" target="_blank" rel="noopener" class="btn btn-secondary">Boletería</a>
+                </div>
+              </div>
+            </article>
+          </transition-group>
+          <div v-if="!filteredEvents.length" class="empty-state">
+            <strong>No encontramos eventos con esos filtros.</strong>
+            <span>Prueba ajustando la búsqueda o borra los filtros activos para ver toda la programación.</span>
+          </div>
+        </template>
+      </div>
+    </section>
     <section class="subscribe-card" aria-labelledby="subscribeTitle">
       <div class="subscribe-card__body">
         <div>
@@ -1278,122 +1394,6 @@
       <p v-else class="subscribe-card__note">
         Podés cambiar tus preferencias cuando quieras. Si preferís dejar de recibir la agenda, respondé al mensaje y te damos de baja.
       </p>
-    </section>
-    <section class="filters-card" :class="{ 'is-collapsed': !filtersExpanded }">
-      <header class="filters-card__header">
-        <h2 class="filters-card__title"><span>🎟️</span> Filtrar agenda</h2>
-        <div class="filters-card__meta">
-          <div class="filter-summary">
-            <span class="filter-summary__count">{{ resultsLabel }}</span>
-            <template v-for="chip in activeFilters" :key="chip.key">
-              <span class="chip">
-                {{ chip.label }}: {{ chip.value }}
-                <button type="button" @click="removeFilter(chip.key)" aria-label="Quitar filtro">&times;</button>
-              </span>
-            </template>
-          </div>
-          <button
-            type="button"
-            class="filters-toggle"
-            @click="toggleFilters"
-            :aria-expanded="filtersExpanded"
-            aria-controls="filters-panel"
-          >
-            <span class="filters-toggle__icon" aria-hidden="true">▾</span>
-            {{ filtersToggleLabel }}
-          </button>
-        </div>
-      </header>
-      <div class="filters" id="filters-panel" :aria-hidden="!filtersExpanded">
-        <label for="fPais">
-          País
-          <select id="fPais" v-model="filters.pais">
-            <option value="">Todos los países</option>
-            <option v-for="opt in paisOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
-          </select>
-        </label>
-        <label for="fCiudad">
-          Ciudad
-          <select id="fCiudad" v-model="filters.ciudad">
-            <option value="">Todas las ciudades</option>
-            <option v-for="opt in ciudadOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
-          </select>
-        </label>
-        <label for="fCompania">
-          Compañía
-          <select id="fCompania" v-model="filters.compania">
-            <option value="">Todas las compañías</option>
-            <option v-for="opt in companiaOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
-          </select>
-        </label>
-        <label for="fFecha">
-          Fecha
-          <input id="fFecha" type="date" v-model="filters.fecha">
-        </label>
-        <label for="fSearch">
-          Búsqueda
-          <input id="fSearch" type="text" v-model="filters.search" placeholder="Buscar por título, lugar o compañía">
-        </label>
-      </div>
-    </section>
-
-    <section>
-      <div class="agenda" id="agenda">
-        <template v-if="loading">
-          <article v-for="n in 6" :key="n" class="skeleton-card">
-            <div class="skeleton-thumb"></div>
-            <div class="skeleton-body">
-              <span class="skeleton-line"></span>
-              <span class="skeleton-line"></span>
-              <span class="skeleton-line short"></span>
-            </div>
-          </article>
-        </template>
-        <template v-else>
-          <transition-group name="scale" tag="div" class="agenda__list">
-            <article v-for="event in filteredEvents" :key="event.id" class="card">
-              <div
-                class="thumb"
-                v-img-fallback="event.piezaCands"
-                role="button"
-                tabindex="0"
-                :aria-label="'Ver más información sobre ' + (event.nombre || 'el evento')"
-                @click="openModal(event)"
-                @keydown.enter.prevent="openModal(event)"
-                @keydown.space.prevent="openModal(event)"
-              >
-                <div class="thumb__overlay">
-                  <span class="badge badge--format" v-if="event.formato">{{ event.formato }}</span>
-                  <span class="badge badge--country" v-if="event.pais">{{ event.pais }}</span>
-                </div>
-              </div>
-              <div class="content">
-                <h3>{{ event.nombre }}</h3>
-                <p class="meta">
-                  <strong>Fecha</strong>
-                  <span>{{ event.fecha || 'Por confirmar' }}</span>
-                </p>
-                <p class="meta">
-                  <strong>Hora</strong>
-                  <span>{{ event.hora || 'Por definir' }}</span>
-                </p>
-                <p class="meta">
-                  <strong>Lugar</strong>
-                  <span>{{ event.lugar || 'Pronto' }}</span>
-                </p>
-                <div class="actions">
-                  <button type="button" class="btn btn-primary" @click="openModal(event)">Ver más</button>
-                  <a v-if="event.boleteria" :href="event.boleteria" target="_blank" rel="noopener" class="btn btn-secondary">Boletería</a>
-                </div>
-              </div>
-            </article>
-          </transition-group>
-          <div v-if="!filteredEvents.length" class="empty-state">
-            <strong>No encontramos eventos con esos filtros.</strong>
-            <span>Prueba ajustando la búsqueda o borra los filtros activos para ver toda la programación.</span>
-          </div>
-        </template>
-      </div>
     </section>
   </main>
 
