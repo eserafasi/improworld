@@ -622,11 +622,6 @@
                 </label>
               </div>
               <div class="form-grid" data-columns="2">
-                <label for="AperturaPuertas">
-                  Apertura de puertas
-                  <input type="time" id="AperturaPuertas" name="AperturaPuertas" />
-                  <span class="inline-hint">Opcional</span>
-                </label>
                 <label for="Pais">
                   País
                   <input type="text" id="Pais" name="País" required placeholder="Ej. Chile" />
@@ -673,11 +668,6 @@
                 <label for="Boleteria">
                   Boletería (URL)
                   <input type="url" id="Boleteria" name="Boleteria" pattern="https?://.+" placeholder="https://" />
-                  <small class="error-message">Debes ingresar una URL válida.</small>
-                </label>
-                <label for="VideoURL">
-                  Video promocional (URL de YouTube)
-                  <input type="url" id="VideoURL" name="VideoURL" pattern="https?://.+" placeholder="https://youtu.be/..." />
                   <small class="error-message">Debes ingresar una URL válida.</small>
                 </label>
               </div>
@@ -1081,7 +1071,10 @@
       try {
         const response = await fetch(scriptURL, {
           method: "POST",
-          body: new URLSearchParams(data),
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
         });
         const result = await response.json();
         if (result.status === "success") {
