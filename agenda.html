@@ -1288,7 +1288,7 @@ function norm(ev) {
   return base;
 }
 
-const { createApp, reactive, ref, computed, onMounted, onBeforeUnmount } = Vue;
+const { createApp, reactive, ref, computed, onMounted, onBeforeUnmount, watch } = Vue;
 
 createApp({
   setup() {
@@ -1304,6 +1304,7 @@ createApp({
     const showModal = ref(false);
     const activeEvent = ref(null);
     const filtersExpanded = ref(false);
+    const detectedCountry = ref("");
 
     const toggleFilters = () => {
       filtersExpanded.value = !filtersExpanded.value;
@@ -1368,6 +1369,30 @@ createApp({
     const paisOptions = computed(() => optionFromMap(list.value.map((ev) => ev.pais)));
     const ciudadOptions = computed(() => optionFromMap(list.value.map((ev) => ev.ciudad)));
     const companiaOptions = computed(() => optionFromMap(list.value.map((ev) => ev.compania)));
+
+    const applyDetectedCountry = () => {
+      if (filters.pais || !detectedCountry.value) return;
+      const normalized = normalizeText(detectedCountry.value);
+      if (!normalized) return;
+      const found = paisOptions.value.find((opt) => opt.value === normalized);
+      if (found) {
+        filters.pais = found.value;
+      }
+    };
+
+    const detectCountry = async () => {
+      try {
+        const response = await fetch("https://ipapi.co/json/");
+        if (!response.ok) return;
+        const data = await response.json();
+        detectedCountry.value = data.country_name || data.country || "";
+        applyDetectedCountry();
+      } catch (err) {
+        console.warn("No se pudo determinar el país del visitante", err);
+      }
+    };
+
+    watch(paisOptions, applyDetectedCountry);
 
     const activeFilters = computed(() => {
       const chips = [];
@@ -1443,6 +1468,7 @@ createApp({
 
     onMounted(() => {
       loadData();
+      detectCountry();
       if (typeof window !== "undefined") {
         filtersExpanded.value = false;
         window.addEventListener("keydown", keyboardHandler);
