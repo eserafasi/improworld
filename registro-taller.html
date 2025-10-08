@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro al taller | Impro World</title>
+  <style>
+    :root {
+      --ink: #0f172a;
+      --muted: #64748b;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --primary: #6366f1;
+      --primary-soft: rgba(99, 102, 241, 0.12);
+      --accent: #10b981;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08);
+      --shadow-md: 0 16px 40px rgba(99, 102, 241, 0.16);
+      --radius-lg: 18px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+      --max-width: 860px;
+      --transition: all 0.25s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(100% 120% at 50% 0%, rgba(99, 102, 241, 0.2) 0%, rgba(241, 245, 249, 0.92) 50%, #fff 100%);
+      color: var(--ink);
+      line-height: 1.6;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .hero {
+      padding: clamp(60px, 8vw, 96px) 20px 32px;
+      text-align: center;
+    }
+
+    .hero__inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      display: grid;
+      gap: 16px;
+    }
+
+    .hero__eyebrow {
+      margin: 0 auto;
+      background: var(--primary-soft);
+      color: var(--primary);
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      width: fit-content;
+    }
+
+    .hero__title {
+      font-size: clamp(2.4rem, 5vw, 3.2rem);
+      line-height: 1.1;
+      max-width: 22ch;
+      margin: 0 auto;
+    }
+
+    .hero__subtitle {
+      max-width: 56ch;
+      margin: 0 auto;
+      color: rgba(15, 23, 42, 0.72);
+      font-size: 1.02rem;
+    }
+
+    .wrap {
+      flex: 1;
+      width: 100%;
+      padding: 0 20px 80px;
+    }
+
+    .card {
+      max-width: var(--max-width);
+      margin: -20px auto 0;
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      padding: clamp(28px, 6vw, 44px);
+      border: 1px solid rgba(148, 163, 184, 0.24);
+      box-shadow: var(--shadow-md);
+      display: grid;
+      gap: 24px;
+    }
+
+    .form__grid {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    label {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: rgba(15, 23, 42, 0.82);
+    }
+
+    input,
+    select,
+    textarea {
+      appearance: none;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      font-size: 1rem;
+      font-family: inherit;
+      color: var(--ink);
+      background: rgba(248, 250, 252, 0.9);
+      transition: var(--transition);
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.18);
+      background: #fff;
+    }
+
+    textarea {
+      min-height: 140px;
+      resize: vertical;
+    }
+
+    .form__full {
+      grid-column: 1 / -1;
+    }
+
+    .form__submit {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .form__submit p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: rgba(15, 23, 42, 0.6);
+    }
+
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 14px 28px;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 12px 32px rgba(99, 102, 241, 0.22);
+    }
+
+    button:hover {
+      background: #4f46e5;
+      transform: translateY(-2px);
+    }
+
+    .notice {
+      padding: 16px 18px;
+      border-radius: var(--radius-md);
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.24);
+      font-size: 0.95rem;
+      color: rgba(15, 118, 110, 0.9);
+    }
+
+    .help {
+      font-size: 0.92rem;
+      color: rgba(15, 23, 42, 0.68);
+    }
+
+    .help a {
+      color: var(--primary);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .help a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 640px) {
+      .form__submit {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .form__submit p {
+        text-align: center;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <div class="hero__inner">
+        <span class="hero__eyebrow">Registro abierto</span>
+        <h1 class="hero__title">Reserva tu lugar en el taller de improvisación narrativa</h1>
+        <p class="hero__subtitle">
+          Comparte los datos de tu compañía o tu práctica individual y nos pondremos en contacto para confirmar tu
+          participación, resolver dudas logísticas y coordinar los detalles de pago.
+        </p>
+      </div>
+    </section>
+
+    <div class="wrap">
+      <form class="card" action="#" method="post">
+        <div class="notice">
+          Los lugares son limitados. Una vez que recibamos tu registro te enviaremos un correo con los pasos para
+          asegurar tu participación en las tres sesiones del taller.
+        </div>
+
+        <div class="form__grid">
+          <div class="field">
+            <label for="nombre">Nombre completo</label>
+            <input id="nombre" name="nombre" type="text" placeholder="Tu nombre y apellido" required />
+          </div>
+          <div class="field">
+            <label for="correo">Correo electrónico</label>
+            <input id="correo" name="correo" type="email" placeholder="nombre@compania.com" required />
+          </div>
+          <div class="field">
+            <label for="telefono">Teléfono o WhatsApp</label>
+            <input id="telefono" name="telefono" type="tel" placeholder="Incluye tu código de país" />
+          </div>
+          <div class="field">
+            <label for="representas">¿Representas a una compañía o vienes de forma individual?</label>
+            <select id="representas" name="representas" required>
+              <option value="">Selecciona una opción</option>
+              <option value="compania">Compañía / Colectivo de improvisación</option>
+              <option value="individual">Artista independiente</option>
+              <option value="institucion">Institución educativa o cultural</option>
+            </select>
+          </div>
+          <div class="field form__full">
+            <label for="nombre-compania">Nombre de tu compañía, colectivo o proyecto</label>
+            <input id="nombre-compania" name="nombre-compania" type="text" placeholder="Impro Company Resonancia" />
+          </div>
+          <div class="field">
+            <label for="pais">País</label>
+            <input id="pais" name="pais" type="text" placeholder="México" />
+          </div>
+          <div class="field">
+            <label for="ciudad">Ciudad</label>
+            <input id="ciudad" name="ciudad" type="text" placeholder="Ciudad de México" />
+          </div>
+          <div class="field">
+            <label for="participantes">Número de participantes</label>
+            <select id="participantes" name="participantes">
+              <option value="">Selecciona una opción</option>
+              <option value="1">1 persona</option>
+              <option value="2-4">2 a 4 personas</option>
+              <option value="5-8">5 a 8 personas</option>
+              <option value="9+">9 o más personas</option>
+            </select>
+          </div>
+          <div class="field form__full">
+            <label for="expectativas">¿Qué esperas obtener del taller?</label>
+            <textarea id="expectativas" name="expectativas" placeholder="Cuéntanos sobre tus objetivos o los de tu compañía"></textarea>
+          </div>
+        </div>
+
+        <div class="form__submit">
+          <p>Responderemos en menos de 48 horas hábiles. Si necesitas atención inmediata escríbenos a <a href="mailto:hola@improworld.com">hola@improworld.com</a>.</p>
+          <button type="submit">Enviar registro</button>
+        </div>
+
+        <p class="help">¿Necesitas una propuesta personalizada para tu compañía? Escríbenos a <a href="mailto:produccion@improworld.com">produccion@improworld.com</a>.</p>
+      </form>
+    </div>
+  </main>
+</body>
+</html>
