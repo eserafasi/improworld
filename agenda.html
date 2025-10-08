@@ -1184,18 +1184,10 @@
             <p><strong>Lugar:</strong> {{ activeEvent.lugar || '—' }}</p>
             <p><strong>Fecha:</strong> {{ activeEvent.fecha || '—' }}</p>
             <p><strong>Hora función:</strong> {{ activeEvent.hora || '—' }}</p>
-            <p><strong>Apertura:</strong> {{ activeEvent.apertura || '—' }}</p>
             <p>
               <strong>Instagram:</strong>
               <template v-if="activeEvent.igUser">
                 <a :href="`https://instagram.com/${activeEvent.igUser}`" target="_blank" rel="noopener">@{{ activeEvent.igUser }}</a>
-              </template>
-              <template v-else>—</template>
-            </p>
-            <p>
-              <strong>Video:</strong>
-              <template v-if="activeEvent.video">
-                <a :href="activeEvent.video" target="_blank" rel="noopener">Ver video</a>
               </template>
               <template v-else>—</template>
             </p>
@@ -1308,7 +1300,6 @@ function norm(ev) {
     fechaISO: "",
     fechaTime: null,
     hora: val(ev.HoraFuncionTexto) || val(ev.HoraFuncion),
-    apertura: val(ev.AperturaPuertasTexto) || val(ev.AperturaPuertas),
     pais: val(ev.Pais) || val(ev["País"]),
     ciudad: val(ev.Ciudad),
     lugar: val(ev.Lugar),
@@ -1317,7 +1308,6 @@ function norm(ev) {
     sinopsis: val(ev.Sinopsis),
     igUser: val(ev.Instagram).replace(/^https?:\/\/(www\.)?instagram\.com\//i, "").replace(/\/.*$/, "").replace(/^@/, ""),
     boleteria: val(ev.Boleteria),
-    video: val(ev.VideoURL),
     piezaCands: driveImageCandidates(val(ev.PiezaPromocional)),
     estado: val(ev.Estado) || "Publicado"
   };
