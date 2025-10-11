@@ -280,10 +280,173 @@
       const submitBtn = form.querySelector('button[type="submit"]');
       const defaultBtnText = submitBtn ? submitBtn.textContent : "";
 
+      const MAX_IMAGE_DIMENSION = 1200;
+
       const setStatus = (message, type) => {
         if (!statusEl) return;
         statusEl.textContent = message || "";
         statusEl.dataset.state = type || "";
+      };
+
+      const setSubmitting = (isSubmitting) => {
+        if (!submitBtn) return;
+        submitBtn.disabled = Boolean(isSubmitting);
+        submitBtn.textContent = isSubmitting ? "Enviando…" : defaultBtnText;
+      };
+
+      const readFileAsDataURL = (file) =>
+        new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = () => reject(reader.error);
+          reader.readAsDataURL(file);
+        });
+
+      const createImageElement = (src) =>
+        new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = (error) => reject(error);
+          img.src = src;
+        });
+
+      const getScaledDimensions = (width, height) => {
+        if (width <= MAX_IMAGE_DIMENSION && height <= MAX_IMAGE_DIMENSION) {
+          return { width, height };
+        }
+        const ratio = Math.min(MAX_IMAGE_DIMENSION / width, MAX_IMAGE_DIMENSION / height);
+        return {
+          width: Math.round(width * ratio),
+          height: Math.round(height * ratio)
+        };
+      };
+
+      const canvasToBlob = (canvas, type, quality) =>
+        new Promise((resolve) => {
+          if (!canvas.toBlob) {
+            resolve(null);
+            return;
+          }
+          canvas.toBlob((blob) => resolve(blob), type, quality);
+        });
+
+      const blobToBase64 = (blob) =>
+        new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.onerror = () => reject(reader.error);
+          reader.readAsDataURL(blob);
+        });
+
+      const replaceExtension = (filename, newExtension) => {
+        const baseName = filename.replace(/\.[^/.]+$/, "");
+        return `${baseName}.${newExtension}`;
+      };
+
+      const generarImagenesPromocionales = async (file) => {
+        const originalDataUrl = await readFileAsDataURL(file);
+        const originalBase64 = typeof originalDataUrl === "string" ? originalDataUrl.split(",")[1] : "";
+
+        const img = await createImageElement(originalDataUrl);
+        const { width, height } = getScaledDimensions(img.width, img.height);
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          throw new Error("No fue posible preparar el lienzo para optimizar la imagen.");
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const preferredFormats = ["image/avif", "image/webp"];
+        let optimizedBlob = null;
+        let optimizedType = null;
+
+        for (const type of preferredFormats) {
+          const candidate = await canvasToBlob(canvas, type, 0.82);
+          if (candidate) {
+            optimizedBlob = candidate;
+            optimizedType = type;
+            break;
+          }
+        }
+
+        if (!optimizedBlob) {
+          const fallbackBlob = await canvasToBlob(canvas, "image/jpeg", 0.88);
+          if (fallbackBlob) {
+            optimizedBlob = fallbackBlob;
+            optimizedType = "image/jpeg";
+          }
+        }
+
+        if (!optimizedBlob) {
+          throw new Error("No fue posible optimizar la imagen proporcionada.");
+        }
+
+        const optimizedDataUrl = await blobToBase64(optimizedBlob);
+        const optimizedBase64 = typeof optimizedDataUrl === "string" ? optimizedDataUrl.split(",")[1] : "";
+        const normalizedOptimizedType = (optimizedType || "image/jpeg").toLowerCase();
+        const optimizedName = normalizedOptimizedType.includes("avif")
+          ? replaceExtension(file.name, "avif")
+          : normalizedOptimizedType.includes("webp")
+            ? replaceExtension(file.name, "webp")
+            : replaceExtension(file.name, "jpg");
+
+        return {
+          originalBase64,
+          originalName: file.name,
+          originalType: file.type || "application/octet-stream",
+          originalSize: file.size || 0,
+          optimizedBase64,
+          optimizedName,
+          optimizedType: optimizedType || "image/jpeg",
+          optimizedSize: optimizedBlob.size || 0
+        };
+      };
+
+      const enviarDatos = async (data) => {
+        const response = await fetch(endpoint, {
+          method: "POST",
+          body: new URLSearchParams(data),
+          mode: "cors"
+        });
+
+        if (!response.ok) {
+          throw new Error(`Solicitud fallida con estado ${response.status}`);
+        }
+
+        const contentType = response.headers.get("content-type") || "";
+        let payload = null;
+
+        if (contentType.includes("application/json")) {
+          payload = await response.json();
+        } else {
+          const text = await response.text();
+          try {
+            payload = JSON.parse(text);
+          } catch (err) {
+            payload = text;
+          }
+        }
+
+        if (payload && typeof payload === "object") {
+          const hasStatusField = Object.prototype.hasOwnProperty.call(payload, "status");
+          const hasSuccessField = Object.prototype.hasOwnProperty.call(payload, "success");
+
+          const isSuccessful = hasStatusField
+            ? String(payload.status).toLowerCase() === "success"
+            : hasSuccessField
+              ? Boolean(payload.success)
+              : true;
+
+          if (!isSuccessful) {
+            const message = payload.message || payload.error || "El servicio indicó un error.";
+            throw new Error(String(message));
+          }
+        }
+
+        return payload;
       };
 
       form.addEventListener("submit", async (event) => {
@@ -303,46 +466,51 @@
           return;
         }
 
-        const formData = new FormData(form);
         setStatus("Enviando flyer…", "pending");
+        setSubmitting(true);
 
-        if (submitBtn) {
-          submitBtn.disabled = true;
-          submitBtn.textContent = "Enviando…";
+        const file = form.flyer.files[0];
+        let processedImage;
+
+        try {
+          processedImage = await generarImagenesPromocionales(file);
+        } catch (processingError) {
+          console.error("No pudimos procesar la imagen adjunta", processingError);
+          setStatus("No pudimos procesar la imagen. Prueba con otro archivo o reduce su peso.", "error");
+          setSubmitting(false);
+          return;
+        }
+
+        const detalles = form.detalles ? form.detalles.value.trim() : "";
+
+        const payload = {
+          OrigenFormulario: "registro-express",
+          PiezaPromocional: processedImage.originalBase64,
+          PiezaPromocionalName: processedImage.originalName,
+          PiezaPromocionalType: processedImage.originalType,
+          PiezaPromocionalSize: String(processedImage.originalSize),
+          PiezaPromocionalOptimizada: processedImage.optimizedBase64,
+          PiezaPromocionalOptimizadaName: processedImage.optimizedName,
+          PiezaPromocionalOptimizadaType: processedImage.optimizedType,
+          PiezaPromocionalOptimizadaSize: String(processedImage.optimizedSize),
+          flyerBase64: processedImage.originalBase64,
+          flyerName: processedImage.originalName,
+          flyerType: processedImage.originalType,
+          flyerSize: String(processedImage.originalSize),
+          flyerOptimizedBase64: processedImage.optimizedBase64,
+          flyerOptimizedName: processedImage.optimizedName,
+          flyerOptimizedType: processedImage.optimizedType,
+          flyerOptimizedSize: String(processedImage.optimizedSize)
+        };
+
+        if (detalles) {
+          payload.Detalles = detalles;
+          payload.TextoAdicional = detalles;
+          payload.flyerDetalles = detalles;
         }
 
         try {
-          const response = await fetch(endpoint, {
-            method: "POST",
-            body: formData,
-            mode: "cors"
-          });
-
-          if (!response.ok) {
-            throw new Error(`Solicitud fallida con estado ${response.status}`);
-          }
-
-          let payload = null;
-          const contentType = response.headers.get("content-type") || "";
-
-          if (contentType.includes("application/json")) {
-            payload = await response.json();
-          } else {
-            const text = await response.text();
-            try {
-              payload = JSON.parse(text);
-            } catch (err) {
-              payload = text;
-            }
-          }
-
-          const hasError = payload && typeof payload === "object" && "success" in payload && !payload.success;
-
-          if (hasError) {
-            const message = payload && payload.message ? String(payload.message) : "";
-            throw new Error(message || "El servicio indicó un error.");
-          }
-
+          await enviarDatos(payload);
           form.reset();
           setStatus("Recibimos tu flyer. Lo publicaremos muy pronto.", "success");
         } catch (error) {
@@ -352,10 +520,7 @@
             "error"
           );
         } finally {
-          if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.textContent = defaultBtnText;
-          }
+          setSubmitting(false);
         }
       });
     })();
