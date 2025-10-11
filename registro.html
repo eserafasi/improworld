@@ -143,6 +143,25 @@
       gap: 14px;
     }
 
+    .form-status {
+      margin: 0;
+      font-size: 0.95rem;
+      min-height: 1.2em;
+      color: rgba(15, 23, 42, 0.68);
+    }
+
+    .form-status[data-state="pending"] {
+      color: #7c3aed;
+    }
+
+    .form-status[data-state="success"] {
+      color: #15803d;
+    }
+
+    .form-status[data-state="error"] {
+      color: #b91c1c;
+    }
+
     label {
       font-weight: 600;
     }
@@ -210,7 +229,7 @@
   </style>
 </head>
 <body>
-  <main>
+  <main class="page">
     <section class="options">
       <div class="options__header">
         <div class="badge">Registro express</div>
@@ -231,17 +250,115 @@
 
       <div class="option">
         <h2>Opción 2 · Subir aquí</h2>
-        <form action="#" method="post" enctype="multipart/form-data">
+        <form
+          id="registro-form"
+          action="#"
+          method="post"
+          enctype="multipart/form-data"
+          data-endpoint="https://script.google.com/macros/s/AKfycbwoCLUfEiRjnmzumQ-Qs82vLUMpfTWHuemY8W6NODHVhGskbdQQHh-rIHKJUpS0cPCSxQ/exec"
+        >
           <label for="flyer">Flyer del evento (JPG o PNG)</label>
           <input id="flyer" name="flyer" type="file" accept="image/png,image/jpeg" required />
 
           <label for="detalles">Texto adicional (opcional)</label>
           <textarea id="detalles" name="detalles" placeholder="Horarios, links, info clave..."></textarea>
 
+          <p class="form-status" role="status" aria-live="polite" data-status></p>
+
           <button type="submit">Enviar flyer</button>
         </form>
       </div>
     </section>
   </main>
+  <script>
+    (function () {
+      const form = document.querySelector("#registro-form");
+      if (!form) return;
+
+      const endpoint = form.dataset.endpoint || "";
+      const statusEl = form.querySelector("[data-status]");
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const defaultBtnText = submitBtn ? submitBtn.textContent : "";
+
+      const setStatus = (message, type) => {
+        if (!statusEl) return;
+        statusEl.textContent = message || "";
+        statusEl.dataset.state = type || "";
+      };
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        if (!endpoint) {
+          console.error("No está configurado el endpoint de recepción.");
+          setStatus(
+            "No se encontró el servicio para recibir el flyer. Escríbenos por Instagram mientras lo resolvemos.",
+            "error"
+          );
+          return;
+        }
+
+        if (!form.flyer || !form.flyer.files || form.flyer.files.length === 0) {
+          setStatus("Selecciona el flyer antes de enviarlo.", "error");
+          return;
+        }
+
+        const formData = new FormData(form);
+        setStatus("Enviando flyer…", "pending");
+
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Enviando…";
+        }
+
+        try {
+          const response = await fetch(endpoint, {
+            method: "POST",
+            body: formData,
+            mode: "cors"
+          });
+
+          if (!response.ok) {
+            throw new Error(`Solicitud fallida con estado ${response.status}`);
+          }
+
+          let payload = null;
+          const contentType = response.headers.get("content-type") || "";
+
+          if (contentType.includes("application/json")) {
+            payload = await response.json();
+          } else {
+            const text = await response.text();
+            try {
+              payload = JSON.parse(text);
+            } catch (err) {
+              payload = text;
+            }
+          }
+
+          const hasError = payload && typeof payload === "object" && "success" in payload && !payload.success;
+
+          if (hasError) {
+            const message = payload && payload.message ? String(payload.message) : "";
+            throw new Error(message || "El servicio indicó un error.");
+          }
+
+          form.reset();
+          setStatus("Recibimos tu flyer. Lo publicaremos muy pronto.", "success");
+        } catch (error) {
+          console.error("No fue posible subir el flyer", error);
+          setStatus(
+            "No pudimos subir el flyer. Intenta de nuevo en unos minutos o envíalo por Instagram.",
+            "error"
+          );
+        } finally {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = defaultBtnText;
+          }
+        }
+      });
+    })();
+  </script>
 </body>
 </html>
