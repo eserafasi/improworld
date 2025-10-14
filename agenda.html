@@ -653,111 +653,6 @@
       font-size: 1.1rem;
     }
 
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.65);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 24px;
-      z-index: 1000;
-    }
-
-    .modal__dialog {
-      background: var(--card);
-      border-radius: var(--radius-lg);
-      max-width: 760px;
-      width: 100%;
-      max-height: 92vh;
-      overflow: auto;
-      box-shadow: 0 30px 60px rgba(15, 23, 42, 0.25);
-      display: flex;
-      flex-direction: column;
-      border: 1px solid rgba(148, 163, 184, 0.26);
-    }
-
-    .modal__header,
-    .modal__footer {
-      padding: 20px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    .modal__header {
-      border-bottom: 1px solid var(--ring);
-    }
-
-    .modal__footer {
-      border-top: 1px solid var(--ring);
-      justify-content: flex-end;
-    }
-
-    .modal__title {
-      font-size: 1.4rem;
-      font-weight: 700;
-    }
-
-    .modal__close {
-      background: transparent;
-      border: none;
-      font-size: 1.8rem;
-      line-height: 1;
-      cursor: pointer;
-      color: var(--muted);
-      transition: var(--transition);
-    }
-
-    .modal__close:hover {
-      color: var(--ink);
-      transform: rotate(6deg);
-    }
-
-    .modal__body {
-      padding: 24px;
-      display: grid;
-      gap: 18px;
-    }
-
-    .modal-hero {
-      width: 100%;
-      aspect-ratio: var(--img-aspect, 16 / 9);
-      border-radius: var(--radius-md);
-      overflow: hidden;
-      background: #f1f5f9;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      max-height: min(70vh, 520px);
-    }
-
-    .modal-hero img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      display: block;
-    }
-
-    .modal-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px 20px;
-    }
-
-    .modal-grid p {
-      margin: 0;
-      font-size: 0.95rem;
-      line-height: 1.5;
-      color: var(--muted);
-    }
-
-    .modal-grid p strong {
-      color: var(--ink);
-      font-weight: 600;
-    }
-
     /* Skeleton loading placeholders (shimmer animation) */
     .skeleton-card {
       pointer-events: none;
@@ -804,16 +699,6 @@
       }
     }
 
-    .fade-enter-active,
-    .fade-leave-active {
-      transition: opacity 0.2s ease;
-    }
-
-    .fade-enter-from,
-    .fade-leave-to {
-      opacity: 0;
-    }
-
     .scale-enter-active,
     .scale-leave-active {
       transition: transform 0.25s ease, opacity 0.25s ease;
@@ -833,10 +718,6 @@
       .filters-card__meta {
         width: 100%;
         justify-content: space-between;
-      }
-
-      .modal__body {
-        padding: 20px;
       }
     }
 
@@ -1077,12 +958,6 @@
               <div
                 class="thumb"
                 v-img-fallback="event.piezaCands"
-                role="button"
-                tabindex="0"
-                :aria-label="'Ver más información sobre ' + (event.nombre || 'el evento')"
-                @click="openModal(event)"
-                @keydown.enter.prevent="openModal(event)"
-                @keydown.space.prevent="openModal(event)"
               >
                 <div class="thumb__overlay">
                   <span class="badge badge--format" v-if="event.formato">{{ event.formato }}</span>
@@ -1103,9 +978,13 @@
                   <strong>Lugar</strong>
                   <span>{{ event.lugar || 'Pronto' }}</span>
                 </p>
-                <div class="actions">
-                  <button type="button" class="btn btn-primary" @click="openModal(event)">Ver más</button>
-                  <a v-if="event.boleteria" :href="event.boleteria" target="_blank" rel="noopener" class="btn btn-secondary">Boletería</a>
+                <div class="actions" v-if="event.boleteria">
+                  <a
+                    :href="event.boleteria"
+                    target="_blank"
+                    rel="noopener"
+                    class="btn btn-primary"
+                  >Comprar boletas</a>
                 </div>
               </div>
             </article>
@@ -1153,43 +1032,6 @@
     </div>
   </footer>
 
-  <transition name="fade">
-    <div v-if="showModal" class="modal" role="dialog" aria-modal="true" @click.self="closeModal">
-      <article class="modal__dialog">
-        <header class="modal__header">
-          <h3 class="modal__title">{{ activeEvent ? activeEvent.nombre : '' }}</h3>
-          <button class="modal__close" @click="closeModal" aria-label="Volver">&times;</button>
-        </header>
-        <div class="modal__body">
-          <div class="modal-hero" v-img-fallback="activeEvent ? activeEvent.piezaCands : []"></div>
-          <div class="modal-grid" v-if="activeEvent">
-            <p style="grid-column: 1 / -1;">
-              <strong>Sinopsis:</strong> {{ activeEvent.sinopsis || '—' }}
-            </p>
-            <p><strong>Formato:</strong> {{ activeEvent.formato || '—' }}</p>
-            <p><strong>País:</strong> {{ activeEvent.pais || '—' }}</p>
-            <p><strong>Ciudad:</strong> {{ activeEvent.ciudad || '—' }}</p>
-            <p><strong>Compañía:</strong> {{ activeEvent.compania || '—' }}</p>
-            <p><strong>Director:</strong> {{ activeEvent.director || '—' }}</p>
-            <p><strong>Lugar:</strong> {{ activeEvent.lugar || '—' }}</p>
-            <p><strong>Fecha:</strong> {{ activeEvent.fecha || '—' }}</p>
-            <p><strong>Hora función:</strong> {{ activeEvent.hora || '—' }}</p>
-            <p>
-              <strong>Instagram:</strong>
-              <template v-if="activeEvent.igUser">
-                <a :href="`https://instagram.com/${activeEvent.igUser}`" target="_blank" rel="noopener">@{{ activeEvent.igUser }}</a>
-              </template>
-              <template v-else>—</template>
-            </p>
-          </div>
-        </div>
-        <footer class="modal__footer">
-          <a v-if="activeEvent && activeEvent.boleteria" :href="activeEvent.boleteria" target="_blank" rel="noopener" class="btn btn-primary">Comprar boletos</a>
-          <button class="btn btn-secondary" type="button" @click="closeModal">Volver</button>
-        </footer>
-      </article>
-    </div>
-  </transition>
 </div>
 
 <script
@@ -1327,7 +1169,7 @@ function norm(ev) {
   return base;
 }
 
-const { createApp, reactive, ref, computed, onMounted, onBeforeUnmount, watch } = Vue;
+const { createApp, reactive, ref, computed, onMounted, watch } = Vue;
 
 createApp({
   setup() {
@@ -1340,8 +1182,6 @@ createApp({
       compania: "",
       fecha: ""
     });
-    const showModal = ref(false);
-    const activeEvent = ref(null);
     const filtersExpanded = ref(false);
     const downloadingPdf = ref(false);
     const detectedCountry = ref("");
@@ -1353,17 +1193,6 @@ createApp({
     const filtersToggleLabel = computed(() =>
       filtersExpanded.value ? "Ocultar filtros" : "Mostrar filtros"
     );
-
-    const closeModal = () => {
-      showModal.value = false;
-      activeEvent.value = null;
-    };
-
-    const keyboardHandler = (e) => {
-      if (e.key === "Escape") {
-        closeModal();
-      }
-    };
 
     const filteredEvents = computed(() => {
       const q = normalizeText(filters.search);
@@ -1475,11 +1304,6 @@ createApp({
 
     const removeFilter = (key) => {
       filters[key] = "";
-    };
-
-    const openModal = (event) => {
-      activeEvent.value = event;
-      showModal.value = true;
     };
 
     const downloadAgendaPdf = async () => {
@@ -1684,13 +1508,6 @@ createApp({
       detectCountry();
       if (typeof window !== "undefined") {
         filtersExpanded.value = false;
-        window.addEventListener("keydown", keyboardHandler);
-      }
-    });
-
-    onBeforeUnmount(() => {
-      if (typeof window !== "undefined") {
-        window.removeEventListener("keydown", keyboardHandler);
       }
     });
 
@@ -1707,10 +1524,6 @@ createApp({
       totalEvents,
       totalCountries,
       thisMonthEvents,
-      openModal,
-      closeModal,
-      showModal,
-      activeEvent,
       filtersExpanded,
       toggleFilters,
       filtersToggleLabel,
