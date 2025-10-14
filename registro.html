@@ -128,6 +128,12 @@
       box-shadow: 0 14px 28px rgba(124, 58, 237, 0.25);
     }
 
+    .cta__icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     .cta span {
       font-size: 1.2rem;
     }
@@ -166,26 +172,152 @@
       font-weight: 600;
     }
 
-    input[type="file"],
-    textarea {
-      border: 1px solid rgba(15, 23, 42, 0.12);
-      border-radius: 14px;
-      padding: 12px 14px;
-      font: inherit;
-      background: rgba(255, 255, 255, 0.92);
-      transition: border-color var(--transition), box-shadow var(--transition);
+    .field-label {
+      font-weight: 600;
+      color: var(--ink);
     }
 
-    textarea {
-      resize: vertical;
-      min-height: 120px;
+    .file-field {
+      display: grid;
+      gap: 10px;
     }
 
-    input[type="file"]:focus-visible,
-    textarea:focus-visible {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.18);
+    .file-input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      border: 0;
+      clip: rect(0, 0, 0, 0);
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .file-picker {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 1px dashed rgba(124, 58, 237, 0.35);
+      background: rgba(124, 58, 237, 0.08);
+    }
+
+    .file-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: 999px;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform var(--transition), box-shadow var(--transition);
+      box-shadow: 0 10px 24px rgba(124, 58, 237, 0.28);
+    }
+
+    .file-trigger span {
+      font-size: 1.15rem;
+    }
+
+    .file-trigger:hover,
+    .file-trigger:focus-visible {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 30px rgba(124, 58, 237, 0.32);
+    }
+
+    .file-name {
+      color: var(--muted);
+      font-size: 0.95rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    dialog {
+      border: none;
+      border-radius: 18px;
+      padding: 0;
+      background: transparent;
+      width: min(380px, 92vw);
+      box-shadow: none;
+    }
+
+    dialog::backdrop {
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(2px);
+    }
+
+    .dialog {
+      background: var(--card);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 18px;
+    }
+
+    .dialog__header {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .dialog__icon {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      background: rgba(124, 58, 237, 0.12);
+      font-size: 1.5rem;
+    }
+
+    dialog[data-state="success"] .dialog__icon {
+      background: rgba(34, 197, 94, 0.15);
+      color: #15803d;
+    }
+
+    dialog[data-state="error"] .dialog__icon {
+      background: rgba(239, 68, 68, 0.16);
+      color: #b91c1c;
+    }
+
+    dialog[data-state="pending"] .dialog__icon {
+      background: rgba(124, 58, 237, 0.12);
+      color: var(--primary);
+    }
+
+    .dialog__title {
+      margin: 0;
+      font-size: 1.15rem;
+    }
+
+    .dialog__message {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.97rem;
+    }
+
+    .dialog__close {
+      justify-self: flex-end;
+      padding: 10px 18px;
+      border-radius: 999px;
+      border: none;
+      background: var(--ink);
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform var(--transition), box-shadow var(--transition);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.24);
+    }
+
+    .dialog__close:hover,
+    .dialog__close:focus-visible {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.28);
     }
 
     button {
@@ -241,15 +373,7 @@
       </div>
 
       <div class="option">
-        <h2>Opción 1 · Instagram DM</h2>
-        <p>Envíanos un mensaje privado a @improworld_oficial con el flyer.</p>
-        <a class="cta" href="https://instagram.com/improworld_oficial" target="_blank" rel="noopener noreferrer">
-          Enviar mensaje <span>↗</span>
-        </a>
-      </div>
-
-      <div class="option">
-        <h2>Opción 2 · Subir aquí</h2>
+        <h2>Opción 1 · Subir aquí</h2>
         <form
           id="registro-form"
           action="#"
@@ -257,18 +381,67 @@
           enctype="multipart/form-data"
           data-endpoint="https://script.google.com/macros/s/AKfycbwoCLUfEiRjnmzumQ-Qs82vLUMpfTWHuemY8W6NODHVhGskbdQQHh-rIHKJUpS0cPCSxQ/exec"
         >
-          <label for="flyer">Flyer del evento (JPG o PNG)</label>
-          <input id="flyer" name="flyer" type="file" accept="image/png,image/jpeg" required />
-
-          <label for="detalles">Texto adicional (opcional)</label>
-          <textarea id="detalles" name="detalles" placeholder="Horarios, links, info clave..."></textarea>
+          <div class="file-field">
+            <label class="field-label" for="flyer">Flyer del evento (JPG o PNG)</label>
+            <input
+              id="flyer"
+              class="file-input"
+              name="flyer"
+              type="file"
+              accept="image/png,image/jpeg"
+              required
+            />
+            <div class="file-picker">
+              <label class="file-trigger" for="flyer">Seleccionar imagen <span>⬆</span></label>
+              <span class="file-name" data-file-name>Arrastra tu flyer o selecciónalo desde tu dispositivo.</span>
+            </div>
+          </div>
 
           <p class="form-status" role="status" aria-live="polite" data-status></p>
 
           <button type="submit">Enviar flyer</button>
         </form>
       </div>
+
+      <div class="option">
+        <h2>Opción 2 · Instagram DM</h2>
+        <p>Envíanos un mensaje privado a @improworld_oficial con el flyer.</p>
+        <a class="cta" href="https://instagram.com/improworld_oficial" target="_blank" rel="noopener noreferrer">
+          <span aria-hidden="true" class="cta__icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M16 2H8C4.686 2 2 4.686 2 8V16C2 19.314 4.686 22 8 22H16C19.314 22 22 19.314 22 16V8C22 4.686 19.314 2 16 2Z"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M12 15C13.657 15 15 13.657 15 12C15 10.343 13.657 9 12 9C10.343 9 9 10.343 9 12C9 13.657 10.343 15 12 15Z"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path d="M17.5 6.51L17.51 6.49889" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </span>
+          Enviar mensaje <span>↗</span>
+        </a>
+      </div>
     </section>
+    <dialog data-dialog>
+      <div class="dialog">
+        <div class="dialog__header">
+          <div class="dialog__icon" aria-hidden="true" data-dialog-icon>ℹ️</div>
+          <div>
+            <h3 class="dialog__title" data-dialog-title>Actualización</h3>
+            <p class="dialog__message" data-dialog-message></p>
+          </div>
+        </div>
+        <button type="button" class="dialog__close" data-dialog-close>Cerrar</button>
+      </div>
+    </dialog>
   </main>
   <script>
     (function () {
@@ -278,14 +451,105 @@
       const endpoint = form.dataset.endpoint || "";
       const statusEl = form.querySelector("[data-status]");
       const submitBtn = form.querySelector('button[type="submit"]');
+      const fileInput = form.querySelector("#flyer");
+      const fileNameEl = form.querySelector("[data-file-name]");
+      const defaultFileName = fileNameEl ? fileNameEl.textContent : "Selecciona un archivo.";
       const defaultBtnText = submitBtn ? submitBtn.textContent : "";
 
       const MAX_IMAGE_DIMENSION = 1200;
 
+      const statusDialog = document.querySelector("[data-dialog]");
+      const dialogMessage = statusDialog ? statusDialog.querySelector("[data-dialog-message]") : null;
+      const dialogTitle = statusDialog ? statusDialog.querySelector("[data-dialog-title]") : null;
+      const dialogIcon = statusDialog ? statusDialog.querySelector("[data-dialog-icon]") : null;
+
+      const titlesByState = {
+        pending: "Estamos procesando tu flyer",
+        success: "¡Flyer recibido!",
+        error: "Ocurrió un problema"
+      };
+
+      const iconsByState = {
+        pending: "⏳",
+        success: "✅",
+        error: "⚠️"
+      };
+
+      const showDialog = (message, type) => {
+        if (!statusDialog || !message) return;
+        statusDialog.dataset.state = type || "";
+
+        if (dialogTitle) {
+          dialogTitle.textContent = titlesByState[type] || "Actualización";
+        }
+
+        if (dialogMessage) {
+          dialogMessage.textContent = message;
+        }
+
+        if (dialogIcon) {
+          dialogIcon.textContent = iconsByState[type] || "ℹ️";
+        }
+
+        if (typeof statusDialog.showModal === "function") {
+          if (!statusDialog.open) {
+            statusDialog.showModal();
+          }
+        } else {
+          statusDialog.setAttribute("open", "");
+        }
+      };
+
+      const closeDialog = () => {
+        if (!statusDialog) return;
+        if (typeof statusDialog.close === "function") {
+          statusDialog.close();
+        } else {
+          statusDialog.removeAttribute("open");
+        }
+      };
+
+      if (statusDialog) {
+        const closeBtn = statusDialog.querySelector("[data-dialog-close]");
+        if (closeBtn) {
+          closeBtn.addEventListener("click", () => {
+            closeDialog();
+          });
+        }
+
+        statusDialog.addEventListener("cancel", (event) => {
+          event.preventDefault();
+          closeDialog();
+        });
+
+        statusDialog.addEventListener("click", (event) => {
+          if (event.target === statusDialog) {
+            closeDialog();
+          }
+        });
+      }
+
+      const updateFileName = (name) => {
+        if (fileNameEl) {
+          fileNameEl.textContent = name || defaultFileName || "Selecciona un archivo.";
+        }
+      };
+
+      if (fileInput) {
+        fileInput.addEventListener("change", () => {
+          const file = fileInput.files && fileInput.files[0];
+          updateFileName(file ? file.name : defaultFileName);
+        });
+      }
+
       const setStatus = (message, type) => {
-        if (!statusEl) return;
-        statusEl.textContent = message || "";
-        statusEl.dataset.state = type || "";
+        if (statusEl) {
+          statusEl.textContent = message || "";
+          statusEl.dataset.state = type || "";
+        }
+        if (message) {
+          showDialog(message, type);
+        }
       };
 
       const setSubmitting = (isSubmitting) => {
@@ -481,8 +745,6 @@
           return;
         }
 
-        const detalles = form.detalles ? form.detalles.value.trim() : "";
-
         const payload = {
           OrigenFormulario: "registro-express",
           PiezaPromocional: processedImage.originalBase64,
@@ -503,15 +765,10 @@
           flyerOptimizedSize: String(processedImage.optimizedSize)
         };
 
-        if (detalles) {
-          payload.Detalles = detalles;
-          payload.TextoAdicional = detalles;
-          payload.flyerDetalles = detalles;
-        }
-
         try {
           await enviarDatos(payload);
           form.reset();
+          updateFileName(defaultFileName);
           setStatus("Recibimos tu flyer. Lo publicaremos muy pronto.", "success");
         } catch (error) {
           console.error("No fue posible subir el flyer", error);
