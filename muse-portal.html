@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Muse Portal · Motores</title>
+    <style>
+      :root {
+        --ink: #0f172a;
+        --muted: #475569;
+        --bg: #f8fafc;
+        --bg-soft: rgba(248, 250, 252, 0.72);
+        --card: #ffffff;
+        --ring: rgba(148, 163, 184, 0.4);
+        --primary: #7c3aed;
+        --primary-soft: rgba(124, 58, 237, 0.12);
+        --accent: #f472b6;
+        --accent-soft: rgba(244, 114, 182, 0.16);
+        --glow: rgba(56, 189, 248, 0.22);
+        --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+        --shadow-md: 0 20px 50px rgba(15, 23, 42, 0.12);
+        --shadow-lg: 0 40px 90px rgba(15, 23, 42, 0.18);
+        --radius-lg: 26px;
+        --radius-md: 18px;
+        --radius-sm: 12px;
+        --max-width: 1100px;
+        --transition: all 0.28s ease;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Manrope", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: radial-gradient(circle at 8% 12%, rgba(244, 114, 182, 0.16), transparent 36%),
+          radial-gradient(circle at 92% -8%, rgba(56, 189, 248, 0.2), transparent 34%),
+          linear-gradient(180deg, rgba(248, 250, 252, 0.94) 0%, #ffffff 80%);
+        color: var(--ink);
+        line-height: 1.6;
+        min-height: 100vh;
+      }
+
+      h1,
+      h2,
+      h3 {
+        font-family: "Manrope", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: var(--ink);
+        margin: 0;
+        line-height: 1.15;
+      }
+
+      .page {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+
+      .hero {
+        padding: 64px 20px 56px;
+      }
+
+      .hero__inner {
+        max-width: var(--max-width);
+        margin: 0 auto;
+        display: grid;
+        gap: 42px;
+      }
+
+      .hero__text {
+        display: grid;
+        gap: 18px;
+      }
+
+      .hero__eyebrow {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.36em;
+        color: rgba(79, 70, 229, 0.72);
+      }
+
+      .hero__heading {
+        font-size: clamp(2.6rem, 6vw, 3.6rem);
+        letter-spacing: -0.03em;
+      }
+
+      .hero__sub {
+        font-size: clamp(1.06rem, 2.3vw, 1.22rem);
+        color: rgba(15, 23, 42, 0.78);
+        max-width: 56ch;
+      }
+
+      .hero__panel {
+        background: rgba(255, 255, 255, 0.72);
+        border-radius: var(--radius-lg);
+        padding: 26px;
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(124, 58, 237, 0.22);
+        box-shadow: 0 18px 60px rgba(76, 29, 149, 0.12);
+        display: grid;
+        gap: 22px;
+      }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .chip {
+        border: 1px solid var(--ring);
+        background: rgba(255, 255, 255, 0.6);
+        padding: 10px 16px;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 0.92rem;
+        color: var(--muted);
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .chip.is-active {
+        border-color: rgba(124, 58, 237, 0.6);
+        background: var(--primary-soft);
+        color: var(--primary);
+        box-shadow: inset 0 1px 2px rgba(124, 58, 237, 0.2);
+      }
+
+      .chip:hover {
+        border-color: rgba(124, 58, 237, 0.38);
+        color: var(--primary);
+      }
+
+      .action-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .btn {
+        border: none;
+        border-radius: 999px;
+        padding: 12px 20px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .btn--primary {
+        background: linear-gradient(120deg, #7c3aed 0%, #8b5cf6 50%, #ec4899 100%);
+        color: white;
+        box-shadow: 0 14px 30px rgba(124, 58, 237, 0.25);
+      }
+
+      .btn--ghost {
+        background: rgba(124, 58, 237, 0.08);
+        color: var(--primary);
+      }
+
+      .btn--outline {
+        border: 1px solid rgba(124, 58, 237, 0.36);
+        background: transparent;
+        color: var(--primary);
+      }
+
+      .btn:hover {
+        transform: translateY(-1px) scale(1.01);
+        box-shadow: 0 18px 40px rgba(124, 58, 237, 0.28);
+      }
+
+      .wrap {
+        max-width: var(--max-width);
+        width: 100%;
+        margin: 0 auto;
+        padding: 0 20px 80px;
+        display: grid;
+        gap: 40px;
+      }
+
+      .section {
+        display: grid;
+        gap: 24px;
+      }
+
+      .section__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        flex-wrap: wrap;
+      }
+
+      .section__title {
+        font-size: 1.65rem;
+        color: var(--primary);
+        letter-spacing: -0.01em;
+      }
+
+      .card {
+        background: var(--card);
+        border-radius: var(--radius-lg);
+        padding: 30px;
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition);
+      }
+
+      .card:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-3px);
+      }
+
+      .prompt-display {
+        display: grid;
+        gap: 18px;
+        position: relative;
+      }
+
+      .prompt-display__label {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.24em;
+        color: rgba(15, 23, 42, 0.5);
+      }
+
+      .prompt-display__text {
+        font-size: clamp(1.4rem, 3vw, 1.9rem);
+        font-weight: 600;
+        color: var(--ink);
+      }
+
+      .prompt-display__meta {
+        font-size: 0.92rem;
+        color: rgba(15, 23, 42, 0.6);
+      }
+
+      .prompt-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+      }
+
+      .prompt-card {
+        background: rgba(255, 255, 255, 0.76);
+        border-radius: var(--radius-md);
+        padding: 18px 20px 22px;
+        border: 1px solid rgba(124, 58, 237, 0.16);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        display: grid;
+        gap: 8px;
+        transition: var(--transition);
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .prompt-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(124, 58, 237, 0.32);
+      }
+
+      .prompt-card::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(124, 58, 237, 0.05), rgba(236, 72, 153, 0.06));
+        opacity: 0;
+        transition: var(--transition);
+      }
+
+      .prompt-card:hover::after {
+        opacity: 1;
+      }
+
+      .prompt-card__title {
+        font-weight: 700;
+        color: var(--primary);
+        font-size: 0.95rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .prompt-card__body {
+        font-size: 1rem;
+        color: var(--ink);
+      }
+
+      .mini-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .mini-chip {
+        background: rgba(124, 58, 237, 0.08);
+        border-radius: 999px;
+        padding: 6px 10px;
+        font-size: 0.75rem;
+        color: rgba(124, 58, 237, 0.85);
+        font-weight: 600;
+      }
+
+      .fusion-controls {
+        display: grid;
+        gap: 14px;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      }
+
+      .select {
+        appearance: none;
+        border-radius: var(--radius-sm);
+        border: 1px solid rgba(124, 58, 237, 0.28);
+        padding: 12px 16px;
+        font-size: 0.95rem;
+        background: rgba(255, 255, 255, 0.9) url('data:image/svg+xml,%3Csvg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M4.47 6.97a.75.75 0 011.06 0L8 9.44l2.47-2.47a.75.75 0 111.06 1.06l-3 3a.75.75 0 01-1.06 0l-3-3a.75.75 0 010-1.06z" fill="%237c3aed"/%3E%3C/svg%3E') right 14px center/16px 16px no-repeat;
+      }
+
+      .daily-card {
+        background: linear-gradient(135deg, rgba(124, 58, 237, 0.16), rgba(236, 72, 153, 0.12));
+        border-radius: var(--radius-lg);
+        padding: 32px;
+        border: 1px solid rgba(124, 58, 237, 0.35);
+        box-shadow: var(--shadow-md);
+        color: #1f1c3f;
+        display: grid;
+        gap: 16px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .daily-card::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.4), transparent 60%);
+        pointer-events: none;
+      }
+
+      .daily-card__title {
+        font-size: 1.4rem;
+        font-weight: 700;
+      }
+
+      .daily-card__quote {
+        font-size: 1.15rem;
+        font-weight: 600;
+      }
+
+      .deep-dive {
+        display: grid;
+        gap: 18px;
+      }
+
+      .deep-dive__list {
+        display: grid;
+        gap: 12px;
+        padding-left: 18px;
+      }
+
+      .deep-dive__list li {
+        color: rgba(15, 23, 42, 0.78);
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.72);
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        font-size: 0.85rem;
+        color: rgba(15, 23, 42, 0.68);
+      }
+
+      .wheel {
+        position: relative;
+        width: min(420px, 100%);
+        aspect-ratio: 1;
+        border-radius: 50%;
+        background: conic-gradient(
+          from 0deg,
+          rgba(124, 58, 237, 0.55) 0deg 45deg,
+          rgba(236, 72, 153, 0.4) 45deg 90deg,
+          rgba(56, 189, 248, 0.45) 90deg 135deg,
+          rgba(244, 114, 182, 0.45) 135deg 180deg,
+          rgba(129, 140, 248, 0.45) 180deg 225deg,
+          rgba(244, 114, 182, 0.32) 225deg 270deg,
+          rgba(56, 189, 248, 0.32) 270deg 315deg,
+          rgba(124, 58, 237, 0.4) 315deg 360deg
+        );
+        box-shadow: 0 26px 60px rgba(76, 29, 149, 0.25);
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .wheel:hover {
+        transform: scale(1.02);
+      }
+
+      .wheel__inner {
+        width: 62%;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.8);
+        display: grid;
+        place-items: center;
+        text-align: center;
+        font-weight: 700;
+        color: var(--primary);
+        padding: 20px;
+        box-shadow: inset 0 8px 22px rgba(148, 163, 184, 0.24);
+      }
+
+      .wheel__label {
+        font-size: 0.78rem;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        color: rgba(15, 23, 42, 0.6);
+      }
+
+      .wheel__category {
+        font-size: 1.18rem;
+        margin-top: 6px;
+      }
+
+      .fade-list {
+        display: grid;
+        gap: 12px;
+      }
+
+      .fade-item {
+        background: rgba(255, 255, 255, 0.65);
+        border-radius: var(--radius-sm);
+        padding: 14px 16px;
+        border: 1px solid rgba(124, 58, 237, 0.16);
+        font-size: 0.95rem;
+        color: rgba(15, 23, 42, 0.76);
+        animation: fadeAway 12s forwards;
+      }
+
+      @keyframes fadeAway {
+        0% {
+          opacity: 1;
+        }
+        80% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+
+      .footer {
+        padding: 40px 20px 80px;
+        text-align: center;
+        color: rgba(15, 23, 42, 0.5);
+        font-size: 0.9rem;
+      }
+
+      @media (max-width: 768px) {
+        .hero {
+          padding-top: 48px;
+        }
+
+        .hero__panel {
+          padding: 20px;
+        }
+
+        .card {
+          padding: 22px;
+        }
+
+        .daily-card {
+          padding: 24px;
+        }
+
+        .wheel {
+          width: min(320px, 100%);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header class="hero">
+        <div class="hero__inner">
+          <div class="hero__text">
+            <span class="hero__eyebrow">Muse Portal</span>
+            <h1 class="hero__heading">Tu pozo infinito de inspiración improvisada</h1>
+            <p class="hero__sub">
+              Un espacio vivo y juguetón que mezcla emociones, lugares, sonidos y destellos visuales.
+              Cada clic es como lanzar dados cósmicos para tu próxima escena, historia o canción.
+            </p>
+          </div>
+          <div class="hero__panel">
+            <div>
+              <strong>Selecciona tu estado de ánimo</strong>
+              <div class="controls" id="moodChips"></div>
+            </div>
+            <div class="action-row">
+              <button class="btn btn--primary" id="surpriseBtn">🎲 Sorpréndeme</button>
+              <button class="btn btn--ghost" id="comboBtn">✨ Combinar 3 elementos</button>
+              <button class="btn btn--outline" id="resetBtn">🔁 Reiniciar tablero</button>
+            </div>
+            <div class="pill">Tip: haz clic sobre un resultado para ir a una micro inmersión.</div>
+          </div>
+        </div>
+      </header>
+
+      <main class="wrap">
+        <section class="section" aria-labelledby="randomizer">
+          <div class="section__header">
+            <h2 class="section__title" id="randomizer">Generador inmediato</h2>
+            <div class="controls" id="categoryChips"></div>
+          </div>
+          <div class="card">
+            <div class="prompt-display">
+              <span class="prompt-display__label" id="promptCategory">Selecciona una categoría</span>
+              <div class="prompt-display__text" id="promptText">Pulsa un botón para invocar a la musa.</div>
+              <div class="prompt-display__meta" id="promptMeta"></div>
+              <div class="action-row">
+                <button class="btn btn--primary" id="inspireBtn">⚡ Inspírame</button>
+                <button class="btn btn--ghost" id="saveBtn">📌 Guardar</button>
+                <button class="btn btn--outline" id="shareBtn">📤 Compartir con Motores</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" aria-labelledby="fusion">
+          <div class="section__header">
+            <h2 class="section__title" id="fusion">Fusionador creativo</h2>
+            <span class="pill">Construye combinaciones improbables</span>
+          </div>
+          <div class="card">
+            <div class="fusion-controls">
+              <label>
+                <span class="prompt-display__label">Elemento 1</span>
+                <select class="select" id="fusionSelectA"></select>
+              </label>
+              <label>
+                <span class="prompt-display__label">Elemento 2</span>
+                <select class="select" id="fusionSelectB"></select>
+              </label>
+              <label>
+                <span class="prompt-display__label">Elemento 3 (opcional)</span>
+                <select class="select" id="fusionSelectC"></select>
+              </label>
+            </div>
+            <div class="action-row" style="margin-top: 16px">
+              <button class="btn btn--primary" id="fusionBtn">🜁 Mezclar</button>
+              <button class="btn btn--outline" id="fusionReset">Limpiar fusión</button>
+            </div>
+            <div class="prompt-display" style="margin-top: 24px">
+              <span class="prompt-display__label">Resultado</span>
+              <div class="prompt-display__text" id="fusionResult">Elige dos o más elementos para mezclarlos.</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" aria-labelledby="library">
+          <div class="section__header">
+            <h2 class="section__title" id="library">Biblioteca de chispas</h2>
+            <span class="pill">Explora por categoría</span>
+          </div>
+          <div class="prompt-grid" id="libraryGrid"></div>
+        </section>
+
+        <section class="section" aria-labelledby="dailyMuse">
+          <div class="section__header">
+            <h2 class="section__title" id="dailyMuse">La musa del día</h2>
+            <span class="pill">Se renueva cada amanecer</span>
+          </div>
+          <div class="daily-card" id="dailyCard">
+            <span class="daily-card__title">Hoy la musa susurra:</span>
+            <div class="daily-card__quote" id="dailyQuote"></div>
+            <div id="dailyDetails"></div>
+            <div class="action-row">
+              <button class="btn btn--ghost" id="shareDaily">Compartir</button>
+              <button class="btn btn--outline" id="refreshDaily">Revelar un eco</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" aria-labelledby="deepDive">
+          <div class="section__header">
+            <h2 class="section__title" id="deepDive">Modo profundizar</h2>
+            <span class="pill">Sigue la pista y descubre más</span>
+          </div>
+          <div class="card">
+            <div class="deep-dive" id="deepDivePanel">
+              <p>Selecciona un resultado para desbloquear enlaces, lecturas y texturas relacionadas.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" aria-labelledby="play">
+          <div class="section__header">
+            <h2 class="section__title" id="play">Juegos de la musa</h2>
+            <span class="pill">Pequeños rituales para mantener la magia</span>
+          </div>
+          <div class="prompt-grid">
+            <div class="card" style="display: grid; gap: 18px">
+              <div class="wheel" id="wheel">
+                <div class="wheel__inner">
+                  <span class="wheel__label">Gira y respira</span>
+                  <div class="wheel__category" id="wheelResult">Categoría sorpresa</div>
+                </div>
+              </div>
+              <button class="btn btn--primary" id="wheelBtn">🎡 Girar rueda</button>
+            </div>
+            <div class="card" style="display: grid; gap: 18px">
+              <h3>Escena sonora</h3>
+              <p>
+                Pulsa para escuchar un paisaje sonoro que coincide con tu último resultado. Cierra los ojos
+                y deja que el audio pinte la escena.
+              </p>
+              <button class="btn btn--ghost" id="soundscapeBtn">🔊 Reproducir paisaje</button>
+              <audio id="soundscape" preload="auto"></audio>
+            </div>
+            <div class="card" style="display: grid; gap: 18px">
+              <h3>Duelo improvisado</h3>
+              <p>Dos jugadores reciben chispas distintas. Al centro, la musa decide qué elementos deben fusionarse.</p>
+              <button class="btn btn--outline" id="battleBtn">⚔️ Lanzar duelo</button>
+              <div class="fade-list" id="battleList"></div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        Muse Portal · Un laboratorio imaginario para motores y motoras. Alimenta tu sesión compartiendo tus
+        hallazgos con un clic.
+      </footer>
+    </div>
+
+    <script>
+      const data = {
+        emotions: {
+          label: "Emociones",
+          prompts: [
+            "Una oleada de euforia contenida",
+            "La incomodidad de una disculpa tardía",
+            "Regocijo después del caos",
+            "Ternura inesperada en medio del miedo",
+            "Celos que se transforman en admiración",
+            "Curiosidad desbordada",
+            "Una nostalgia dulce y luminosa",
+            "Rabia que busca justicia poética"
+          ],
+          meta: "Dibuja la intensidad emocional de tu escena."
+        },
+        situations: {
+          label: "Situaciones",
+          prompts: [
+            "Llegas tarde a tu propia boda y alguien ya ocupa tu lugar",
+            "Dos desconocidos se refugian de la lluvia en un museo nocturno",
+            "Una reunión familiar que es, en secreto, una misión de espionaje",
+            "Encontrarse a sí mismo dentro del sueño de otra persona",
+            "Un brindis improvisado en un tren en movimiento",
+            "Un pueblo celebra el regreso de una criatura mítica",
+            "Una lista de compras que resulta ser un mapa del tesoro"
+          ],
+          meta: "Punto de partida para escenas inesperadas."
+        },
+        places: {
+          label: "Lugares",
+          prompts: [
+            "Cocina a las 3 a.m. iluminada por la heladera",
+            "Una biblioteca bajo el mar",
+            "Un ascensor que solo se mueve cuando cantas",
+            "Mercado flotante en un planeta desconocido",
+            "Un teatro abandonado lleno de eco",
+            "La azotea donde se reúnen los recuerdos perdidos",
+            "Una estación de tren en el borde de un sueño"
+          ],
+          meta: "Ambientaciones para viajar sin moverte."
+        },
+        objects: {
+          label: "Objetos",
+          prompts: [
+            "Un espejo roto que devuelve futuros posibles",
+            "Una carta vieja sin remitente",
+            "Un paraguas que cambia de color según tu secreto",
+            "Un cuaderno con páginas arrancadas",
+            "Una brújula que apunta hacia las personas",
+            "Un amuleto hecho con metal espacial",
+            "Un reloj de arena lleno de pétalos"
+          ],
+          meta: "Elementos que encienden la acción."
+        },
+        dialogue: {
+          label: "Líneas de diálogo",
+          prompts: [
+            "\"No recordaba que los fantasmas pudieran cocinar así.\"",
+            "\"Si abrimos esa puerta, prometes no mirar atrás.\"",
+            "\"Hoy decido quién soy, y no pienso repetirlo.\"",
+            "\"Es la primera vez que el futuro llega temprano.\"",
+            "\"Te he esperado en esta esquina desde que nací.\"",
+            "\"No soy de aquí, pero este lugar sueña conmigo.\""
+          ],
+          meta: "Frases detonadoras para escenas veloces."
+        },
+        sound: {
+          label: "Música y sonidos",
+          prompts: [
+            "Ritmo de percusión minimalista y envolvente",
+            "Un dron etéreo con campanas lejanas",
+            "Beatbox con ecos digitales",
+            "Canturreos en círculo que se superponen",
+            "Jazz suave con chasquidos y respiraciones",
+            "Lluvia filtrándose en un hangar vacío",
+            "Melodía de piano con notas invertidas"
+          ],
+          meta: "Paisajes que activan el oído."
+        },
+        movement: {
+          label: "Movimiento",
+          prompts: [
+            "Muévete como una sombra que olvidó a su dueñ@",
+            "Cada paso dibuja geometrías invisibles",
+            "Camina como si el suelo fuese gelatina",
+            "Imita a una planta que busca el sol",
+            "Salta como si evitaras charcos imaginarios",
+            "Gira como un planeta con gravedad propia",
+            "Desplázate como si leyeses las paredes"
+          ],
+          meta: "Impulsos para el cuerpo en escena."
+        },
+        visuals: {
+          label: "Visuales",
+          prompts: [
+            "GIF de tinta expandiéndose en agua",
+            "Collage de ojos cósmicos",
+            "Foto de calle neblinosa con luces púrpuras",
+            "Imagen térmica de un abrazo",
+            "Pintura abstracta con colores cítricos",
+            "GIF de un cometa pasando en cámara lenta",
+            "Ilustración de una ciudad sobre nubes"
+          ],
+          meta: "Ideas visuales para provocar atmósferas."
+        }
+      };
+
+      const moods = {
+        neutro: {
+          label: "Equilibrado",
+          weights: { emotions: 1, situations: 1, places: 1, objects: 1, dialogue: 1, sound: 1, movement: 1, visuals: 1 }
+        },
+        caotico: {
+          label: "Caótico",
+          weights: { emotions: 0.7, situations: 1.4, places: 1.2, objects: 1, dialogue: 1.1, sound: 1.3, movement: 1.5, visuals: 1.4 }
+        },
+        calmado: {
+          label: "Calmado",
+          weights: { emotions: 1.2, situations: 0.8, places: 1.4, objects: 1, dialogue: 0.9, sound: 1.3, movement: 0.8, visuals: 1.2 }
+        },
+        surreal: {
+          label: "Surreal",
+          weights: { emotions: 0.9, situations: 1.2, places: 1.3, objects: 1.1, dialogue: 1, sound: 1.2, movement: 1, visuals: 1.5 }
+        },
+        luminoso: {
+          label: "Luminoso",
+          weights: { emotions: 1.4, situations: 0.9, places: 1.1, objects: 1, dialogue: 1.2, sound: 1, movement: 1, visuals: 1.3 }
+        }
+      };
+
+      const deepDiveContent = {
+        emotions: [
+          {
+            title: "El color de la euforia",
+            link: "https://en.wikipedia.org/wiki/Joy",
+            description: "Breve viaje por cómo la alegría se describe en diferentes culturas."
+          },
+          {
+            title: "Ensayo: nostalgia luminosa",
+            link: "https://poetica2point0.substack.com/",
+            description: "Una reflexión creativa sobre memorias felices que regresan."
+          }
+        ],
+        situations: [
+          {
+            title: "Microrrelato: Sueños prestados",
+            link: "https://es.wikipedia.org/wiki/Sue%C3%B1o",
+            description: "Inicia con un sueño ajeno y observa cómo se transforma."
+          },
+          {
+            title: "Juego narrativo",
+            link: "https://storycube.es/",
+            description: "Combina dados narrativos para continuar la escena."
+          }
+        ],
+        places: [
+          {
+            title: "Atlas imaginario",
+            link: "https://www.atlasobscura.com/",
+            description: "Explora lugares reales que parecen inventados."
+          },
+          {
+            title: "Paisajes sonoros nocturnos",
+            link: "https://mynoise.net/",
+            description: "Escucha espacios improbables para inspirar atmósferas."
+          }
+        ],
+        objects: [
+          {
+            title: "Museo de objetos imposibles",
+            link: "https://www.thisiscolossal.com/tag/surrealism/",
+            description: "Arte surrealista para imaginar reliquias únicas."
+          },
+          {
+            title: "Generador de reliquias",
+            link: "https://artprompts.org/things",
+            description: "Herramienta para inventar artefactos curiosos."
+          }
+        ],
+        dialogue: [
+          {
+            title: "Banco de frases teatrales",
+            link: "https://improvresourcecenter.com/",
+            description: "Archiva líneas para comenzar escenas con fuerza."
+          },
+          {
+            title: "Poemario instantáneo",
+            link: "https://www.poemist.com/",
+            description: "Busca versos aleatorios que resuenen con tu frase."
+          }
+        ],
+        sound: [
+          {
+            title: "Loops para improvisar",
+            link: "https://freesound.org/",
+            description: "Encuentra sonidos libres para acompañar tu escena."
+          },
+          {
+            title: "Playlists ambientales",
+            link: "https://asoftmurmur.com/",
+            description: "Mezcla sonidos naturales y electrónicos según tu tono."
+          }
+        ],
+        movement: [
+          {
+            title: "Laboratorio de movimiento",
+            link: "https://www.gaga-people.com/en/",
+            description: "Explora propuestas corporales para expandir tu vocabulario."
+          },
+          {
+            title: "Video: sombras vivas",
+            link: "https://www.youtube.com/watch?v=5N5N1dC7BJM",
+            description: "Danza contemporánea inspirada en sombras y luces."
+          }
+        ],
+        visuals: [
+          {
+            title: "Banco de visuales oníricos",
+            link: "https://unsplash.com/collections/1588205/dreamscapes",
+            description: "Imágenes libres que parecen sueños."
+          },
+          {
+            title: "GIFs hipnóticos",
+            link: "https://giphy.com/explore/space-art",
+            description: "Explora texturas visuales en movimiento."
+          }
+        ]
+      };
+
+      const soundscapeSources = [
+        "https://cdn.pixabay.com/download/audio/2022/10/11/audio_c0b2bc09d7.mp3?filename=deep-ambient-122836.mp3",
+        "https://cdn.pixabay.com/download/audio/2023/01/09/audio_a9c7d3b9e3.mp3?filename=soft-piano-132136.mp3",
+        "https://cdn.pixabay.com/download/audio/2022/03/15/audio_517071d13a.mp3?filename=night-ambience-200079.mp3"
+      ];
+
+      const battlePrompts = [
+        "Fusiona emoción + movimiento y crea un saludo mutante",
+        "Objeto prohibido + línea de diálogo para el jugador 1",
+        "Sonido extraño + lugar imposible para el jugador 2",
+        "Amb@s deben usar la misma imagen pero emociones opuestas",
+        "Incluye un gesto repetido cada vez que digas la palabra clave",
+        "Solo puedes comunicarte con sonidos hasta que alguien ría"
+      ];
+
+      let currentMood = "neutro";
+      let currentCategory = null;
+      let savedPrompts = [];
+      let lastPrompt = null;
+
+      const moodContainer = document.getElementById("moodChips");
+      const categoryContainer = document.getElementById("categoryChips");
+      const libraryGrid = document.getElementById("libraryGrid");
+      const promptCategory = document.getElementById("promptCategory");
+      const promptText = document.getElementById("promptText");
+      const promptMeta = document.getElementById("promptMeta");
+      const inspireBtn = document.getElementById("inspireBtn");
+      const surpriseBtn = document.getElementById("surpriseBtn");
+      const comboBtn = document.getElementById("comboBtn");
+      const resetBtn = document.getElementById("resetBtn");
+      const saveBtn = document.getElementById("saveBtn");
+      const shareBtn = document.getElementById("shareBtn");
+      const deepDivePanel = document.getElementById("deepDivePanel");
+      const fusionSelectA = document.getElementById("fusionSelectA");
+      const fusionSelectB = document.getElementById("fusionSelectB");
+      const fusionSelectC = document.getElementById("fusionSelectC");
+      const fusionBtn = document.getElementById("fusionBtn");
+      const fusionReset = document.getElementById("fusionReset");
+      const fusionResult = document.getElementById("fusionResult");
+      const dailyQuote = document.getElementById("dailyQuote");
+      const dailyDetails = document.getElementById("dailyDetails");
+      const shareDaily = document.getElementById("shareDaily");
+      const refreshDaily = document.getElementById("refreshDaily");
+      const wheel = document.getElementById("wheel");
+      const wheelBtn = document.getElementById("wheelBtn");
+      const wheelResult = document.getElementById("wheelResult");
+      const soundscapeBtn = document.getElementById("soundscapeBtn");
+      const soundscape = document.getElementById("soundscape");
+      const battleBtn = document.getElementById("battleBtn");
+      const battleList = document.getElementById("battleList");
+
+      function initMoodChips() {
+        Object.entries(moods).forEach(([value, mood]) => {
+          const chip = document.createElement("button");
+          chip.type = "button";
+          chip.className = `chip ${value === currentMood ? "is-active" : ""}`;
+          chip.textContent = mood.label;
+          chip.addEventListener("click", () => {
+            currentMood = value;
+            [...moodContainer.children].forEach((child) => child.classList.remove("is-active"));
+            chip.classList.add("is-active");
+            if (lastPrompt) {
+              updateDeepDive(lastPrompt.category);
+            }
+          });
+          moodContainer.appendChild(chip);
+        });
+      }
+
+      function initCategoryChips() {
+        Object.entries(data).forEach(([key, category]) => {
+          const chip = document.createElement("button");
+          chip.type = "button";
+          chip.className = "chip";
+          chip.textContent = category.label;
+          chip.addEventListener("click", () => {
+            currentCategory = key;
+            [...categoryContainer.children].forEach((child) => child.classList.remove("is-active"));
+            chip.classList.add("is-active");
+            revealPrompt(key);
+          });
+          categoryContainer.appendChild(chip);
+        });
+      }
+
+      function initLibrary() {
+        Object.entries(data).forEach(([key, category]) => {
+          const card = document.createElement("article");
+          card.className = "prompt-card";
+          card.innerHTML = `
+            <span class="prompt-card__title">${category.label}</span>
+            <span class="prompt-card__body">${category.prompts[0]}</span>
+            <div class="mini-chips">
+              ${category.prompts
+                .slice(1, 4)
+                .map((prompt) => `<span class="mini-chip">${prompt}</span>`)
+                .join("")}
+            </div>
+          `;
+          card.addEventListener("click", () => {
+            currentCategory = key;
+            highlightCategoryChip(key);
+            revealPrompt(key);
+          });
+          libraryGrid.appendChild(card);
+        });
+      }
+
+      function highlightCategoryChip(key) {
+        [...categoryContainer.children].forEach((child) => {
+          if (child.textContent === data[key].label) {
+            child.classList.add("is-active");
+          } else {
+            child.classList.remove("is-active");
+          }
+        });
+      }
+
+      function weightedRandomCategory() {
+        const weights = moods[currentMood].weights;
+        const entries = Object.entries(weights);
+        const total = entries.reduce((sum, [key, weight]) => sum + weight, 0);
+        let random = Math.random() * total;
+        for (const [key, weight] of entries) {
+          if ((random -= weight) <= 0) {
+            return key;
+          }
+        }
+        return entries[entries.length - 1][0];
+      }
+
+      function revealPrompt(categoryKey) {
+        const category = data[categoryKey];
+        const prompt = category.prompts[Math.floor(Math.random() * category.prompts.length)];
+        lastPrompt = { category: categoryKey, prompt };
+        promptCategory.textContent = category.label;
+        promptText.textContent = prompt;
+        promptMeta.textContent = category.meta;
+        updateDeepDive(categoryKey);
+      }
+
+      function combinePrompts(count = 3) {
+        const categories = Object.keys(data);
+        const selected = [];
+        while (selected.length < count) {
+          const category = weightedRandomCategory();
+          if (!selected.includes(category)) {
+            selected.push(category);
+          }
+        }
+        const combined = selected
+          .map((key) => `${data[key].label}: ${randomPrompt(key)}`)
+          .join(" · ");
+        promptCategory.textContent = "Combinación";
+        promptText.textContent = combined;
+        promptMeta.textContent = "Mezcla libre para escenas híbridas.";
+        lastPrompt = { category: selected[0], prompt: combined };
+        updateDeepDive(selected[0]);
+      }
+
+      function randomPrompt(categoryKey) {
+        const category = data[categoryKey];
+        return category.prompts[Math.floor(Math.random() * category.prompts.length)];
+      }
+
+      function updateDeepDive(categoryKey) {
+        deepDivePanel.innerHTML = "";
+        const title = document.createElement("h3");
+        title.textContent = `${data[categoryKey].label}: pistas para explorar`;
+        const list = document.createElement("ul");
+        list.className = "deep-dive__list";
+        (deepDiveContent[categoryKey] || []).forEach((item) => {
+          const li = document.createElement("li");
+          li.innerHTML = `<strong>${item.title}</strong> — <a href="${item.link}" target="_blank" rel="noopener">${item.link}</a><br /><span>${item.description}</span>`;
+          list.appendChild(li);
+        });
+        deepDivePanel.appendChild(title);
+        deepDivePanel.appendChild(list);
+        const notice = document.createElement("p");
+        notice.innerHTML =
+          "¿Quieres más? Abre el prompt guardado para añadir notas personales y enlaces que encuentres.";
+        deepDivePanel.appendChild(notice);
+      }
+
+      function initFusionSelects() {
+        const options = Object.entries(data)
+          .map(([key, value]) => `<option value="${key}">${value.label}</option>`)
+          .join("");
+        [fusionSelectA, fusionSelectB, fusionSelectC].forEach((select, index) => {
+          select.innerHTML = `<option value="">—</option>${options}`;
+          if (index === 0) select.selectedIndex = 1;
+        });
+      }
+
+      function generateFusion() {
+        const keys = [fusionSelectA.value, fusionSelectB.value, fusionSelectC.value].filter(Boolean);
+        if (keys.length < 2) {
+          fusionResult.textContent = "Elige al menos dos elementos para fusionar.";
+          return;
+        }
+        const parts = keys.map((key) => `${data[key].label}: ${randomPrompt(key)}`);
+        fusionResult.textContent = parts.join(" // ");
+      }
+
+      function resetFusion() {
+        [fusionSelectA, fusionSelectB, fusionSelectC].forEach((select) => (select.selectedIndex = 0));
+        fusionResult.textContent = "Elige dos o más elementos para mezclarlos.";
+      }
+
+      function initDailyMuse() {
+        const today = new Date().toISOString().split("T")[0];
+        const seed = today.split("-").join("");
+        const rng = mulberry32(Number(seed));
+        const categoryKeys = Object.keys(data);
+        const category = categoryKeys[Math.floor(rng() * categoryKeys.length)];
+        const prompt = data[category].prompts[Math.floor(rng() * data[category].prompts.length)];
+        const extra = categoryKeys
+          .filter((key) => key !== category)
+          .sort(() => rng() - 0.5)
+          .slice(0, 2)
+          .map((key) => `${data[key].label}: ${data[key].prompts[Math.floor(rng() * data[key].prompts.length)]}`);
+        dailyQuote.textContent = prompt;
+        dailyDetails.innerHTML = `<div class="mini-chips">${extra
+          .map((item) => `<span class="mini-chip">${item}</span>`)
+          .join("")}</div>`;
+        lastPrompt = { category, prompt };
+        updateDeepDive(category);
+      }
+
+      function mulberry32(a) {
+        return function () {
+          let t = (a += 0x6d2b79f5);
+          t = Math.imul(t ^ (t >>> 15), t | 1);
+          t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+          return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+      }
+
+      function handleSave() {
+        if (!lastPrompt) return;
+        savedPrompts.push(lastPrompt);
+        promptMeta.textContent = `Guardado en tu colección (${savedPrompts.length}).`;        
+      }
+
+      async function handleShare(content) {
+        const text = content || `${promptCategory.textContent}: ${promptText.textContent}`;
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: "Muse Portal · Motores",
+              text,
+              url: window.location.href
+            });
+          } catch (err) {
+            console.warn("Compartir cancelado", err);
+          }
+        } else if (navigator.clipboard) {
+          await navigator.clipboard.writeText(text);
+          promptMeta.textContent = "Copiado al portapapeles para compartir.";
+        }
+      }
+
+      function resetBoard() {
+        currentCategory = null;
+        promptCategory.textContent = "Selecciona una categoría";
+        promptText.textContent = "Pulsa un botón para invocar a la musa.";
+        promptMeta.textContent = "";
+        deepDivePanel.innerHTML = '<p>Selecciona un resultado para desbloquear enlaces, lecturas y texturas relacionadas.</p>';
+        [...categoryContainer.children].forEach((child) => child.classList.remove("is-active"));
+        battleList.innerHTML = "";
+        wheelResult.textContent = "Categoría sorpresa";
+      }
+
+      function initWheel() {
+        wheel.addEventListener("click", spinWheel);
+        wheelBtn.addEventListener("click", spinWheel);
+      }
+
+      function spinWheel() {
+        wheel.classList.add("is-spinning");
+        wheel.style.transition = "transform 1.4s cubic-bezier(.22,.61,.36,1)";
+        const rotations = 360 * (3 + Math.random() * 2);
+        wheel.style.transform = `rotate(${rotations}deg)`;
+        setTimeout(() => {
+          wheel.style.transition = "";
+          wheel.style.transform = "";
+          wheel.classList.remove("is-spinning");
+          const key = weightedRandomCategory();
+          wheelResult.textContent = data[key].label;
+          highlightCategoryChip(key);
+          revealPrompt(key);
+        }, 1400);
+      }
+
+      function initSoundscape() {
+        soundscapeBtn.addEventListener("click", () => {
+          const source = soundscapeSources[Math.floor(Math.random() * soundscapeSources.length)];
+          soundscape.src = source;
+          soundscape.play();
+          soundscapeBtn.textContent = "⏸️ Pausar";
+        });
+        soundscape.addEventListener("ended", () => {
+          soundscapeBtn.textContent = "🔊 Reproducir paisaje";
+        });
+        soundscapeBtn.addEventListener("dblclick", () => {
+          soundscape.pause();
+          soundscape.currentTime = 0;
+          soundscapeBtn.textContent = "🔊 Reproducir paisaje";
+        });
+      }
+
+      function initBattle() {
+        battleBtn.addEventListener("click", () => {
+          battleList.innerHTML = "";
+          const items = Array.from({ length: 2 }, () => document.createElement("div"));
+          items.forEach((item, index) => {
+            const key = weightedRandomCategory();
+            item.className = "fade-item";
+            item.innerHTML = `<strong>Jugador ${index + 1}:</strong> ${data[key].label} → ${randomPrompt(key)}`;
+            battleList.appendChild(item);
+          });
+          const central = document.createElement("div");
+          central.className = "fade-item";
+          central.innerHTML = `<strong>La musa dicta:</strong> ${battlePrompts[Math.floor(Math.random() * battlePrompts.length)]}`;
+          battleList.appendChild(central);
+        });
+      }
+
+      initMoodChips();
+      initCategoryChips();
+      initLibrary();
+      initFusionSelects();
+      initDailyMuse();
+      initWheel();
+      initSoundscape();
+      initBattle();
+
+      inspireBtn.addEventListener("click", () => {
+        const key = currentCategory || weightedRandomCategory();
+        highlightCategoryChip(key);
+        revealPrompt(key);
+      });
+
+      surpriseBtn.addEventListener("click", () => {
+        const key = weightedRandomCategory();
+        highlightCategoryChip(key);
+        revealPrompt(key);
+      });
+
+      comboBtn.addEventListener("click", () => combinePrompts(3));
+      resetBtn.addEventListener("click", resetBoard);
+      saveBtn.addEventListener("click", handleSave);
+      shareBtn.addEventListener("click", () => handleShare());
+      fusionBtn.addEventListener("click", generateFusion);
+      fusionReset.addEventListener("click", resetFusion);
+      shareDaily.addEventListener("click", () => handleShare(`La musa del día: ${dailyQuote.textContent}`));
+      refreshDaily.addEventListener("click", () => {
+        combinePrompts(2);
+        handleShare(`Eco del día: ${promptText.textContent}`);
+      });
+    </script>
+  </body>
+</html>
