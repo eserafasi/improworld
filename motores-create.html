@@ -445,7 +445,7 @@
   <script>
     (function () {
       const params = new URLSearchParams(window.location.search);
-      const baseUrl = new URL(".", window.location.href);
+      const rootUrl = new URL("/", window.location.href);
       const sessionInput = document.getElementById("session-id");
       const connectButton = document.getElementById("connect");
       const disconnectButton = document.getElementById("disconnect");
@@ -472,7 +472,7 @@
 
       function buildUrl(path) {
         const normalized = path.replace(/^\/+/, "");
-        return new URL(normalized, baseUrl).toString();
+        return new URL(normalized, rootUrl).toString();
       }
 
       function setStatus(message, state = "info") {
@@ -502,13 +502,13 @@
 
       function updateDrawLink() {
         if (!sessionId) {
-          drawLink.href = new URL("motores-draw.html", baseUrl).toString();
+          drawLink.href = new URL("motores-draw.html", rootUrl).toString();
           drawLink.setAttribute("aria-disabled", "true");
           return;
         }
         drawLink.href = new URL(
           `motores-draw.html?session=${encodeURIComponent(sessionId)}`,
-          baseUrl
+          rootUrl
         ).toString();
         drawLink.removeAttribute("aria-disabled");
       }
@@ -647,8 +647,8 @@
           setStatus("Escribe un nombre para la sesión.", "error");
           return;
         }
-        const wsUrl = new URL(`ws/${encodeURIComponent(targetSession)}`, baseUrl);
-        wsUrl.protocol = wsUrl.protocol === "https:" ? "wss:" : "ws:";
+        const wsUrl = new URL(`/ws/${encodeURIComponent(targetSession)}`, rootUrl);
+        wsUrl.protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
         if (websocket) {
           websocket.close();
         }
