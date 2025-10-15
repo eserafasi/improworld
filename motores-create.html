@@ -442,10 +442,12 @@
       </div>
     </main>
   </div>
-  <script>
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <script type="module">
+    import { createHostSession, normalizeSessionId, FALLBACK_CATEGORY } from "./motores-session.js";
+
     (function () {
       const params = new URLSearchParams(window.location.search);
-      const rootUrl = new URL("/", window.location.href);
       const sessionInput = document.getElementById("session-id");
       const connectButton = document.getElementById("connect");
       const disconnectButton = document.getElementById("disconnect");
@@ -459,10 +461,14 @@
       const motorsContainer = document.getElementById("motors");
       const drawLink = document.getElementById("draw-link");
 
-      let websocket = null;
+      const hostSession = createHostSession();
+
       let sessionId = "";
+      let normalizedId = "";
       let motors = [];
       let summary = { total: 0, categories: [] };
+      let peerCount = 0;
+      let statusTimeout = null;
 
       const savedSession = window.localStorage.getItem("motores:session");
       const initialSession = params.get("session") || savedSession || "";
@@ -470,47 +476,23 @@
         sessionInput.value = initialSession;
       }
 
-      function buildUrl(path) {
-        const normalized = path.replace(/^\/+/, "");
-        return new URL(normalized, rootUrl).toString();
-      }
-
       function setStatus(message, state = "info") {
         statusText.textContent = message;
         statusText.dataset.state = state;
       }
 
-      function setConnectedState(connected) {
-        submitButton.disabled = !connected;
-        resetButton.disabled = !connected;
-        connectButton.hidden = connected;
-        disconnectButton.hidden = !connected;
-        sessionInput.readOnly = connected;
-        if (connected) {
-          setStatus("Conectado a la sesión " + sessionId + ".");
-          window.localStorage.setItem("motores:session", sessionId);
-          updateDrawLink();
-        } else {
-          setStatus("Sin conexión.");
-          motors = [];
-          summary = { total: 0, categories: [] };
-          renderSummary();
-          renderMotors();
-          updateDrawLink();
-        }
+      function sanitizeCategoryLabel(category) {
+        const clean = (category || "").trim();
+        return clean || FALLBACK_CATEGORY;
       }
 
       function updateDrawLink() {
-        if (!sessionId) {
-          drawLink.href = new URL("motores-draw.html", rootUrl).toString();
-          drawLink.setAttribute("aria-disabled", "true");
-          return;
+        const activeId = normalizedId || normalizeSessionId(sessionInput.value || "");
+        if (activeId) {
+          drawLink.href = `motores-draw.html?session=${encodeURIComponent(activeId)}`;
+        } else {
+          drawLink.href = "motores-draw.html";
         }
-        drawLink.href = new URL(
-          `motores-draw.html?session=${encodeURIComponent(sessionId)}`,
-          rootUrl
-        ).toString();
-        drawLink.removeAttribute("aria-disabled");
       }
 
       function renderSummary() {
@@ -546,7 +528,7 @@
 
             const category = document.createElement("span");
             category.className = "motor-item__category";
-            category.textContent = motor.category;
+            category.textContent = sanitizeCategoryLabel(motor.category);
 
             const text = document.createElement("p");
             text.className = "motor-item__text";
@@ -560,181 +542,222 @@
 
       function updateCategorySuggestions() {
         categoriesDataList.innerHTML = "";
-        summary.categories.forEach((category) => {
+        const unique = new Set(
+          summary.categories
+            .map((category) => category.name)
+            .filter((name) => name && name !== FALLBACK_CATEGORY)
+        );
+        unique.forEach((name) => {
           const option = document.createElement("option");
-          option.value = category.name;
+          option.value = name;
           categoriesDataList.appendChild(option);
         });
       }
 
-      function ensureConnected() {
-        if (!sessionId) {
-          setStatus("Primero conecta la sesión.", "error");
-          return false;
-        }
-        if (!websocket || websocket.readyState !== WebSocket.OPEN) {
-          setStatus("Conexión no disponible. Intenta reconectar.", "error");
-          return false;
-        }
-        return true;
+      function updateSubmitAvailability() {
+        submitButton.disabled = !hostSession.isConnected() || !textArea.value.trim();
       }
 
-      async function handleSubmit() {
-        const text = textArea.value.trim();
-        const category = categoryInput.value.trim();
-        if (!ensureConnected()) {
-          return;
-        }
-        if (!text) {
-          setStatus("Escribe un texto antes de enviarlo.", "error");
-          return;
-        }
-        submitButton.disabled = true;
-        try {
-          const response = await fetch(
-            buildUrl(`api/sessions/${encodeURIComponent(sessionId)}/motors`),
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ text, category }),
-            }
-          );
-          if (!response.ok) {
-            const error = await response.json().catch(() => ({}));
-            throw new Error(error.detail || "No fue posible guardar el motor.");
-          }
-          textArea.value = "";
-          categoryInput.value = "";
-          textArea.focus();
-        } catch (error) {
-          console.error(error);
-          setStatus(error.message, "error");
-        } finally {
-          submitButton.disabled = false;
+      function updateResetAvailability() {
+        resetButton.disabled = !hostSession.isConnected() || !motors.length;
+      }
+
+      function clearStatusTimeout() {
+        if (statusTimeout) {
+          window.clearTimeout(statusTimeout);
+          statusTimeout = null;
         }
       }
 
-      async function handleReset() {
-        if (!ensureConnected()) {
+      function updateConnectionStatus() {
+        if (statusTimeout) {
           return;
         }
-        const confirmation = window.confirm("¿Vaciar la sesión por completo? Esta acción es irreversible.");
-        if (!confirmation) {
+        if (!hostSession.isConnected()) {
+          setStatus("Sin conexión.");
           return;
         }
-        resetButton.disabled = true;
-        try {
-          const response = await fetch(
-            buildUrl(`api/sessions/${encodeURIComponent(sessionId)}/reset`),
-            {
-              method: "POST",
-            }
-          );
-          if (!response.ok) {
-            throw new Error("No se pudo vaciar la sesión.");
-          }
-        } catch (error) {
-          console.error(error);
-          setStatus(error.message, "error");
-        } finally {
-          resetButton.disabled = false;
-        }
+        const shareId = normalizedId || normalizeSessionId(sessionId) || normalizeSessionId(sessionInput.value || "");
+        const peersText = peerCount
+          ? peerCount === 1
+            ? "1 participante remoto conectado."
+            : `${peerCount} participantes remotos conectados.`
+          : "Esperando que otras personas se conecten.";
+        setStatus(`Sesión lista. Comparte el ID: ${shareId}. ${peersText}`);
       }
 
-      function connect() {
+      function showStatusThenRestore(message, state = "info") {
+        clearStatusTimeout();
+        setStatus(message, state);
+        statusTimeout = window.setTimeout(() => {
+          statusTimeout = null;
+          updateConnectionStatus();
+        }, 2200);
+      }
+
+      function setConnectedState(connected) {
+        connectButton.hidden = connected;
+        disconnectButton.hidden = !connected;
+        sessionInput.readOnly = connected;
+        connectButton.disabled = connected;
+        updateSubmitAvailability();
+        updateResetAvailability();
+        if (!connected) {
+          connectButton.disabled = false;
+        }
+        updateDrawLink();
+      }
+
+      async function handleConnect() {
         const targetSession = sessionInput.value.trim();
         if (!targetSession) {
           setStatus("Escribe un nombre para la sesión.", "error");
           return;
         }
-        const wsUrl = new URL(`/ws/${encodeURIComponent(targetSession)}`, rootUrl);
-        wsUrl.protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-        if (websocket) {
-          websocket.close();
+        clearStatusTimeout();
+        connectButton.disabled = true;
+        setStatus("Creando la sesión...");
+        try {
+          await hostSession.connect(targetSession);
+        } catch (error) {
+          console.error(error);
+          setStatus(error?.message || "No fue posible iniciar la sesión.", "error");
+          connectButton.disabled = false;
         }
-        setStatus("Conectando...");
-        sessionId = targetSession;
-        websocket = new WebSocket(wsUrl.toString());
-        websocket.addEventListener("open", () => {
-          setConnectedState(true);
-        });
-        websocket.addEventListener("message", (event) => {
-          try {
-            const data = JSON.parse(event.data);
-            if (data.type === "init") {
-              motors = data.motors || [];
-              summary = data.summary || { total: 0, categories: [] };
-              renderMotors();
-              renderSummary();
-              updateCategorySuggestions();
-              if (data.lastDrawn) {
-                // no-op en esta página
-              }
-            } else if (data.type === "motor_added") {
-              motors.push(data.motor);
-              summary = data.summary || summary;
-              renderMotors();
-              renderSummary();
-              updateCategorySuggestions();
-            } else if (data.type === "reset") {
-              motors = [];
-              summary = { total: 0, categories: [] };
-              renderMotors();
-              renderSummary();
-              updateCategorySuggestions();
-              setStatus("La sesión quedó vacía.");
-            } else if (data.type === "drawn") {
-              summary = data.summary || summary;
-              renderSummary();
-              updateCategorySuggestions();
-            }
-          } catch (error) {
-            console.error("Error al procesar mensaje", error);
-          }
-        });
-        websocket.addEventListener("close", () => {
-          setConnectedState(false);
-        });
-        websocket.addEventListener("error", () => {
-          setStatus("No se pudo establecer la conexión.", "error");
-        });
       }
 
-      function disconnect() {
-        if (websocket) {
-          websocket.close();
-        }
-        websocket = null;
-        sessionId = "";
+      function handleDisconnect() {
+        clearStatusTimeout();
+        hostSession.disconnect();
         window.localStorage.removeItem("motores:session");
-        sessionInput.readOnly = false;
-        setConnectedState(false);
-        updateDrawLink();
       }
 
-      connectButton.addEventListener("click", connect);
-      disconnectButton.addEventListener("click", disconnect);
-      resetButton.addEventListener("click", handleReset);
-      submitButton.addEventListener("click", handleSubmit);
+      function handleSubmit() {
+        const text = textArea.value.trim();
+        const category = categoryInput.value.trim();
+        if (!text) {
+          showStatusThenRestore("Escribe un texto antes de enviarlo.");
+          return;
+        }
+        try {
+          hostSession.addMotor(text, category);
+          textArea.value = "";
+          categoryInput.value = "";
+          textArea.focus();
+          showStatusThenRestore("Motor compartido con la sala.");
+        } catch (error) {
+          console.error(error);
+          setStatus(error.message || "No se pudo agregar el motor.", "error");
+        } finally {
+          updateSubmitAvailability();
+        }
+      }
+
+      function handleReset() {
+        if (!hostSession.isConnected()) {
+          setStatus("Conecta la sesión antes de vaciarla.", "error");
+          return;
+        }
+        const confirmed = window.confirm(
+          "¿Vaciar la sesión por completo? Esta acción es irreversible."
+        );
+        if (!confirmed) {
+          return;
+        }
+        try {
+          hostSession.reset();
+          showStatusThenRestore("La sesión quedó vacía.");
+        } catch (error) {
+          console.error(error);
+          setStatus(error.message || "No se pudo vaciar la sesión.", "error");
+        }
+      }
+
+      textArea.addEventListener("input", updateSubmitAvailability);
       textArea.addEventListener("keydown", (event) => {
         if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
           event.preventDefault();
           handleSubmit();
         }
       });
-
       sessionInput.addEventListener("keydown", (event) => {
-        if (event.key === "Enter") {
+        if (event.key === "Enter" && !sessionInput.readOnly) {
           event.preventDefault();
-          if (sessionInput.readOnly) {
-            return;
-          }
-          connect();
+          handleConnect();
         }
       });
 
+      connectButton.addEventListener("click", handleConnect);
+      disconnectButton.addEventListener("click", handleDisconnect);
+      resetButton.addEventListener("click", handleReset);
+      submitButton.addEventListener("click", handleSubmit);
+
+      hostSession.on("connected", ({ sessionId: rawId, normalizedId: normalized }) => {
+        clearStatusTimeout();
+        sessionId = rawId;
+        normalizedId = normalized;
+        peerCount = 0;
+        setConnectedState(true);
+        window.localStorage.setItem("motores:session", rawId);
+        updateConnectionStatus();
+      });
+
+      hostSession.on("disconnected", () => {
+        clearStatusTimeout();
+        setConnectedState(false);
+        normalizedId = "";
+        peerCount = 0;
+        setStatus("Sin conexión.");
+      });
+
+      hostSession.on("state", ({ motors: incomingMotors, summary: incomingSummary }) => {
+        motors = Array.isArray(incomingMotors) ? incomingMotors : [];
+        summary = incomingSummary || { total: 0, categories: [] };
+        renderMotors();
+        renderSummary();
+        updateCategorySuggestions();
+        updateResetAvailability();
+      });
+
+      hostSession.on("motor-added", () => {
+        showStatusThenRestore("Motor compartido con la sala.");
+      });
+
+      hostSession.on("drawn", () => {
+        showStatusThenRestore("Alguien sacó un motor.");
+      });
+
+      hostSession.on("reset", () => {
+        showStatusThenRestore("La sesión quedó vacía.");
+      });
+
+      hostSession.on("peer-count", (count) => {
+        peerCount = count || 0;
+        updateConnectionStatus();
+      });
+
+      hostSession.on("error", (error) => {
+        clearStatusTimeout();
+        setStatus(error?.message || "Se produjo un error en la sesión.", "error");
+        if (!hostSession.isConnected()) {
+          connectButton.disabled = false;
+        }
+      });
+
+      hostSession.on("peer-error", ({ message }) => {
+        clearStatusTimeout();
+        setStatus(message || "Se produjo un error en un participante.", "error");
+      });
+
+      updateDrawLink();
+      renderSummary();
+      renderMotors();
+      updateCategorySuggestions();
+      updateSubmitAvailability();
+      updateResetAvailability();
+
       if (initialSession) {
-        connect();
+        handleConnect();
       }
     })();
   </script>

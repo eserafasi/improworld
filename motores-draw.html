@@ -362,7 +362,10 @@
       </section>
     </main>
   </div>
-  <script>
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <script type="module">
+    import { createDrawClient, normalizeSessionId, FALLBACK_CATEGORY } from "./motores-session.js";
+
     (function () {
       const params = new URLSearchParams(window.location.search);
       const sessionInput = document.getElementById("session-input");
@@ -378,11 +381,14 @@
       const promptCategory = document.getElementById("prompt-category");
       const createLink = document.getElementById("create-link");
 
-      let websocket = null;
+      const drawClient = createDrawClient();
+
       let sessionId = "";
+      let normalizedId = "";
       let summary = { total: 0, categories: [] };
-      let currentCategory = null;
       let lastDrawn = null;
+      let currentCategory = null;
+      let statusTimeout = null;
 
       const savedSession = window.localStorage.getItem("motores:session");
       const initialSession = params.get("session") || savedSession || "";
@@ -395,32 +401,49 @@
         statusText.dataset.state = state;
       }
 
-      function setConnectedState(connected) {
-        connectButton.hidden = connected;
-        disconnectButton.hidden = !connected;
-        drawAnyButton.disabled = !connected;
-        drawAgainButton.disabled = !connected || !lastDrawn;
-        sessionInput.readOnly = connected;
-        if (!connected) {
-          summary = { total: 0, categories: [] };
-          renderSummary();
-          renderCategories();
-          promptText.textContent = "Conecta para comenzar.";
-          promptCategory.textContent = "";
-          setStatus("Sin conexión.");
-        } else {
-          setStatus(`Conectado a la sesión ${sessionId}.`);
-          window.localStorage.setItem("motores:session", sessionId);
-          updateCreateLink();
+      function clearStatusTimeout() {
+        if (statusTimeout) {
+          window.clearTimeout(statusTimeout);
+          statusTimeout = null;
         }
       }
 
+      function showStatusThenRestore(message, state = "info") {
+        clearStatusTimeout();
+        setStatus(message, state);
+        statusTimeout = window.setTimeout(() => {
+          statusTimeout = null;
+          updateConnectionStatus();
+        }, 2200);
+      }
+
+      function sanitizeCategoryLabel(category) {
+        const clean = (category || "").trim();
+        return clean || FALLBACK_CATEGORY;
+      }
+
       function updateCreateLink() {
-        if (!sessionId) {
+        const activeId = normalizedId || normalizeSessionId(sessionInput.value || "");
+        if (activeId) {
+          createLink.href = `motores-create.html?session=${encodeURIComponent(activeId)}`;
+        } else {
           createLink.href = "motores-create.html";
+        }
+      }
+
+      function updateConnectionStatus() {
+        if (statusTimeout) {
           return;
         }
-        createLink.href = `motores-create.html?session=${encodeURIComponent(sessionId)}`;
+        if (!drawClient.isConnected()) {
+          setStatus("Sin conexión.");
+          return;
+        }
+        const shareId = normalizedId || normalizeSessionId(sessionInput.value || "");
+        const categoryMessage = currentCategory
+          ? `Filtrando por la categoría "${currentCategory}".`
+          : "Sacará de cualquier categoría.";
+        setStatus(`Conectado a la sesión ${shareId}. ${categoryMessage}`);
       }
 
       function renderSummary() {
@@ -428,196 +451,207 @@
         if (!summary.categories.length) {
           categoryCount.textContent = "Sin categorías disponibles.";
         } else {
-          const labels = summary.categories.map((category) => `${category.name} (${category.count})`);
-          categoryCount.textContent = labels.join(" · ");
+          categoryCount.textContent = summary.categories
+            .map((category) => `${category.name} (${category.count})`)
+            .join(" · ");
         }
+        drawAnyButton.disabled = !drawClient.isConnected() || !summary.total;
+        drawAgainButton.disabled = !drawClient.isConnected() || !lastDrawn;
       }
 
       function renderCategories() {
-        if (currentCategory) {
-          const exists = summary.categories.some(
-            (category) => category.name === currentCategory
-          );
-          if (!exists) {
-            currentCategory = null;
-          }
-        }
         categoryContainer.innerHTML = "";
         if (!summary.categories.length) {
-          const info = document.createElement("p");
-          info.textContent = "No hay categorías aún.";
-          categoryContainer.appendChild(info);
+          currentCategory = null;
           return;
         }
-        const allButton = createCategoryChip("Todas", null);
-        categoryContainer.appendChild(allButton);
+        const exists = summary.categories.some((category) => category.name === currentCategory);
+        if (!exists) {
+          currentCategory = null;
+        }
         summary.categories.forEach((category) => {
-          const chip = createCategoryChip(category.name, category.name);
-          categoryContainer.appendChild(chip);
-        });
-        updateChipSelection();
-      }
-
-      function createCategoryChip(label, value) {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "category-chip";
-        button.textContent = label;
-        button.setAttribute("aria-pressed", String(value === currentCategory));
-        button.addEventListener("click", () => {
-          currentCategory = value;
-          updateChipSelection();
-        });
-        return button;
-      }
-
-      function updateChipSelection() {
-        const chips = categoryContainer.querySelectorAll(".category-chip");
-        chips.forEach((chip) => {
-          const label = chip.textContent;
-          if ((label === "Todas" && currentCategory === null) || label === currentCategory) {
-            chip.setAttribute("aria-pressed", "true");
-          } else {
-            chip.setAttribute("aria-pressed", "false");
-          }
-        });
-      }
-
-      function ensureConnected() {
-        if (!sessionId) {
-          setStatus("Primero conecta con la sesión.", "error");
-          return false;
-        }
-        if (!websocket || websocket.readyState !== WebSocket.OPEN) {
-          setStatus("Conexión no disponible.", "error");
-          return false;
-        }
-        return true;
-      }
-
-      async function drawMotor(selectedCategory) {
-        if (!ensureConnected()) {
-          return;
-        }
-        const body = selectedCategory ? { category: selectedCategory } : {};
-        try {
-          const response = await fetch(`/api/sessions/${encodeURIComponent(sessionId)}/draw`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "category-chip";
+          button.textContent = `${category.name} (${category.count})`;
+          const active = currentCategory === category.name;
+          button.setAttribute("aria-pressed", active ? "true" : "false");
+          button.addEventListener("click", () => {
+            if (currentCategory === category.name) {
+              currentCategory = null;
+            } else {
+              currentCategory = category.name;
+            }
+            renderCategories();
+            updateConnectionStatus();
           });
-          if (!response.ok) {
-            const error = await response.json().catch(() => ({}));
-            throw new Error(error.detail || "No fue posible obtener un motor.");
-          }
-        } catch (error) {
-          console.error(error);
-          setStatus(error.message, "error");
+          categoryContainer.appendChild(button);
+        });
+      }
+
+      function setConnectedState(connected) {
+        connectButton.hidden = connected;
+        disconnectButton.hidden = !connected;
+        sessionInput.readOnly = connected;
+        connectButton.disabled = connected;
+        if (!connected) {
+          connectButton.disabled = false;
+          summary = { total: 0, categories: [] };
+          lastDrawn = null;
+          currentCategory = null;
+          promptText.textContent = "Conecta para comenzar.";
+          promptCategory.textContent = "";
         }
+        renderSummary();
+        renderCategories();
+        updateCreateLink();
       }
 
-      function handleDrawAny() {
-        drawMotor(currentCategory);
-      }
-
-      function handleDrawAgain() {
-        if (lastDrawn) {
-          promptText.textContent = lastDrawn.text;
-          promptCategory.textContent = lastDrawn.category ? `Categoría: ${lastDrawn.category}` : "";
-        }
-      }
-
-      function connect() {
+      async function handleConnect() {
         const targetSession = sessionInput.value.trim();
         if (!targetSession) {
           setStatus("Escribe un nombre de sesión.", "error");
           return;
         }
-        if (websocket) {
-          websocket.close();
+        clearStatusTimeout();
+        connectButton.disabled = true;
+        setStatus("Conectando con la sesión...");
+        try {
+          const { sessionId: rawId, normalizedId: normalized } = await drawClient.connect(targetSession);
+          sessionId = rawId;
+          normalizedId = normalized;
+          window.localStorage.setItem("motores:session", rawId);
+        } catch (error) {
+          console.error(error);
+          setStatus(error?.message || "No fue posible conectar con la sesión.", "error");
+          connectButton.disabled = false;
         }
-        const protocol = window.location.protocol === "https:" ? "wss" : "ws";
-        const wsUrl = `${protocol}://${window.location.host}/ws/${encodeURIComponent(targetSession)}`;
-        setStatus("Conectando...");
-        sessionId = targetSession;
-        websocket = new WebSocket(wsUrl);
-        websocket.addEventListener("open", () => {
-          setConnectedState(true);
-        });
-        websocket.addEventListener("message", (event) => {
-          try {
-            const data = JSON.parse(event.data);
-            if (data.type === "init") {
-              summary = data.summary || { total: 0, categories: [] };
-              lastDrawn = data.lastDrawn || null;
-              renderSummary();
-              renderCategories();
-              if (lastDrawn) {
-                promptText.textContent = lastDrawn.text;
-                promptCategory.textContent = lastDrawn.category ? `Categoría: ${lastDrawn.category}` : "";
-                drawAgainButton.disabled = false;
-              } else {
-                drawAgainButton.disabled = true;
-              }
-            } else if (data.type === "motor_added") {
-              summary = data.summary || summary;
-              renderSummary();
-              renderCategories();
-            } else if (data.type === "drawn") {
-              summary = data.summary || summary;
-              lastDrawn = data.motor;
-              promptText.textContent = data.motor.text;
-              promptCategory.textContent = data.motor.category ? `Categoría: ${data.motor.category}` : "";
-              renderSummary();
-              renderCategories();
-              drawAgainButton.disabled = false;
-            } else if (data.type === "reset") {
-              summary = { total: 0, categories: [] };
-              lastDrawn = null;
-              currentCategory = null;
-              promptText.textContent = "Todo quedó en blanco. Añadan nuevos motores.";
-              promptCategory.textContent = "";
-              renderSummary();
-              renderCategories();
-              drawAgainButton.disabled = true;
-            }
-          } catch (error) {
-            console.error("Mensaje inválido", error);
-          }
-        });
-        websocket.addEventListener("close", () => {
-          setConnectedState(false);
-        });
-        websocket.addEventListener("error", () => {
-          setStatus("No se pudo establecer la conexión.", "error");
-        });
       }
 
-      function disconnect() {
-        if (websocket) {
-          websocket.close();
-        }
-        websocket = null;
-        sessionId = "";
+      function handleDisconnect() {
+        clearStatusTimeout();
+        drawClient.disconnect();
         window.localStorage.removeItem("motores:session");
-        setConnectedState(false);
-        updateCreateLink();
       }
 
-      connectButton.addEventListener("click", connect);
-      disconnectButton.addEventListener("click", disconnect);
+      function handleDrawAny() {
+        try {
+          drawClient.draw(currentCategory || "");
+          showStatusThenRestore("Solicitando un nuevo motor...");
+        } catch (error) {
+          console.error(error);
+          setStatus(error.message || "No fue posible pedir un motor.", "error");
+        }
+      }
+
+      function handleDrawAgain() {
+        if (!lastDrawn) {
+          return;
+        }
+        promptText.textContent = lastDrawn.text;
+        promptCategory.textContent = lastDrawn.category
+          ? `Categoría: ${sanitizeCategoryLabel(lastDrawn.category)}`
+          : "";
+        showStatusThenRestore("Último motor recordado.");
+      }
+
+      connectButton.addEventListener("click", handleConnect);
+      disconnectButton.addEventListener("click", handleDisconnect);
       drawAnyButton.addEventListener("click", handleDrawAny);
       drawAgainButton.addEventListener("click", handleDrawAgain);
 
-      const enterHandler = (event) => {
-        if (event.key === "Enter") {
-          connect();
+      sessionInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" && !sessionInput.readOnly) {
+          event.preventDefault();
+          handleConnect();
         }
-      };
-      sessionInput.addEventListener("keydown", enterHandler);
+      });
 
+      drawClient.on("state", ({ summary: incomingSummary, lastDrawn: incomingLastDrawn }) => {
+        summary = incomingSummary || { total: 0, categories: [] };
+        lastDrawn = incomingLastDrawn || null;
+        renderSummary();
+        renderCategories();
+        if (lastDrawn) {
+          promptText.textContent = lastDrawn.text;
+          promptCategory.textContent = lastDrawn.category
+            ? `Categoría: ${sanitizeCategoryLabel(lastDrawn.category)}`
+            : "";
+        } else if (drawClient.isConnected()) {
+          promptText.textContent = "Presiona el botón para sacar un motor.";
+          promptCategory.textContent = "";
+        }
+        if (!statusTimeout) {
+          updateConnectionStatus();
+        }
+      });
+
+      drawClient.on("motor-added", ({ summary: incomingSummary }) => {
+        if (incomingSummary) {
+          summary = incomingSummary;
+        }
+        renderSummary();
+        renderCategories();
+        showStatusThenRestore("Hay un motor nuevo disponible.");
+      });
+
+      drawClient.on("drawn", ({ motor, summary: incomingSummary }) => {
+        if (incomingSummary) {
+          summary = incomingSummary;
+        }
+        lastDrawn = motor || null;
+        if (motor) {
+          promptText.textContent = motor.text;
+          promptCategory.textContent = motor.category
+            ? `Categoría: ${sanitizeCategoryLabel(motor.category)}`
+            : "";
+        }
+        renderSummary();
+        renderCategories();
+        drawAgainButton.disabled = !lastDrawn;
+        showStatusThenRestore("Motor recibido.");
+      });
+
+      drawClient.on("reset", () => {
+        summary = { total: 0, categories: [] };
+        lastDrawn = null;
+        currentCategory = null;
+        promptText.textContent = "Todo quedó en blanco. Añadan nuevos motores.";
+        promptCategory.textContent = "";
+        renderSummary();
+        renderCategories();
+        drawAgainButton.disabled = true;
+        showStatusThenRestore("La sala se vació.");
+      });
+
+      drawClient.on("connected", () => {
+        clearStatusTimeout();
+        setConnectedState(true);
+        updateConnectionStatus();
+      });
+
+      drawClient.on("disconnected", () => {
+        clearStatusTimeout();
+        normalizedId = "";
+        setConnectedState(false);
+        setStatus("Sin conexión.");
+      });
+
+      drawClient.on("error", (error) => {
+        clearStatusTimeout();
+        setStatus(error?.message || "Se produjo un error en la sesión.", "error");
+        if (!drawClient.isConnected()) {
+          connectButton.disabled = false;
+        }
+      });
+
+      renderSummary();
+      renderCategories();
+      updateCreateLink();
       if (initialSession) {
-        connect();
+        handleConnect();
+      } else {
+        setStatus("Sin conexión.");
       }
     })();
   </script>
