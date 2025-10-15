@@ -445,6 +445,7 @@
   <script>
     (function () {
       const params = new URLSearchParams(window.location.search);
+      const baseUrl = new URL(".", window.location.href);
       const sessionInput = document.getElementById("session-id");
       const connectButton = document.getElementById("connect");
       const disconnectButton = document.getElementById("disconnect");
@@ -467,6 +468,11 @@
       const initialSession = params.get("session") || savedSession || "";
       if (initialSession) {
         sessionInput.value = initialSession;
+      }
+
+      function buildUrl(path) {
+        const normalized = path.replace(/^\/+/, "");
+        return new URL(normalized, baseUrl).toString();
       }
 
       function setStatus(message, state = "info") {
@@ -496,11 +502,14 @@
 
       function updateDrawLink() {
         if (!sessionId) {
-          drawLink.href = "motores-draw.html";
+          drawLink.href = new URL("motores-draw.html", baseUrl).toString();
           drawLink.setAttribute("aria-disabled", "true");
           return;
         }
-        drawLink.href = "motores-draw.html?session=" + encodeURIComponent(sessionId);
+        drawLink.href = new URL(
+          `motores-draw.html?session=${encodeURIComponent(sessionId)}`,
+          baseUrl
+        ).toString();
         drawLink.removeAttribute("aria-disabled");
       }
 
@@ -582,11 +591,14 @@
         }
         submitButton.disabled = true;
         try {
-          const response = await fetch(`/api/sessions/${encodeURIComponent(sessionId)}/motors`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text, category }),
-          });
+          const response = await fetch(
+            buildUrl(`api/sessions/${encodeURIComponent(sessionId)}/motors`),
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ text, category }),
+            }
+          );
           if (!response.ok) {
             const error = await response.json().catch(() => ({}));
             throw new Error(error.detail || "No fue posible guardar el motor.");
@@ -612,9 +624,12 @@
         }
         resetButton.disabled = true;
         try {
-          const response = await fetch(`/api/sessions/${encodeURIComponent(sessionId)}/reset`, {
-            method: "POST",
-          });
+          const response = await fetch(
+            buildUrl(`api/sessions/${encodeURIComponent(sessionId)}/reset`),
+            {
+              method: "POST",
+            }
+          );
           if (!response.ok) {
             throw new Error("No se pudo vaciar la sesión.");
           }
@@ -632,14 +647,14 @@
           setStatus("Escribe un nombre para la sesión.", "error");
           return;
         }
-        const protocol = window.location.protocol === "https:" ? "wss" : "ws";
-        const wsUrl = `${protocol}://${window.location.host}/ws/${encodeURIComponent(targetSession)}`;
+        const wsUrl = new URL(`ws/${encodeURIComponent(targetSession)}`, baseUrl);
+        wsUrl.protocol = wsUrl.protocol === "https:" ? "wss:" : "ws:";
         if (websocket) {
           websocket.close();
         }
         setStatus("Conectando...");
         sessionId = targetSession;
-        websocket = new WebSocket(wsUrl);
+        websocket = new WebSocket(wsUrl.toString());
         websocket.addEventListener("open", () => {
           setConnectedState(true);
         });
