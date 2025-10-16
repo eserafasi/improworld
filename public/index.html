@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Impro Inspiration Collector</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #111827;
+      --fg: #f9fafb;
+      --accent: #f97316;
+      --muted: #6b7280;
+    }
+
+    body {
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      background: linear-gradient(135deg, #0f172a, #1f2937);
+      color: var(--fg);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      padding: 24px;
+      box-sizing: border-box;
+    }
+
+    [v-cloak] {
+      display: none;
+    }
+
+    .app {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 18px;
+      max-width: 960px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
+      box-sizing: border-box;
+      gap: 20px;
+    }
+
+    header {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    header h1 {
+      font-size: 1.75rem;
+      margin: 0;
+    }
+
+    header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      border-radius: 14px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    label {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    input[type="password"],
+    textarea {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      color: var(--fg);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 1rem;
+      font-family: inherit;
+      resize: none;
+    }
+
+    textarea {
+      min-height: 100px;
+    }
+
+    button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: 12px;
+      border: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      background: var(--accent);
+      color: #111827;
+      box-shadow: 0 6px 20px rgba(249, 115, 22, 0.3);
+    }
+
+    button.secondary {
+      background: transparent;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      color: var(--fg);
+      box-shadow: none;
+    }
+
+    button.danger {
+      background: #f43f5e;
+      color: white;
+      box-shadow: 0 6px 18px rgba(244, 63, 94, 0.35);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    button:not(:disabled):hover {
+      transform: translateY(-1px);
+    }
+
+    .status {
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .flex-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .flex-row > * {
+      flex: 1;
+    }
+
+    .inspirations {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 320px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .inspiration-item {
+      border-radius: 12px;
+      background: rgba(30, 41, 59, 0.75);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      padding: 14px;
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .inspiration-meta {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .badge {
+      background: rgba(148, 163, 184, 0.2);
+      color: var(--fg);
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    @media (max-width: 720px) {
+      body {
+        padding: 16px;
+      }
+
+      .app {
+        padding: 18px;
+      }
+
+      header h1 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="app" v-cloak>
+    <header>
+      <h1>Impro Inspiration Collector</h1>
+      <p>Share a quick inspiration with the show. Host password required to join.</p>
+      <div class="status">
+        <span>Connection: <strong>{{ connectionStatus }}</strong></span>
+        <span v-if="statusMessage"> · {{ statusMessage }}</span>
+      </div>
+    </header>
+
+    <section class="card" v-if="!authenticated">
+      <label for="password">Enter show password</label>
+      <input
+        id="password"
+        type="password"
+        v-model="password"
+        @keyup.enter="authenticate"
+        placeholder="Password"
+      />
+      <button :disabled="!password" @click="authenticate">Join Session</button>
+    </section>
+
+    <template v-else>
+      <section class="card">
+        <div class="flex-row">
+          <div>
+            <label for="inspiration">Add inspiration</label>
+            <textarea
+              id="inspiration"
+              v-model="draft"
+              :maxlength="maxLength"
+              placeholder="Keep it snappy (140 characters)"
+            ></textarea>
+            <div class="status">{{ draft.length }} / {{ maxLength }}</div>
+          </div>
+        </div>
+        <div class="controls">
+          <button @click="submit" :disabled="!draft.trim() || submitting">Submit</button>
+          <button class="secondary" @click="togglePresenter">
+            {{ presenterMode ? 'Hide' : 'Show' }} presenter view
+          </button>
+          <button class="secondary" @click="download('txt')" :disabled="!inspirations.length">Download .txt</button>
+          <button class="secondary" @click="download('json')" :disabled="!inspirations.length">Download .json</button>
+          <button class="danger" @click="clearAll" :disabled="!inspirations.length">Clear All</button>
+        </div>
+        <div v-if="lastSubmitted" class="badge">Submitted! "{{ lastSubmitted.text }}"</div>
+      </section>
+
+      <section class="card" v-if="presenterMode">
+        <div class="flex-row" style="align-items: center;">
+          <h2 style="margin: 0; flex: 1;">Presenter View</h2>
+          <span class="badge">{{ inspirations.length }} inspirations</span>
+        </div>
+        <div class="inspirations" v-if="inspirations.length">
+          <article class="inspiration-item" v-for="item in inspirations" :key="item.id">
+            <div>
+              <p style="margin: 0 0 6px 0; font-size: 1.05rem;">{{ item.text }}</p>
+              <div class="inspiration-meta">{{ formatTimestamp(item.timestamp) }}</div>
+            </div>
+            <button class="secondary" @click="remove(item.id)">Delete</button>
+          </article>
+        </div>
+        <div v-else class="status">No inspirations yet.</div>
+      </section>
+    </template>
+  </div>
+
+  <script>
+    const { createApp, ref, computed, onMounted } = Vue;
+
+    createApp({
+      setup() {
+        const password = ref('');
+        const draft = ref('');
+        const inspirations = ref([]);
+        const statusMessage = ref('');
+        const authenticated = ref(false);
+        const presenterMode = ref(false);
+        const submitting = ref(false);
+        const connectionStatus = ref('connecting');
+        const lastSubmitted = ref(null);
+        const maxLength = 140;
+        let socket = null;
+
+        function resetStatus(message, duration = 3000) {
+          statusMessage.value = message;
+          if (!message) return;
+          setTimeout(() => {
+            if (statusMessage.value === message) {
+              statusMessage.value = '';
+            }
+          }, duration);
+        }
+
+        function connect() {
+          const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+          socket = new WebSocket(`${protocol}://${window.location.host}`);
+
+          socket.addEventListener('open', () => {
+            connectionStatus.value = 'connected';
+            resetStatus('Connected to show.');
+            if (password.value) {
+              socket.send(JSON.stringify({ type: 'auth', password: password.value }));
+            }
+          });
+
+          socket.addEventListener('close', () => {
+            connectionStatus.value = 'disconnected';
+            authenticated.value = false;
+            inspirations.value = [];
+            submitting.value = false;
+            resetStatus('Connection lost. Retrying...');
+            setTimeout(connect, 2000);
+          });
+
+          socket.addEventListener('error', () => {
+            connectionStatus.value = 'error';
+            resetStatus('Connection error.');
+          });
+
+          socket.addEventListener('message', event => {
+            const message = JSON.parse(event.data);
+            switch (message.type) {
+              case 'connected':
+                connectionStatus.value = 'connected';
+                break;
+              case 'auth-ok':
+                authenticated.value = true;
+                inspirations.value = message.inspirations || [];
+                resetStatus('Password accepted.');
+                break;
+              case 'list':
+                inspirations.value = message.inspirations || [];
+                break;
+              case 'submit-ok':
+                submitting.value = false;
+                lastSubmitted.value = message.inspiration;
+                draft.value = '';
+                resetStatus('Inspiration received!');
+                break;
+              case 'error':
+                submitting.value = false;
+                resetStatus(message.message || 'Something went wrong.');
+                break;
+            }
+          });
+        }
+
+        function authenticate() {
+          if (!socket || socket.readyState !== WebSocket.OPEN) {
+            resetStatus('Still connecting...');
+            return;
+          }
+          socket.send(JSON.stringify({ type: 'auth', password: password.value }));
+        }
+
+        function submit() {
+          if (!draft.value.trim()) return;
+          if (!socket || socket.readyState !== WebSocket.OPEN) {
+            resetStatus('Reconnecting, please try again.');
+            return;
+          }
+          submitting.value = true;
+          socket.send(JSON.stringify({ type: 'submit', text: draft.value }));
+        }
+
+        function remove(id) {
+          if (!socket || socket.readyState !== WebSocket.OPEN) {
+            resetStatus('Reconnecting, please try again.');
+            return;
+          }
+          socket.send(JSON.stringify({ type: 'delete', id }));
+        }
+
+        function clearAll() {
+          if (!confirm('Clear all inspirations?')) return;
+          if (!socket || socket.readyState !== WebSocket.OPEN) {
+            resetStatus('Reconnecting, please try again.');
+            return;
+          }
+          socket.send(JSON.stringify({ type: 'clear' }));
+        }
+
+        function togglePresenter() {
+          presenterMode.value = !presenterMode.value;
+        }
+
+        function formatTimestamp(iso) {
+          const date = new Date(iso);
+          return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function download(kind) {
+          const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+          let content = '';
+          let mime = 'text/plain';
+          let extension = kind === 'json' ? 'json' : 'txt';
+
+          if (kind === 'json') {
+            content = JSON.stringify(inspirations.value, null, 2);
+            mime = 'application/json';
+          } else {
+            content = inspirations.value.map(item => `- ${item.text} (${formatTimestamp(item.timestamp)})`).join('\n');
+          }
+
+          const blob = new Blob([content], { type: mime });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `inspirations-${timestamp}.${extension}`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }
+
+        onMounted(() => {
+          connect();
+        });
+
+        return {
+          password,
+          draft,
+          inspirations,
+          statusMessage,
+          authenticated,
+          presenterMode,
+          submitting,
+          connectionStatus,
+          lastSubmitted,
+          maxLength,
+          authenticate,
+          submit,
+          remove,
+          clearAll,
+          togglePresenter,
+          formatTimestamp,
+          download
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>
