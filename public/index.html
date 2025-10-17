@@ -360,9 +360,18 @@
         const maxLength = 140;
         const websocketUrl = ref(getSocketUrl());
         let socket = null;
-        let shouldReconnect = false;
+        let shouldReconnect = true;
         let pendingAuth = false;
         let reconnectTimer = null;
+
+        function scheduleReconnect() {
+          if (!shouldReconnect) return;
+          if (reconnectTimer) return;
+          reconnectTimer = setTimeout(() => {
+            reconnectTimer = null;
+            connect();
+          }, 2000);
+        }
 
         function resetStatus(message, duration = 3000) {
           statusMessage.value = message;
@@ -372,13 +381,6 @@
               statusMessage.value = '';
             }
           }, duration);
-        }
-
-        function clearReconnectTimer() {
-          if (reconnectTimer) {
-            clearTimeout(reconnectTimer);
-            reconnectTimer = null;
-          }
         }
 
         function getSocketUrl() {
@@ -406,7 +408,10 @@
             return;
           }
 
-          clearReconnectTimer();
+          if (reconnectTimer) {
+            clearTimeout(reconnectTimer);
+            reconnectTimer = null;
+          }
           connectionStatus.value = 'connecting';
           socket = new WebSocket(websocketUrl.value);
 
@@ -427,7 +432,7 @@
             if (shouldReconnect) {
               resetStatus('Connection lost. Retrying...');
               pendingAuth = true;
-              reconnectTimer = setTimeout(connect, 2000);
+              scheduleReconnect();
             } else {
               resetStatus('Connection closed.');
             }
@@ -437,6 +442,7 @@
             connectionStatus.value = 'error';
             resetStatus('Connection error.');
             socket = null;
+            scheduleReconnect();
           });
 
           socket.addEventListener('message', event => {
@@ -544,6 +550,8 @@
           document.body.removeChild(a);
           URL.revokeObjectURL(url);
         }
+
+        connect();
 
         return {
           password,

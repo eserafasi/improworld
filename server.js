@@ -3,15 +3,16 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-const PORT = process.env.PORT || 3000;
-const HOST = process.env.HOST || '0.0.0.0';
-const SESSION_PASSWORD = process.env.SHOW_PASSWORD || process.env.SESSION_PASSWORD || 'test';
+const DEFAULT_PORT = 3000;
+const DEFAULT_HOST = '0.0.0.0';
+const PORT = process.env.PORT || DEFAULT_PORT;
+const HOST = process.env.HOST || DEFAULT_HOST;
+const SESSION_PASSWORD =
+  process.env.SHOW_PASSWORD || process.env.SESSION_PASSWORD || 'test';
 const RATE_LIMIT_MS = 2000;
 const MAX_LENGTH = 140;
 
 const publicDir = path.join(__dirname, 'public');
-const clients = new Set();
-
 const blocklist = [
   'fuck',
   'shit',
@@ -20,121 +21,8 @@ const blocklist = [
   'bastard',
   'dick',
   'cunt',
-  'pussy'
+  'pussy',
 ];
-
-let inspirations = [];
-
-const server = http.createServer((req, res) => {
-  const rawUrl = req.url.split('?')[0];
-  const url = rawUrl === '/' ? '/index.html' : rawUrl;
-  const safePath = path.normalize(url).replace(/^\/+/, '');
-  const filePath = path.join(publicDir, safePath);
-
-  if (!filePath.startsWith(publicDir)) {
-    res.writeHead(403, { 'Content-Type': 'text/plain' });
-    res.end('Forbidden');
-    return;
-  }
-
-  fs.readFile(filePath, (err, data) => {
-    if (err) {
-      res.writeHead(err.code === 'ENOENT' ? 404 : 500, { 'Content-Type': 'text/plain' });
-      res.end('Not found');
-      return;
-    }
-
-    const ext = path.extname(filePath).toLowerCase();
-    const contentType = ext === '.html'
-      ? 'text/html; charset=utf-8'
-      : 'text/plain; charset=utf-8';
-    res.writeHead(200, { 'Content-Type': contentType });
-    res.end(data);
-  });
-});
-
-server.on('upgrade', (req, socket) => {
-  if (req.headers['upgrade']?.toLowerCase() !== 'websocket') {
-    socket.destroy();
-    return;
-  }
-
-  const key = req.headers['sec-websocket-key'];
-  if (!key) {
-    socket.destroy();
-    return;
-  }
-
-  const acceptKey = crypto
-    .createHash('sha1')
-    .update(key + '258EAFA5-E914-47DA-95CA-C5AB0DC85B11')
-    .digest('base64');
-
-  const responseHeaders = [
-    'HTTP/1.1 101 Switching Protocols',
-    'Upgrade: websocket',
-    'Connection: Upgrade',
-    `Sec-WebSocket-Accept: ${acceptKey}`
-  ];
-
-  socket.write(responseHeaders.join('\r\n') + '\r\n\r\n');
-  socket.setNoDelay(true);
-
-  const client = {
-    socket,
-    buffer: Buffer.alloc(0),
-    isAuthenticated: false,
-    lastSubmission: 0
-  };
-
-  clients.add(client);
-  send(client, { type: 'connected' });
-
-  socket.on('data', data => handleSocketData(client, data));
-  socket.on('close', () => {
-    clients.delete(client);
-  });
-  socket.on('error', () => {
-    clients.delete(client);
-  });
-});
-
-function handleSocketData(client, data) {
-  client.buffer = Buffer.concat([client.buffer, data]);
-
-  try {
-    while (true) {
-      const frame = decodeFrame(client.buffer);
-      if (!frame) {
-        break;
-      }
-
-      client.buffer = client.buffer.slice(frame.length);
-
-      switch (frame.opcode) {
-        case 0x1: {
-          const payload = frame.payload.toString('utf8');
-          handleMessage(client, payload);
-          break;
-        }
-        case 0x8: {
-          client.socket.end();
-          clients.delete(client);
-          return;
-        }
-        case 0x9: {
-          sendFrame(client.socket, frame.payload, 0xA);
-          break;
-        }
-        default:
-          break;
-      }
-    }
-  } catch (error) {
-    client.socket.destroy();
-    clients.delete(client);
-  }
-}
 
 function decodeFrame(buffer) {
   if (buffer.length < 2) return null;
@@ -188,7 +76,7 @@ function decodeFrame(buffer) {
   return {
     opcode,
     payload,
-    length: offset + payloadLength
+    length: offset + payloadLength,
   };
 }
 
@@ -225,136 +113,371 @@ function sendFrame(socket, payload, opcode = 0x1) {
   socket.write(frame);
 }
 
-function send(client, payload) {
-  try {
-    sendFrame(client.socket, Buffer.from(JSON.stringify(payload)));
-  } catch (error) {
-    client.socket.destroy();
+function createInspirationServer(options = {}) {
+  const {
+    password = SESSION_PASSWORD,
+    rateLimitMs = RATE_LIMIT_MS,
+    maxLength = MAX_LENGTH,
+    host = HOST,
+    port = PORT,
+    initialInspirations = [],
+  } = options;
+
+  let inspirations = initialInspirations.slice();
+  const clients = new Set();
+
+  const server = http.createServer((req, res) => {
+    const rawUrl = req.url.split('?')[0];
+    const url = rawUrl === '/' ? '/index.html' : rawUrl;
+    const safePath = path.normalize(url).replace(/^\/+/, '');
+    const filePath = path.join(publicDir, safePath);
+
+    if (!filePath.startsWith(publicDir)) {
+      res.writeHead(403, { 'Content-Type': 'text/plain' });
+      res.end('Forbidden');
+      return;
+    }
+
+    fs.readFile(filePath, (err, data) => {
+      if (err) {
+        res.writeHead(err.code === 'ENOENT' ? 404 : 500, {
+          'Content-Type': 'text/plain',
+        });
+        res.end('Not found');
+        return;
+      }
+
+      const ext = path.extname(filePath).toLowerCase();
+      const contentType =
+        ext === '.html' ? 'text/html; charset=utf-8' : 'text/plain; charset=utf-8';
+      res.writeHead(200, { 'Content-Type': contentType });
+      res.end(data);
+    });
+  });
+
+  function closeClient(client) {
+    try {
+      client.socket.end();
+    } catch (_error) {
+      // ignore
+    }
+    try {
+      client.socket.destroy();
+    } catch (_error) {
+      // ignore
+    }
     clients.delete(client);
   }
-}
 
-function broadcastList() {
-  for (const client of clients) {
-    if (client.isAuthenticated) {
-      send(client, { type: 'list', inspirations });
-    }
-  }
-}
-
-function sanitizeInput(text) {
-  const normalized = text.trim();
-  if (!normalized) {
-    return { ok: false, reason: 'Empty inspiration is not allowed.' };
-  }
-
-  if (normalized.length > MAX_LENGTH) {
-    return { ok: false, reason: `Inspiration must be ${MAX_LENGTH} characters or fewer.` };
-  }
-
-  const lower = normalized.toLowerCase();
-  for (const word of blocklist) {
-    const pattern = new RegExp(`\\b${word.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')}\\b`, 'i');
-    if (pattern.test(lower)) {
-      return { ok: false, reason: 'That word is not allowed.' };
+  function send(client, payload) {
+    try {
+      sendFrame(client.socket, Buffer.from(JSON.stringify(payload)));
+    } catch (_error) {
+      closeClient(client);
     }
   }
 
-  return { ok: true, value: normalized };
-}
-
-function handleMessage(client, raw) {
-  let message;
-  try {
-    message = JSON.parse(raw);
-  } catch (err) {
-    send(client, { type: 'error', message: 'Invalid message format.' });
-    return;
+  function broadcastList() {
+    for (const client of clients) {
+      if (client.isAuthenticated) {
+        send(client, { type: 'list', inspirations });
+      }
+    }
   }
 
-  switch (message.type) {
-    case 'auth': {
-      if (typeof message.password !== 'string') {
-        send(client, { type: 'error', message: 'Password is required.' });
-        return;
-      }
-
-      if (message.password === SESSION_PASSWORD) {
-        client.isAuthenticated = true;
-        send(client, { type: 'auth-ok', inspirations });
-      } else {
-        send(client, { type: 'error', message: 'Incorrect password.' });
-      }
-      break;
+  function sanitizeInput(text) {
+    const normalized = text.trim();
+    if (!normalized) {
+      return { ok: false, reason: 'Empty inspiration is not allowed.' };
     }
-    case 'submit': {
-      if (!client.isAuthenticated) {
-        send(client, { type: 'error', message: 'Authenticate first.' });
-        return;
-      }
 
-      const now = Date.now();
-      if (now - client.lastSubmission < RATE_LIMIT_MS) {
-        send(client, { type: 'error', message: 'Please wait a moment before submitting again.' });
-        return;
-      }
-
-      if (typeof message.text !== 'string') {
-        send(client, { type: 'error', message: 'Text is required.' });
-        return;
-      }
-
-      const result = sanitizeInput(message.text);
-      if (!result.ok) {
-        send(client, { type: 'error', message: result.reason });
-        return;
-      }
-
-      const inspiration = {
-        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        text: result.value,
-        timestamp: new Date().toISOString()
+    if (normalized.length > maxLength) {
+      return {
+        ok: false,
+        reason: `Inspiration must be ${maxLength} characters or fewer.`,
       };
-
-      inspirations = [inspiration, ...inspirations];
-      client.lastSubmission = now;
-      broadcastList();
-      send(client, { type: 'submit-ok', inspiration });
-      break;
     }
-    case 'delete': {
-      if (!client.isAuthenticated) {
-        send(client, { type: 'error', message: 'Authenticate first.' });
-        return;
-      }
 
-      if (typeof message.id !== 'string') {
-        send(client, { type: 'error', message: 'Inspiration ID required.' });
-        return;
+    const lower = normalized.toLowerCase();
+    for (const word of blocklist) {
+      const pattern = new RegExp(`\\b${word.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')}\\b`, 'i');
+      if (pattern.test(lower)) {
+        return { ok: false, reason: 'That word is not allowed.' };
       }
-
-      const beforeLength = inspirations.length;
-      inspirations = inspirations.filter(item => item.id !== message.id);
-      if (inspirations.length !== beforeLength) {
-        broadcastList();
-      }
-      break;
     }
-    case 'clear': {
-      if (!client.isAuthenticated) {
-        send(client, { type: 'error', message: 'Authenticate first.' });
-        return;
-      }
 
-      inspirations = [];
-      broadcastList();
-      break;
-    }
-    default:
-      send(client, { type: 'error', message: 'Unknown message type.' });
+    return { ok: true, value: normalized };
   }
+
+  function handleMessage(client, raw) {
+    let message;
+    try {
+      message = JSON.parse(raw);
+    } catch (_error) {
+      send(client, { type: 'error', message: 'Invalid message format.' });
+      return;
+    }
+
+    switch (message.type) {
+      case 'auth': {
+        if (typeof message.password !== 'string') {
+          send(client, { type: 'error', message: 'Password is required.' });
+          return;
+        }
+
+        if (message.password === password) {
+          client.isAuthenticated = true;
+          send(client, { type: 'auth-ok', inspirations });
+        } else {
+          send(client, { type: 'error', message: 'Incorrect password.' });
+        }
+        break;
+      }
+      case 'submit': {
+        if (!client.isAuthenticated) {
+          send(client, { type: 'error', message: 'Authenticate first.' });
+          return;
+        }
+
+        const now = Date.now();
+        if (now - client.lastSubmission < rateLimitMs) {
+          send(client, {
+            type: 'error',
+            message: 'Please wait a moment before submitting again.',
+          });
+          return;
+        }
+
+        if (typeof message.text !== 'string') {
+          send(client, { type: 'error', message: 'Text is required.' });
+          return;
+        }
+
+        const result = sanitizeInput(message.text);
+        if (!result.ok) {
+          send(client, { type: 'error', message: result.reason });
+          return;
+        }
+
+        const inspiration = {
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          text: result.value,
+          timestamp: new Date().toISOString(),
+        };
+
+        inspirations = [inspiration, ...inspirations];
+        client.lastSubmission = now;
+        broadcastList();
+        send(client, { type: 'submit-ok', inspiration });
+        break;
+      }
+      case 'delete': {
+        if (!client.isAuthenticated) {
+          send(client, { type: 'error', message: 'Authenticate first.' });
+          return;
+        }
+
+        if (typeof message.id !== 'string') {
+          send(client, { type: 'error', message: 'Inspiration ID required.' });
+          return;
+        }
+
+        const beforeLength = inspirations.length;
+        inspirations = inspirations.filter((item) => item.id !== message.id);
+        if (inspirations.length !== beforeLength) {
+          broadcastList();
+        }
+        break;
+      }
+      case 'clear': {
+        if (!client.isAuthenticated) {
+          send(client, { type: 'error', message: 'Authenticate first.' });
+          return;
+        }
+
+        inspirations = [];
+        broadcastList();
+        break;
+      }
+      default: {
+        send(client, { type: 'error', message: 'Unknown message type.' });
+      }
+    }
+  }
+
+  function handleSocketData(client, data) {
+    client.buffer = Buffer.concat([client.buffer, data]);
+
+    try {
+      while (true) {
+        const frame = decodeFrame(client.buffer);
+        if (!frame) {
+          break;
+        }
+
+        client.buffer = client.buffer.slice(frame.length);
+
+        switch (frame.opcode) {
+          case 0x1: {
+            const payload = frame.payload.toString('utf8');
+            handleMessage(client, payload);
+            break;
+          }
+          case 0x8: {
+            client.socket.end();
+            clients.delete(client);
+            return;
+          }
+          case 0x9: {
+            sendFrame(client.socket, frame.payload, 0x0a);
+            break;
+          }
+          default:
+            break;
+        }
+      }
+    } catch (_error) {
+      closeClient(client);
+    }
+  }
+
+  server.on('upgrade', (req, socket) => {
+    if (req.headers['upgrade']?.toLowerCase() !== 'websocket') {
+      socket.destroy();
+      return;
+    }
+
+    const key = req.headers['sec-websocket-key'];
+    if (!key) {
+      socket.destroy();
+      return;
+    }
+
+    const acceptKey = crypto
+      .createHash('sha1')
+      .update(key + '258EAFA5-E914-47DA-95CA-C5AB0DC85B11')
+      .digest('base64');
+
+    const responseHeaders = [
+      'HTTP/1.1 101 Switching Protocols',
+      'Upgrade: websocket',
+      'Connection: Upgrade',
+      `Sec-WebSocket-Accept: ${acceptKey}`,
+    ];
+
+    socket.write(responseHeaders.join('\r\n') + '\r\n\r\n');
+    socket.setNoDelay(true);
+
+    const client = {
+      socket,
+      buffer: Buffer.alloc(0),
+      isAuthenticated: false,
+      lastSubmission: 0,
+    };
+
+    clients.add(client);
+    send(client, { type: 'connected' });
+
+    socket.on('data', (data) => handleSocketData(client, data));
+    socket.on('close', () => {
+      clients.delete(client);
+    });
+    socket.on('error', () => {
+      clients.delete(client);
+    });
+  });
+
+  function formatHost(rawHost) {
+    if (!rawHost) return '0.0.0.0';
+    if (rawHost === '::') return '0.0.0.0';
+    return rawHost;
+  }
+
+  function start(listenPort = port, listenHost = host) {
+    const portNumber = typeof listenPort === 'string' ? Number(listenPort) : listenPort;
+    return new Promise((resolve, reject) => {
+      function onError(error) {
+        reject(error);
+      }
+
+      server.once('error', onError);
+      server.listen(portNumber, listenHost, () => {
+        server.off('error', onError);
+        const addressInfo = server.address();
+        if (typeof addressInfo === 'string') {
+          resolve({ host: formatHost(listenHost), port: portNumber });
+          return;
+        }
+        resolve({ host: formatHost(addressInfo.address), port: addressInfo.port });
+      });
+    });
+  }
+
+  function stop() {
+    for (const client of clients) {
+      closeClient(client);
+    }
+    clients.clear();
+    inspirations = [];
+
+    return new Promise((resolve, reject) => {
+      if (!server.listening) {
+        resolve();
+        return;
+      }
+
+      server.close((error) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve();
+        }
+      });
+    });
+  }
+
+  function address() {
+    const info = server.address();
+    if (!info) return null;
+    if (typeof info === 'string') {
+      return { address: info, port: null };
+    }
+    return info;
+  }
+
+  function getWebSocketUrl() {
+    const info = address();
+    if (!info || info.port == null) {
+      return null;
+    }
+    const hostPart = info.address.includes(':') ? `[${info.address}]` : info.address;
+    return `ws://${hostPart}:${info.port}/socket`;
+  }
+
+  return {
+    start,
+    stop,
+    server,
+    address,
+    getWebSocketUrl,
+    broadcastList,
+    getInspirations: () => inspirations.slice(),
+  };
 }
 
-server.listen(PORT, HOST, () => {
-  console.log(`Inspiration collector server listening on http://${HOST}:${PORT}`);
-});
+module.exports = { createInspirationServer };
+
+if (require.main === module) {
+  const inspirationServer = createInspirationServer();
+  inspirationServer
+    .start(PORT, HOST)
+    .then(({ host: boundHost, port: boundPort }) => {
+      console.log(
+        `Inspiration collector server listening on http://${boundHost}:${boundPort}`,
+      );
+    })
+    .catch((error) => {
+      console.error('Failed to start server:', error);
+      process.exit(1);
+    });
+}
