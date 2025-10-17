@@ -7,3 +7,7 @@
   port = 8888
   framework = "#custom"
   publish = "public"
+
+[[edge_functions]]
+  path = "/socket"
+  function = "socket"
