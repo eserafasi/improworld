@@ -7,24 +7,40 @@
   <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
   <style>
     :root {
-      color-scheme: light dark;
-      --bg: #111827;
-      --fg: #f9fafb;
-      --accent: #f97316;
-      --muted: #6b7280;
+      color-scheme: light;
+      --ink: #101828;
+      --muted: #667085;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --ring: #e2e8f0;
+      --primary: #7c3aed;
+      --primary-soft: #ede9fe;
+      --accent: #f59e0b;
+      --accent-soft: rgba(245, 158, 11, 0.14);
+      --success: #22c55e;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08);
+      --shadow-md: 0 18px 48px rgba(79, 70, 229, 0.12);
+      --radius-lg: 18px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+      --transition: all 0.2s ease;
+      --max-width: 960px;
+    }
+
+    * {
+      box-sizing: border-box;
     }
 
     body {
-      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       margin: 0;
-      background: linear-gradient(135deg, #0f172a, #1f2937);
-      color: var(--fg);
       min-height: 100vh;
+      background: linear-gradient(180deg, #faf5ff 0%, #f8fafc 45%, #ffffff 100%);
+      color: var(--ink);
+      padding: 48px 18px;
       display: flex;
       justify-content: center;
-      align-items: stretch;
-      padding: 24px;
-      box-sizing: border-box;
+      align-items: flex-start;
     }
 
     [v-cloak] {
@@ -32,65 +48,101 @@
     }
 
     .app {
-      background: rgba(15, 23, 42, 0.85);
-      backdrop-filter: blur(14px);
-      border: 1px solid rgba(148, 163, 184, 0.2);
-      border-radius: 18px;
-      max-width: 960px;
       width: 100%;
-      display: flex;
-      flex-direction: column;
-      padding: 24px;
-      box-sizing: border-box;
-      gap: 20px;
+      max-width: var(--max-width);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 32px;
+      align-items: start;
     }
 
     header {
+      background: var(--card);
+      box-shadow: var(--shadow-sm);
+      border-radius: var(--radius-lg);
+      padding: 28px;
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 12px;
+      border: 1px solid rgba(124, 58, 237, 0.1);
     }
 
     header h1 {
-      font-size: 1.75rem;
       margin: 0;
+      font-size: clamp(2rem, 4vw, 2.6rem);
+      letter-spacing: -0.02em;
     }
 
     header p {
       margin: 0;
-      color: var(--muted);
-      font-size: 0.95rem;
+      color: rgba(16, 24, 40, 0.72);
+      font-size: 1rem;
+      max-width: 48ch;
     }
 
-    .card {
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid rgba(148, 163, 184, 0.25);
-      border-radius: 14px;
-      padding: 20px;
+    .status {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    .status strong {
+      color: var(--primary);
+    }
+
+    .status__message {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .panel {
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      padding: 28px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 20px;
     }
 
     label {
       font-weight: 600;
       font-size: 0.95rem;
+      color: var(--ink);
     }
 
     input[type="password"],
     textarea {
-      background: rgba(15, 23, 42, 0.8);
-      border: 1px solid rgba(148, 163, 184, 0.35);
-      color: var(--fg);
-      border-radius: 12px;
+      background: var(--card);
+      border: 1px solid var(--ring);
+      border-radius: var(--radius-md);
       padding: 12px 14px;
       font-size: 1rem;
       font-family: inherit;
+      color: var(--ink);
+      transition: var(--transition);
       resize: none;
     }
 
+    input[type="password"]:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12);
+    }
+
     textarea {
-      min-height: 100px;
+      min-height: 110px;
     }
 
     button {
@@ -98,29 +150,28 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      padding: 10px 16px;
-      border-radius: 12px;
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
       border: none;
       font-weight: 600;
       font-size: 0.95rem;
       cursor: pointer;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-      background: var(--accent);
-      color: #111827;
-      box-shadow: 0 6px 20px rgba(249, 115, 22, 0.3);
+      transition: var(--transition);
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 12px 30px rgba(124, 58, 237, 0.26);
     }
 
     button.secondary {
-      background: transparent;
-      border: 1px solid rgba(148, 163, 184, 0.4);
-      color: var(--fg);
+      background: var(--primary-soft);
+      color: var(--primary);
       box-shadow: none;
+      border: 1px solid rgba(124, 58, 237, 0.24);
     }
 
     button.danger {
-      background: #f43f5e;
-      color: white;
-      box-shadow: 0 6px 18px rgba(244, 63, 94, 0.35);
+      background: #ef4444;
+      box-shadow: 0 12px 30px rgba(239, 68, 68, 0.28);
     }
 
     button:disabled {
@@ -134,75 +185,81 @@
       transform: translateY(-1px);
     }
 
-    .status {
-      font-size: 0.9rem;
-      color: var(--muted);
-    }
-
-    .flex-row {
+    .controls {
       display: flex;
       flex-wrap: wrap;
       gap: 12px;
     }
 
-    .flex-row > * {
+    .controls > * {
+      flex: 1 1 160px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      align-self: flex-start;
+      background: var(--accent-soft);
+      color: var(--accent);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .panel__header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .panel__header h2 {
+      margin: 0;
+      font-size: 1.4rem;
       flex: 1;
+      color: var(--ink);
     }
 
     .inspirations {
       display: flex;
       flex-direction: column;
       gap: 12px;
-      max-height: 320px;
+      max-height: 340px;
       overflow-y: auto;
       padding-right: 4px;
     }
 
     .inspiration-item {
-      border-radius: 12px;
-      background: rgba(30, 41, 59, 0.75);
-      border: 1px solid rgba(148, 163, 184, 0.2);
-      padding: 14px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(160deg, rgba(236, 233, 254, 0.9), #ffffff);
+      border: 1px solid rgba(124, 58, 237, 0.18);
+      padding: 18px;
       display: flex;
       justify-content: space-between;
-      gap: 14px;
+      gap: 16px;
       align-items: flex-start;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .inspiration-item p {
+      margin: 0 0 6px 0;
+      font-size: 1.05rem;
+      color: var(--ink);
     }
 
     .inspiration-meta {
-      font-size: 0.75rem;
+      font-size: 0.8rem;
       color: var(--muted);
     }
 
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .badge {
-      background: rgba(148, 163, 184, 0.2);
-      color: var(--fg);
-      border-radius: 999px;
-      padding: 4px 10px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    @media (max-width: 720px) {
+    @media (max-width: 800px) {
       body {
-        padding: 16px;
+        padding: 32px 16px;
       }
 
       .app {
-        padding: 18px;
-      }
-
-      header h1 {
-        font-size: 1.5rem;
+        grid-template-columns: minmax(0, 1fr);
       }
     }
   </style>
@@ -210,62 +267,73 @@
 <body>
   <div id="app" class="app" v-cloak>
     <header>
-      <h1>Impro Inspiration Collector</h1>
-      <p>Share a quick inspiration with the show. Host password required to join.</p>
+      <div>
+        <h1>Impro Inspiration Collector</h1>
+        <p>Comparte una inspiración con la función. Necesitas la contraseña del host para participar.</p>
+      </div>
       <div class="status">
-        <span>Connection: <strong>{{ connectionStatus }}</strong></span>
-        <span v-if="statusMessage"> · {{ statusMessage }}</span>
+        <span>Connection:</span>
+        <strong v-text="connectionStatus"></strong>
+        <span v-if="statusMessage" class="status__message">
+          <span>•</span>
+          <span v-text="statusMessage"></span>
+        </span>
       </div>
     </header>
 
-    <section class="card" v-if="!authenticated">
-      <label for="password">Enter show password</label>
-      <input
-        id="password"
-        type="password"
-        v-model="password"
-        @keyup.enter="authenticate"
-        placeholder="Password"
-      />
+    <section class="panel" v-if="!authenticated">
+      <div>
+        <label for="password">Enter show password</label>
+        <input
+          id="password"
+          type="password"
+          v-model="password"
+          @keyup.enter="authenticate"
+          placeholder="Password"
+        />
+      </div>
       <button :disabled="!password" @click="authenticate">Join Session</button>
     </section>
 
     <template v-else>
-      <section class="card">
-        <div class="flex-row">
-          <div>
-            <label for="inspiration">Add inspiration</label>
-            <textarea
-              id="inspiration"
-              v-model="draft"
-              :maxlength="maxLength"
-              placeholder="Keep it snappy (140 characters)"
-            ></textarea>
-            <div class="status">{{ draft.length }} / {{ maxLength }}</div>
-          </div>
+      <section class="panel">
+        <div>
+          <label for="inspiration">Add inspiration</label>
+          <textarea
+            id="inspiration"
+            v-model="draft"
+            :maxlength="maxLength"
+            placeholder="Keep it snappy (140 characters)"
+          ></textarea>
+          <div class="status"><span v-text="draft.length"></span> / <span v-text="maxLength"></span></div>
         </div>
         <div class="controls">
           <button @click="submit" :disabled="!draft.trim() || submitting">Submit</button>
-          <button class="secondary" @click="togglePresenter">
-            {{ presenterMode ? 'Hide' : 'Show' }} presenter view
-          </button>
+          <button
+            class="secondary"
+            @click="togglePresenter"
+            v-text="presenterMode ? 'Hide presenter view' : 'Show presenter view'"
+          ></button>
           <button class="secondary" @click="download('txt')" :disabled="!inspirations.length">Download .txt</button>
           <button class="secondary" @click="download('json')" :disabled="!inspirations.length">Download .json</button>
           <button class="danger" @click="clearAll" :disabled="!inspirations.length">Clear All</button>
         </div>
-        <div v-if="lastSubmitted" class="badge">Submitted! "{{ lastSubmitted.text }}"</div>
+        <div v-if="lastSubmitted" class="badge">
+          <span>Submitted!</span>
+          <span v-text="`“${lastSubmitted.text}”`"></span>
+        </div>
       </section>
 
-      <section class="card" v-if="presenterMode">
-        <div class="flex-row" style="align-items: center;">
-          <h2 style="margin: 0; flex: 1;">Presenter View</h2>
-          <span class="badge">{{ inspirations.length }} inspirations</span>
+      <section class="panel" v-if="presenterMode">
+        <div class="panel__header">
+          <h2>Presenter View</h2>
+          <span class="badge" v-text="`${inspirations.length} inspirations`"></span>
         </div>
         <div class="inspirations" v-if="inspirations.length">
           <article class="inspiration-item" v-for="item in inspirations" :key="item.id">
             <div>
-              <p style="margin: 0 0 6px 0; font-size: 1.05rem;">{{ item.text }}</p>
-              <div class="inspiration-meta">{{ formatTimestamp(item.timestamp) }}</div>
+              <p v-text="item.text"></p>
+              <div class="inspiration-meta" v-text="formatTimestamp(item.timestamp)"></div>
             </div>
             <button class="secondary" @click="remove(item.id)">Delete</button>
           </article>
