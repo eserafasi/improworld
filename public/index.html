@@ -344,7 +344,7 @@
   </div>
 
   <script>
-    const { createApp, ref, computed, onMounted } = Vue;
+    const { createApp, ref } = Vue;
 
     createApp({
       setup() {
@@ -355,10 +355,14 @@
         const authenticated = ref(false);
         const presenterMode = ref(false);
         const submitting = ref(false);
-        const connectionStatus = ref('connecting');
+        const connectionStatus = ref('disconnected');
         const lastSubmitted = ref(null);
         const maxLength = 140;
+        const websocketUrl = ref(getSocketUrl());
         let socket = null;
+        let shouldReconnect = false;
+        let pendingAuth = false;
+        let reconnectTimer = null;
 
         function resetStatus(message, duration = 3000) {
           statusMessage.value = message;
@@ -370,14 +374,45 @@
           }, duration);
         }
 
-        function connect() {
+        function clearReconnectTimer() {
+          if (reconnectTimer) {
+            clearTimeout(reconnectTimer);
+            reconnectTimer = null;
+          }
+        }
+
+        function getSocketUrl() {
+          const params = new URLSearchParams(window.location.search);
+          const override =
+            params.get('socket') ||
+            params.get('ws') ||
+            params.get('server');
+
+          if (override) {
+            return override;
+          }
+
+          if (window.INSPIRATION_SOCKET_URL) {
+            return window.INSPIRATION_SOCKET_URL;
+          }
+
           const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-          socket = new WebSocket(`${protocol}://${window.location.host}`);
+          return `${protocol}://${window.location.host}`;
+        }
+
+        function connect() {
+          if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) {
+            return;
+          }
+
+          clearReconnectTimer();
+          connectionStatus.value = 'connecting';
+          socket = new WebSocket(websocketUrl.value);
 
           socket.addEventListener('open', () => {
             connectionStatus.value = 'connected';
             resetStatus('Connected to show.');
-            if (password.value) {
+            if (pendingAuth && password.value) {
               socket.send(JSON.stringify({ type: 'auth', password: password.value }));
             }
           });
@@ -387,13 +422,20 @@
             authenticated.value = false;
             inspirations.value = [];
             submitting.value = false;
-            resetStatus('Connection lost. Retrying...');
-            setTimeout(connect, 2000);
+            socket = null;
+            if (shouldReconnect) {
+              resetStatus('Connection lost. Retrying...');
+              pendingAuth = true;
+              reconnectTimer = setTimeout(connect, 2000);
+            } else {
+              resetStatus('Connection closed.');
+            }
           });
 
           socket.addEventListener('error', () => {
             connectionStatus.value = 'error';
             resetStatus('Connection error.');
+            socket = null;
           });
 
           socket.addEventListener('message', event => {
@@ -405,6 +447,7 @@
               case 'auth-ok':
                 authenticated.value = true;
                 inspirations.value = message.inspirations || [];
+                pendingAuth = false;
                 resetStatus('Password accepted.');
                 break;
               case 'list':
@@ -425,8 +468,17 @@
         }
 
         function authenticate() {
+          if (!password.value) return;
+          shouldReconnect = true;
+          pendingAuth = true;
+
           if (!socket || socket.readyState !== WebSocket.OPEN) {
-            resetStatus('Still connecting...');
+            if (!socket || socket.readyState === WebSocket.CLOSED) {
+              resetStatus('Connecting to show...');
+              connect();
+            } else {
+              resetStatus('Still connecting...');
+            }
             return;
           }
           socket.send(JSON.stringify({ type: 'auth', password: password.value }));
@@ -491,10 +543,6 @@
           document.body.removeChild(a);
           URL.revokeObjectURL(url);
         }
-
-        onMounted(() => {
-          connect();
-        });
 
         return {
           password,
