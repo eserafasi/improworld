@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agenda ImproWorld · Calendario</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    :root {
+      --ink: #101828;
+      --muted: #667085;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --primary: #7c3aed;
+      --primary-soft: rgba(124, 58, 237, 0.12);
+      --accent: #f59e0b;
+      --accent-soft: rgba(245, 158, 11, 0.14);
+      --success: #22c55e;
+      --radius-lg: 18px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+      --shadow-sm: 0 6px 20px rgba(15, 23, 42, 0.08);
+      --shadow-md: 0 18px 48px rgba(79, 70, 229, 0.12);
+      --max-width: 1200px;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, #faf5ff 0%, #f8fafc 45%, #ffffff 100%);
+      color: var(--ink);
+    }
+
+    [v-cloak] {
+      display: none !important;
+    }
+
+    .page {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .hero {
+      padding: 64px 20px 36px;
+      background: radial-gradient(120% 120% at 50% 0%, rgba(124, 58, 237, 0.14) 0%, rgba(124, 58, 237, 0) 60%),
+        linear-gradient(140deg, rgba(124, 58, 237, 0.12) 10%, rgba(59, 130, 246, 0.08) 100%);
+    }
+
+    .hero__inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      display: grid;
+      gap: 28px;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(2.2rem, 5vw, 3.2rem);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+    }
+
+    .hero p {
+      margin: 0;
+      font-size: 1.05rem;
+      color: rgba(16, 24, 40, 0.78);
+      max-width: 60ch;
+    }
+
+    .hero__meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .hero__meta strong {
+      color: var(--primary);
+    }
+
+    main {
+      flex: 1;
+      padding: 0 20px 72px;
+    }
+
+    .wrap {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      display: grid;
+      gap: 24px;
+    }
+
+    .calendar-card {
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid rgba(124, 58, 237, 0.16);
+      padding: 24px;
+      display: grid;
+      gap: 24px;
+    }
+
+    .calendar-card__header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .calendar-card__title {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .calendar-card__title h2 {
+      margin: 0;
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      letter-spacing: -0.01em;
+    }
+
+    .calendar-card__title span {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .calendar-controls {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(124, 58, 237, 0.08);
+      padding: 8px 12px;
+      border-radius: 999px;
+    }
+
+    .calendar-controls button {
+      appearance: none;
+      border: none;
+      background: var(--card);
+      color: var(--primary);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(124, 58, 237, 0.18);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .calendar-controls button:hover,
+    .calendar-controls button:focus-visible {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 32px rgba(124, 58, 237, 0.24);
+      outline: none;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .weekday {
+      text-align: center;
+      font-weight: 600;
+      color: rgba(16, 24, 40, 0.68);
+      font-size: 0.9rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .day {
+      background: rgba(255, 255, 255, 0.82);
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+      min-height: 120px;
+      position: relative;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .day:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+      z-index: 2;
+    }
+
+    .day--muted {
+      background: rgba(248, 250, 252, 0.7);
+      color: rgba(100, 116, 139, 0.92);
+    }
+
+    .day--today {
+      border-color: rgba(124, 58, 237, 0.5);
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.18);
+    }
+
+    .day__header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .day__number {
+      font-weight: 700;
+      font-size: 1.05rem;
+    }
+
+    .day__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .day__events {
+      display: grid;
+      gap: 8px;
+    }
+
+    .event {
+      display: grid;
+      gap: 6px;
+      background: rgba(124, 58, 237, 0.08);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      border: 1px solid rgba(124, 58, 237, 0.16);
+    }
+
+    .event__title {
+      margin: 0;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .event__meta {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      color: rgba(15, 23, 42, 0.72);
+      font-size: 0.85rem;
+    }
+
+    .event__meta strong {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 48px 0;
+      font-size: 1rem;
+    }
+
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .loading::before {
+      content: "";
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 3px solid rgba(124, 58, 237, 0.16);
+      border-top-color: var(--primary);
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @media (max-width: 960px) {
+      .calendar-grid {
+        gap: 8px;
+      }
+
+      .day {
+        min-height: 110px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .calendar-card {
+        padding: 20px;
+      }
+
+      .calendar-card__header {
+        align-items: stretch;
+      }
+
+      .calendar-controls {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .calendar-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .weekday {
+        display: none;
+      }
+
+      .day {
+        min-height: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="page" v-cloak>
+    <header class="hero">
+      <div class="hero__inner">
+        <div>
+          <h1>Agenda ImproWorld · Calendario</h1>
+          <p>
+            Visualiza todos los eventos de improvisación en un calendario mensual. Filtramos los datos publicados en la agenda y los agrupamos automáticamente por día para que planifiques tus asistencias de un vistazo.
+          </p>
+        </div>
+        <div class="hero__meta">
+          <span><strong>{{ totalEventos }}</strong> eventos publicados</span>
+          <span>Actualizado el <strong>{{ ultimaActualizacion }}</strong></span>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="wrap">
+        <section class="calendar-card">
+          <div class="calendar-card__header">
+            <div class="calendar-card__title">
+              <h2>{{ mesActualLabel }}</h2>
+              <span v-if="visibleEventosMes === 1">Un evento en este mes</span>
+              <span v-else>{{ visibleEventosMes }} eventos en este mes</span>
+            </div>
+            <div class="calendar-controls">
+              <button type="button" @click="cambiarMes(-1)" aria-label="Mes anterior">← Anterior</button>
+              <div>{{ mesActualCorto }}</div>
+              <button type="button" @click="cambiarMes(1)" aria-label="Mes siguiente">Siguiente →</button>
+            </div>
+          </div>
+
+          <div v-if="error" class="empty">{{ error }}</div>
+          <div v-else-if="cargando" class="loading">Cargando eventos…</div>
+          <template v-else>
+            <div v-if="dias.length" class="calendar-grid">
+              <div class="weekday" v-for="dia in encabezados" :key="dia">{{ dia }}</div>
+              <article
+                v-for="day in dias"
+                :key="day.iso"
+                class="day"
+                :class="{ 'day--muted': !day.mesActual, 'day--today': day.esHoy }"
+              >
+                <header class="day__header">
+                  <span class="day__number">{{ day.numero }}</span>
+                  <span v-if="day.eventos.length" class="day__badge">{{ day.eventos.length }} · {{ day.eventos.length === 1 ? 'evento' : 'eventos' }}</span>
+                </header>
+                <div v-if="day.eventos.length" class="day__events">
+                  <article v-for="evento in day.eventos" :key="evento.id" class="event">
+                    <h3 class="event__title">{{ evento.nombre }}</h3>
+                    <div class="event__meta">
+                      <span><strong>{{ evento.horaLabel }}</strong> · {{ evento.lugarLabel }}</span>
+                      <span>{{ evento.ciudadLabel }}</span>
+                    </div>
+                  </article>
+                </div>
+              </article>
+            </div>
+            <p v-else class="empty">No hay eventos programados para este mes.</p>
+          </template>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script>
+  const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwoCLUfEiRjnmzumQ-Qs82vLUMpfTWHuemY8W6NODHVhGskbdQQHh-rIHKJUpS0cPCSxQ/exec";
+
+  function val(x) {
+    return x === undefined || x === null ? "" : String(x).trim();
+  }
+
+  function formatFecha(v) {
+    if (!v) return "";
+    const d = new Date(v);
+    if (isNaN(d)) return "";
+    return d.toISOString().split("T")[0];
+  }
+
+  function createFallbackId() {
+    try {
+      if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+        return crypto.randomUUID();
+      }
+    } catch (_) {
+      // ignore
+    }
+    return `event-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  }
+
+  function parseHora(value) {
+    if (!value) return { label: "Horario por confirmar", minutes: Number.POSITIVE_INFINITY };
+    const clean = String(value).trim();
+    const match = clean.match(/(\d{1,2})(?::(\d{2}))?/);
+    if (!match) {
+      return { label: clean, minutes: Number.POSITIVE_INFINITY };
+    }
+    const hours = Number.parseInt(match[1], 10);
+    const minutes = Number.parseInt(match[2] ?? "0", 10);
+    if (Number.isNaN(hours) || Number.isNaN(minutes)) {
+      return { label: clean, minutes: Number.POSITIVE_INFINITY };
+    }
+    const label = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+    return { label, minutes: hours * 60 + minutes };
+  }
+
+  function norm(ev) {
+    const fechaISO = formatFecha(ev.FechaFuncion || ev.fecha || ev.fechaRaw);
+    const horaInfo = parseHora(val(ev.HoraFuncionTexto) || val(ev.HoraFuncion));
+    return {
+      id: val(ev.Id) || val(ev.ID) || createFallbackId(),
+      nombre: val(ev.NombreFormato) || val(ev["Nombre de la Obra"]) || "Evento sin nombre",
+      fechaISO,
+      horaLabel: horaInfo.label,
+      horaValue: horaInfo.minutes,
+      ciudadLabel: val(ev.Ciudad) || val(ev.Pais) || val(ev["País"]) || "",
+      lugarLabel: val(ev.Lugar) || "Ubicación por confirmar",
+      pais: val(ev.Pais) || val(ev["País"]),
+      estado: val(ev.Estado) || "Publicado",
+    };
+  }
+
+  const { createApp, ref, computed, onMounted } = Vue;
+
+  createApp({
+    setup() {
+      const cargando = ref(true);
+      const error = ref("");
+      const lista = ref([]);
+      const hoy = new Date();
+      const hoyISO = new Date(hoy.getTime() - hoy.getTimezoneOffset() * 60000).toISOString().split("T")[0];
+      const mesActual = ref(new Date(hoy.getFullYear(), hoy.getMonth(), 1));
+      const ultimaActualizacion = ref(new Date().toLocaleDateString("es-ES", { dateStyle: "long" }));
+
+      const encabezados = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+
+      const eventosPorDia = computed(() => {
+        const map = new Map();
+        for (const item of lista.value) {
+          if (!item.fechaISO || item.estado === "Despublicado") continue;
+          if (!map.has(item.fechaISO)) {
+            map.set(item.fechaISO, []);
+          }
+          map.get(item.fechaISO).push(item);
+        }
+        for (const events of map.values()) {
+          events.sort((a, b) => a.horaValue - b.horaValue || a.nombre.localeCompare(b.nombre, "es"));
+        }
+        return map;
+      });
+
+      const totalEventos = computed(() => lista.value.filter((ev) => ev.estado !== "Despublicado").length);
+
+      const dias = computed(() => {
+        const base = new Date(mesActual.value.getTime());
+        base.setDate(1);
+        const offset = (base.getDay() + 6) % 7; // Monday as first day
+        const inicio = new Date(base.getTime());
+        inicio.setDate(inicio.getDate() - offset);
+        const celdas = [];
+        for (let i = 0; i < 42; i += 1) {
+          const d = new Date(inicio.getTime());
+          d.setDate(inicio.getDate() + i);
+          const iso = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().split("T")[0];
+          const eventos = eventosPorDia.value.get(iso) || [];
+          celdas.push({
+            iso,
+            numero: d.getDate(),
+            mesActual: d.getMonth() === mesActual.value.getMonth(),
+            esHoy: iso === hoyISO,
+            eventos,
+          });
+        }
+        return celdas;
+      });
+
+      const visibleEventosMes = computed(() => {
+        return dias.value
+          .filter((day) => day.mesActual)
+          .reduce((acc, day) => acc + day.eventos.length, 0);
+      });
+
+      const mesActualLabel = computed(() =>
+        mesActual.value.toLocaleDateString("es-ES", { month: "long", year: "numeric" })
+      );
+
+      const mesActualCorto = computed(() =>
+        mesActual.value.toLocaleDateString("es-ES", { month: "short", year: "numeric" })
+      );
+
+      function cambiarMes(delta) {
+        const nuevo = new Date(mesActual.value.getTime());
+        nuevo.setMonth(nuevo.getMonth() + delta, 1);
+        mesActual.value = nuevo;
+      }
+
+      async function cargar() {
+        cargando.value = true;
+        error.value = "";
+        try {
+          const response = await fetch(WEBAPP_URL);
+          if (!response.ok) {
+            throw new Error(`No se pudo cargar la agenda (${response.status})`);
+          }
+          const data = await response.json();
+          lista.value = Array.isArray(data) ? data.map(norm) : [];
+          ultimaActualizacion.value = new Date().toLocaleDateString("es-ES", { dateStyle: "long" });
+        } catch (err) {
+          console.error("Error al cargar la agenda", err);
+          error.value = "No fue posible cargar los eventos. Intenta de nuevo más tarde.";
+          lista.value = [];
+        } finally {
+          cargando.value = false;
+        }
+      }
+
+      onMounted(() => {
+        cargar();
+      });
+
+      return {
+        cargando,
+        error,
+        dias,
+        encabezados,
+        cambiarMes,
+        mesActualLabel,
+        mesActualCorto,
+        visibleEventosMes,
+        totalEventos,
+        ultimaActualizacion,
+      };
+    }
+  }).mount("#app");
+  </script>
+</body>
+</html>
