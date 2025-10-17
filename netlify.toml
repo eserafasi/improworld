@@ -1,0 +1,13 @@
+[build]
+  publish = "public"
+
+[dev]
+  command = "npm run start"
+  targetPort = 3000
+  port = 8888
+  framework = "#custom"
+  publish = "public"
+
+[[edge_functions]]
+  path = "/socket"
+  function = "socket"
