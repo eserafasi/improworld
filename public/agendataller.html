@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agenda de Talleres de Impro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #0f172a;
+      --muted: #64748b;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --primary: #7c3aed;
+      --primary-soft: rgba(124, 58, 237, 0.12);
+      --accent: #f97316;
+      --radius-lg: 18px;
+      --radius-md: 14px;
+      --shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.08);
+      --max-width: 1080px;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, rgba(124, 58, 237, 0.08) 0%, rgba(248, 250, 252, 1) 40%, #ffffff 100%);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .page {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .hero {
+      padding: 72px 20px 48px;
+      text-align: center;
+    }
+
+    .hero__inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      display: grid;
+      gap: 24px;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.2rem, 5vw, 3.2rem);
+      line-height: 1.05;
+      margin: 0;
+      font-weight: 700;
+    }
+
+    .hero p {
+      margin: 0;
+      font-size: 1.05rem;
+      color: rgba(15, 23, 42, 0.78);
+      max-width: 60ch;
+      justify-self: center;
+    }
+
+    .summary {
+      max-width: var(--max-width);
+      margin: 0 auto 32px;
+      padding: 0 20px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .summary-card {
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 24px;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid rgba(124, 58, 237, 0.18);
+    }
+
+    .summary-card strong {
+      font-size: clamp(1.15rem, 3vw, 1.45rem);
+    }
+
+    .summary-card span {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .summary-card__label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--primary-soft);
+      padding: 8px 12px;
+      border-radius: 999px;
+      color: var(--primary);
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    main {
+      flex: 1;
+      width: 100%;
+      padding-bottom: 72px;
+    }
+
+    .grid {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid rgba(100, 116, 139, 0.2);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 28px rgba(15, 23, 42, 0.14);
+    }
+
+    .card__title {
+      font-size: 1.25rem;
+      margin: 0;
+      font-weight: 700;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      align-self: flex-start;
+      background: rgba(249, 115, 22, 0.12);
+      color: var(--accent);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .meta {
+      display: grid;
+      gap: 6px;
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    .meta strong {
+      color: var(--ink);
+      font-weight: 600;
+    }
+
+    .contact {
+      margin-top: 12px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--primary);
+      text-decoration: none;
+      font-size: 0.95rem;
+    }
+
+    .contact:hover,
+    .contact:focus-visible {
+      text-decoration: underline;
+    }
+
+    .empty {
+      max-width: var(--max-width);
+      margin: 40px auto 0;
+      padding: 0 20px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .spinner {
+      width: 28px;
+      height: 28px;
+      border: 3px solid rgba(124, 58, 237, 0.2);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.85s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .hero {
+        padding: 56px 16px 36px;
+      }
+
+      .summary-card {
+        padding: 18px;
+      }
+
+      .grid {
+        padding: 0 16px;
+        gap: 18px;
+      }
+
+      .card {
+        padding: 20px;
+        border-radius: var(--radius-md);
+      }
+    }
+  </style>
+</head>
+<body>
+<div id="app" class="page">
+  <header class="hero">
+    <div class="hero__inner">
+      <h1>Agenda de talleres de impro</h1>
+      <p>
+        Explora los próximos talleres de improvisación en nuestra comunidad. Aprende con facilitadores
+        experimentados, conecta con nuevas personas y potencia tu creatividad en distintos rincones del mundo.
+      </p>
+    </div>
+  </header>
+
+  <main>
+    <section class="summary">
+      <div class="summary-card">
+        <span class="summary-card__label">🎭 Talleres activos</span>
+        <div>
+          <strong>{{ upcomingCount }}</strong>
+          <span>próximos talleres publicados</span>
+        </div>
+      </div>
+    </section>
+
+    <section v-if="loading" class="empty" aria-live="polite">
+      <div class="spinner" role="status" aria-label="Cargando"></div>
+      <p>Cargando información de los talleres…</p>
+    </section>
+
+    <section v-if="!loading && error" class="empty" role="alert">
+      <h2>Ups, no pudimos cargar la agenda</h2>
+      <p>{{ error }}</p>
+    </section>
+
+    <section v-if="!loading" class="grid" aria-live="polite">
+      <article v-for="taller in upcoming" :key="taller.id" class="card">
+        <span class="badge">{{ taller.fechaCorta }}</span>
+        <h2 class="card__title">{{ taller.nombre }}</h2>
+        <div class="meta">
+          <span><strong>Facilitador:</strong> {{ taller.facilitador || "Por anunciar" }}</span>
+          <span><strong>Fecha:</strong> {{ taller.fechaLarga }}</span>
+          <span><strong>Ciudad:</strong> {{ taller.ciudad || "—" }}</span>
+          <span><strong>País:</strong> {{ taller.pais || "—" }}</span>
+          <span v-if="taller.precio"><strong>Precio:</strong> {{ taller.precio }}</span>
+          <span v-else><strong>Precio:</strong> Consulta detalles</span>
+        </div>
+        <a
+          v-if="taller.contacto"
+          class="contact"
+          :href="taller.contactoUrl"
+          target="_blank"
+          rel="noopener"
+        >
+          📬 Contacto
+        </a>
+        <span v-else class="contact" aria-hidden="true">Información de contacto próximamente</span>
+      </article>
+    </section>
+
+    <section v-if="!loading && !error && !upcoming.length" class="empty">
+      <h2>No hay talleres próximos por ahora</h2>
+      <p>Vuelve pronto o comparte un nuevo taller con la comunidad.</p>
+    </section>
+  </main>
+</div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+<script>
+  const DATA_SOURCE = "talleres_impro_data.xlsx";
+  const fallbackData = [
+    {
+      "Nombre del taller": "Impro para principiantes",
+      Facilitador: "María López",
+      Fecha: "2024-07-10",
+      Ciudad: "Buenos Aires",
+      País: "Argentina",
+      Precio: "45 USD",
+      Contacto: "hola@improba.com"
+    },
+    {
+      "Nombre del taller": "Narrativas largas",
+      Facilitador: "Juan Pérez",
+      Fecha: "2024-08-02",
+      Ciudad: "Ciudad de México",
+      País: "México",
+      Precio: "750 MXN",
+      Contacto: "https://ejemplo.com/narrativas"
+    },
+    {
+      "Nombre del taller": "Impro musical",
+      Facilitador: "Carla Gómez",
+      Fecha: "2024-09-15",
+      Ciudad: "Madrid",
+      País: "España",
+      Precio: "",
+      Contacto: "contacto@improes.com"
+    }
+  ];
+
+  const { createApp, ref, computed, onMounted } = Vue;
+
+  function normalizeRow(row) {
+    const nombre = row["Nombre del taller"] || row.Nombre || "Taller sin nombre";
+    const facilitador = row.Facilitador || row.Facilitadora || "";
+    const fechaRaw = row.Fecha || row["Fecha del taller"] || "";
+    const ciudad = row.Ciudad || "";
+    const pais = row.País || row.Pais || "";
+    const precio = row.Precio || row.Costo || "";
+    const contacto = row.Contacto || row.Email || row["Formulario"] || "";
+
+    let fecha = fechaRaw;
+    let fechaISO = "";
+    let fechaTime = Number.POSITIVE_INFINITY;
+    if (fechaRaw) {
+      const parsed = new Date(fechaRaw);
+      if (!Number.isNaN(parsed.getTime())) {
+        fechaISO = parsed.toISOString().split("T")[0];
+        fechaTime = parsed.getTime();
+        fecha = parsed;
+      }
+    }
+
+    const fechaLarga = fecha instanceof Date
+      ? fecha.toLocaleDateString("es-ES", { weekday: "long", year: "numeric", month: "long", day: "numeric" })
+      : fechaRaw;
+
+    const fechaCorta = fecha instanceof Date
+      ? fecha.toLocaleDateString("es-ES", { day: "2-digit", month: "short" })
+      : fechaRaw || "Fecha por confirmar";
+
+    const contactoUrl = (() => {
+      if (!contacto) return "";
+      if (/^https?:/i.test(contacto)) return contacto;
+      if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contacto)) {
+        return `mailto:${contacto}`;
+      }
+      return contacto;
+    })();
+
+    return {
+      id: `${nombre}-${fechaISO || fechaRaw || Math.random().toString(16).slice(2)}`,
+      nombre,
+      facilitador,
+      fecha,
+      fechaISO,
+      fechaTime,
+      fechaLarga,
+      fechaCorta,
+      ciudad,
+      pais,
+      precio,
+      contacto,
+      contactoUrl
+    };
+  }
+
+  createApp({
+    setup() {
+      const loading = ref(true);
+      const error = ref("");
+      const talleres = ref([]);
+
+      const upcoming = computed(() => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return talleres.value
+          .filter((item) => {
+            if (!item.fechaTime || !Number.isFinite(item.fechaTime)) return true;
+            return item.fechaTime >= today.getTime();
+          })
+          .sort((a, b) => {
+            const timeDiff = (a.fechaTime || Number.POSITIVE_INFINITY) - (b.fechaTime || Number.POSITIVE_INFINITY);
+            if (timeDiff !== 0) return timeDiff;
+            return a.nombre.localeCompare(b.nombre, "es");
+          });
+      });
+
+      const upcomingCount = computed(() => upcoming.value.length);
+
+      async function loadData() {
+        loading.value = true;
+        error.value = "";
+        try {
+          const response = await fetch(DATA_SOURCE);
+          if (!response.ok) {
+            throw new Error(`No se pudo obtener el archivo (${response.status})`);
+          }
+          const buffer = await response.arrayBuffer();
+          const workbook = XLSX.read(buffer, { type: "array" });
+          const sheetName = workbook.SheetNames[0];
+          const sheet = workbook.Sheets[sheetName];
+          const json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+          if (!Array.isArray(json) || !json.length) {
+            throw new Error("El archivo está vacío");
+          }
+          talleres.value = json.map(normalizeRow);
+        } catch (err) {
+          console.warn("Fallo al leer el archivo de talleres, usando datos de respaldo", err);
+          talleres.value = fallbackData.map(normalizeRow);
+          error.value = "Se está mostrando información de ejemplo mientras restauramos la conexión con la hoja de cálculo.";
+        } finally {
+          loading.value = false;
+        }
+      }
+
+      onMounted(() => {
+        loadData();
+      });
+
+      return {
+        loading,
+        error,
+        upcoming,
+        upcomingCount
+      };
+    }
+  }).mount("#app");
+</script>
+</body>
+</html>
