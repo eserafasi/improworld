@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Espacios para Impro en el Mundo</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: linear-gradient(180deg, #f9fafb 0%, #eef2f7 100%);
+      color: #1f2933;
+      display: flex;
+      min-height: 100vh;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 1.75rem 1rem;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(6px);
+      border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    h1 {
+      margin: 0 0 0.35rem;
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+      letter-spacing: -0.01em;
+    }
+
+    p.lead {
+      margin: 0;
+      color: #475569;
+      font-size: clamp(1rem, 2vw, 1.1rem);
+    }
+
+    main {
+      width: min(1100px, 100%);
+      margin: 0 auto;
+      padding: 2rem 1.25rem 3rem;
+      flex: 1;
+    }
+
+    .grid {
+      display: grid;
+      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      padding: 1.6rem;
+      box-shadow: 0 16px 30px rgba(15, 23, 42, 0.12);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover,
+    .card:focus-within {
+      transform: translateY(-4px);
+      box-shadow: 0 22px 40px rgba(15, 23, 42, 0.18);
+    }
+
+    .card h2 {
+      margin: 0;
+      font-size: 1.35rem;
+      color: #0f172a;
+    }
+
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.6rem;
+      font-size: 0.94rem;
+      color: #334155;
+    }
+
+    .meta span {
+      background: rgba(79, 70, 229, 0.08);
+      color: #4338ca;
+      padding: 0.4rem 0.6rem;
+      border-radius: 999px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .details {
+      font-size: 0.95rem;
+      color: #475569;
+      line-height: 1.6;
+    }
+
+    .details strong {
+      color: #1e293b;
+    }
+
+    .card a {
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: 600;
+      word-break: break-word;
+    }
+
+    .card a:hover {
+      text-decoration: underline;
+    }
+
+    .empty-state {
+      background: rgba(255, 255, 255, 0.8);
+      padding: 2.5rem;
+      border-radius: 20px;
+      text-align: center;
+      color: #475569;
+      border: 1px dashed rgba(148, 163, 184, 0.6);
+      font-size: 1.05rem;
+      margin-top: 2rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem 1rem 2.5rem;
+      color: #64748b;
+      font-size: 0.9rem;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: radial-gradient(circle at top, #111827, #0f172a);
+        color: #e2e8f0;
+      }
+
+      header {
+        background: rgba(15, 23, 42, 0.75);
+        border-color: rgba(148, 163, 184, 0.15);
+        box-shadow: 0 12px 30px rgba(2, 6, 23, 0.6);
+      }
+
+      p.lead {
+        color: #94a3b8;
+      }
+
+      .card {
+        background: rgba(15, 23, 42, 0.85);
+        border-color: rgba(148, 163, 184, 0.15);
+        box-shadow: 0 18px 32px rgba(2, 6, 23, 0.7);
+      }
+
+      .card h2 {
+        color: #e2e8f0;
+      }
+
+      .details,
+      .meta {
+        color: #cbd5f5;
+      }
+
+      .meta span {
+        background: rgba(99, 102, 241, 0.22);
+        color: #c7d2fe;
+      }
+
+      .card a {
+        color: #93c5fd;
+      }
+
+      .empty-state {
+        background: rgba(15, 23, 42, 0.8);
+        border-color: rgba(148, 163, 184, 0.4);
+        color: #cbd5f5;
+      }
+
+      footer {
+        color: #94a3b8;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Espacios para Impro en el Mundo</h1>
+    <p class="lead">Información recopilada desde <strong>espacios_impro_data.xlsx</strong> con espacios ideales para shows y clases.</p>
+  </header>
+
+  <main>
+    <section id="spaces" class="grid" aria-live="polite"></section>
+    <div id="empty" class="empty-state" hidden>
+      No se encontraron espacios registrados todavía. ¡Comparte el tuyo para que la comunidad pueda improvisar en más rincones del planeta!
+    </div>
+  </main>
+
+  <footer>
+    Datos de ejemplo generados para demostrar la integración con hojas de cálculo. Actualiza <em>espacios_impro_data.xlsx</em> para mostrar tus propios espacios.
+  </footer>
+
+  <script>
+    const mockSpreadsheetFilename = "espacios_impro_data.xlsx";
+
+    function loadSpacesFromSpreadsheet() {
+      console.info(`Simulando lectura del archivo ${mockSpreadsheetFilename}`);
+      return Promise.resolve([
+        {
+          nombre: "La Cúpula Impro Hub",
+          ciudad: "Barcelona",
+          pais: "España",
+          uso: "Ambos",
+          capacidad: "70 personas",
+          contacto: "hola@lacupulaimpro.com",
+          link: "https://lacupulaimpro.com"
+        },
+        {
+          nombre: "Playhouse Studio",
+          ciudad: "Chicago",
+          pais: "Estados Unidos",
+          uso: "Shows",
+          capacidad: "120 personas",
+          contacto: "booking@playhouseimprov.org",
+          link: "https://playhouseimprov.org/space"
+        },
+        {
+          nombre: "ImproVisión Cultural Center",
+          ciudad: "Bogotá",
+          pais: "Colombia",
+          uso: "Clases",
+          capacidad: "45 personas",
+          contacto: "+57 311 555 8899",
+          link: "https://instagram.com/improvisioncc"
+        },
+        {
+          nombre: "The Yes And Loft",
+          ciudad: "Melbourne",
+          pais: "Australia",
+          uso: "Ambos",
+          capacidad: "60 personas",
+          contacto: "loft@yesandcollective.au",
+          link: "https://yesandcollective.au/loft"
+        }
+      ]);
+    }
+
+    function renderSpaces(spaces) {
+      const container = document.getElementById("spaces");
+      const emptyState = document.getElementById("empty");
+
+      if (!spaces.length) {
+        container.innerHTML = "";
+        emptyState.hidden = false;
+        return;
+      }
+
+      emptyState.hidden = true;
+
+      const fragment = document.createDocumentFragment();
+      spaces.forEach((space) => {
+        const card = document.createElement("article");
+        card.className = "card";
+        card.innerHTML = `
+          <h2>${space.nombre}</h2>
+          <div class="meta">
+            <span title="Ciudad">${space.ciudad}</span>
+            <span title="País">${space.pais}</span>
+            <span title="Uso">${space.uso}</span>
+          </div>
+          <div class="details">
+            <p><strong>Capacidad:</strong> ${space.capacidad}</p>
+            <p><strong>Contacto:</strong> <a href="mailto:${space.contacto}">${space.contacto}</a></p>
+            ${space.link ? `<p><strong>Link:</strong> <a href="${space.link}" target="_blank" rel="noopener">${space.link}</a></p>` : ""}
+          </div>
+        `;
+        fragment.appendChild(card);
+      });
+
+      container.replaceChildren(fragment);
+    }
+
+    loadSpacesFromSpreadsheet().then(renderSpaces).catch((error) => {
+      console.error("No fue posible leer la hoja de cálculo", error);
+      renderSpaces([]);
+    });
+  </script>
+</body>
+</html>
