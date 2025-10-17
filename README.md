@@ -29,3 +29,13 @@ Esto iniciará un servidor local en `http://127.0.0.1:8000` con los siguientes r
 - `motores-draw.html`: interfaz centrada en mostrar el motor sorteado y sacar nuevos impulsos desde cualquier dispositivo conectado a la misma sesión.
 
 Ambas páginas se comunican con el backend vía WebSockets y peticiones HTTP para mantenerse sincronizadas entre todos los participantes.
+
+### Despliegue en Netlify
+
+El sitio puede servirse como un _static site_ desde Netlify. La carpeta `public/` contiene todas las páginas HTML y recursos necesarios, mientras que el WebSocket se ejecuta como una Edge Function en `netlify/edge-functions/socket.js`.
+
+1. **Publicar la carpeta correcta.** El archivo `netlify.toml` ya establece `public/` como directorio de publicación, por lo que no se necesita un comando de _build_.
+2. **Configurar la función Edge.** Netlify detecta automáticamente los archivos en `netlify/edge-functions/`; el endpoint `/socket` queda asociado a la función `socket` que implementa el mismo protocolo que `server.js`.
+3. **Variables de entorno opcionales.** Si quieres personalizar la contraseña del show, define `SHOW_PASSWORD` (o `SESSION_PASSWORD`) desde la UI de Netlify. La función Edge lee cualquiera de estas variables y usa `test` como valor por defecto si no están presentes.
+
+Una vez desplegado, los clientes cargarán la aplicación desde `https://<tu-sitio>.netlify.app/` y se conectarán automáticamente a `wss://<tu-sitio>.netlify.app/socket` gracias a la lógica incluida en `public/index.html`.
