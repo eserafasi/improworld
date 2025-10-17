@@ -5,7 +5,7 @@ const crypto = require('crypto');
 
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || '0.0.0.0';
-const SESSION_PASSWORD = process.env.SHOW_PASSWORD || process.env.SESSION_PASSWORD || 'impro';
+const SESSION_PASSWORD = process.env.SHOW_PASSWORD || process.env.SESSION_PASSWORD || 'test';
 const RATE_LIMIT_MS = 2000;
 const MAX_LENGTH = 140;
 
