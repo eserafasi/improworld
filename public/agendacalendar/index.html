@@ -431,16 +431,16 @@
     .filters-card {
       background: var(--card);
       border-radius: var(--radius-lg);
-      padding: 28px;
+      padding: 16px 20px;
       box-shadow: var(--shadow-md);
       border: 1px solid rgba(124, 58, 237, 0.08);
       display: grid;
-      gap: 20px;
+      gap: 16px;
       transition: all 0.25s ease;
     }
 
     .filters-card.is-collapsed {
-      padding-bottom: 22px;
+      padding-bottom: 12px;
     }
 
     .filters-card.is-collapsed .filters {
@@ -456,30 +456,31 @@
     }
 
     .filters-card__title {
-      font-size: 1.35rem;
+      margin: 0;
+      font-size: 1.2rem;
       font-weight: 700;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
 
     .filters-card__title span {
       display: inline-flex;
-      width: 38px;
-      height: 38px;
-      border-radius: 12px;
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
       background: var(--primary-soft);
       color: var(--primary);
       align-items: center;
       justify-content: center;
       font-weight: 600;
-      font-size: 1.1rem;
+      font-size: 1rem;
     }
 
     .filters-card__meta {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px 12px;
+      gap: 8px 12px;
       align-items: center;
       justify-content: flex-end;
       margin-left: auto;
@@ -488,7 +489,7 @@
     .filter-summary {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: 8px;
       align-items: center;
     }
 
@@ -500,13 +501,13 @@
     .filters {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
+      gap: 12px;
     }
 
     .filters label {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 4px;
       font-size: 0.85rem;
       color: var(--muted);
       font-weight: 600;
@@ -516,7 +517,7 @@
 
     .filters select,
     .filters input {
-      padding: 10px 12px;
+      padding: 8px 12px;
       border: 1px solid var(--ring);
       border-radius: 12px;
       font-size: 0.95rem;
@@ -839,7 +840,7 @@
 
     @media (max-width: 900px) {
       .filters-card {
-        padding: 22px;
+        padding: 16px 18px;
       }
 
       .filters-card__meta {
@@ -854,9 +855,9 @@
       }
 
       .filters-card__title span {
-        width: 32px;
-        height: 32px;
-        font-size: 1rem;
+        width: 28px;
+        height: 28px;
+        font-size: 0.95rem;
       }
 
       .agenda__list {
@@ -866,7 +867,7 @@
 
     @media (max-width: 640px) {
       .filters-card {
-        padding: 18px;
+        padding: 16px;
       }
 
       .filters-card__meta {
@@ -1368,6 +1369,33 @@
     return d.toISOString().split("T")[0];
   }
 
+  const monthFormatterCache = new Map();
+
+  function formatWithCapitalizedMonth(date, options) {
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
+      return "";
+    }
+    const key = JSON.stringify(
+      Object.keys(options || {})
+        .sort()
+        .map((prop) => [prop, options[prop]])
+    );
+    let formatter = monthFormatterCache.get(key);
+    if (!formatter) {
+      formatter = new Intl.DateTimeFormat("es-ES", options);
+      monthFormatterCache.set(key, formatter);
+    }
+    return formatter
+      .formatToParts(date)
+      .map((part) => {
+        if (part.type === "month") {
+          return part.value ? part.value.charAt(0).toUpperCase() + part.value.slice(1) : part.value;
+        }
+        return part.value;
+      })
+      .join("");
+  }
+
   function createFallbackId() {
     try {
       if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
@@ -1514,7 +1542,7 @@
     if (fechaRaw) {
       const d = new Date(fechaRaw);
       if (!Number.isNaN(d.getTime())) {
-        fechaLabel = d.toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" });
+        fechaLabel = formatWithCapitalizedMonth(d, { day: "numeric", month: "short", year: "numeric" });
         const local = new Date(d);
         local.setHours(0, 0, 0, 0);
         fechaTime = local.getTime();
@@ -1658,7 +1686,7 @@
           const fechaLocal = new Date(`${iso}T00:00:00`);
           const weekdayLongRaw = fechaLocal.toLocaleDateString("es-ES", { weekday: "long" });
           const weekdayShortRaw = fechaLocal.toLocaleDateString("es-ES", { weekday: "short" });
-          const monthLongRaw = fechaLocal.toLocaleDateString("es-ES", { day: "numeric", month: "long" });
+          const monthLabel = formatWithCapitalizedMonth(fechaLocal, { day: "numeric", month: "long" });
           const eventos = eventosPorDia.value.get(iso) || [];
           celdas.push({
             iso,
@@ -1668,7 +1696,7 @@
             eventos,
             weekdayLong: weekdayLongRaw.charAt(0).toUpperCase() + weekdayLongRaw.slice(1),
             weekdayShort: weekdayShortRaw.charAt(0).toUpperCase() + weekdayShortRaw.slice(1),
-            fechaLabel: monthLongRaw.charAt(0).toUpperCase() + monthLongRaw.slice(1),
+            fechaLabel: monthLabel,
           });
         }
         return celdas;
@@ -1688,11 +1716,11 @@
       });
 
       const mesActualLabel = computed(() =>
-        mesActual.value.toLocaleDateString("es-ES", { month: "long", year: "numeric" })
+        formatWithCapitalizedMonth(mesActual.value, { month: "long", year: "numeric" })
       );
 
       const mesActualCorto = computed(() =>
-        mesActual.value.toLocaleDateString("es-ES", { month: "short", year: "numeric" })
+        formatWithCapitalizedMonth(mesActual.value, { month: "short", year: "numeric" })
       );
 
       function cambiarMes(delta) {
@@ -1703,7 +1731,7 @@
 
       function fechaLarga(iso) {
         const fecha = new Date(`${iso}T00:00:00`);
-        const baseRaw = fecha.toLocaleDateString("es-ES", {
+        const baseRaw = formatWithCapitalizedMonth(fecha, {
           weekday: "long",
           day: "numeric",
           month: "long",
