@@ -121,6 +121,14 @@
       justify-content: space-between;
     }
 
+    .calendar-card__actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
     .calendar-card__title {
       display: flex;
       flex-direction: column;
@@ -168,10 +176,55 @@
       outline: none;
     }
 
+    .view-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(124, 58, 237, 0.08);
+      padding: 8px;
+      border-radius: 999px;
+    }
+
+    .view-toggle button {
+      appearance: none;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 8px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    }
+
+    .view-toggle button[aria-pressed="true"] {
+      background: var(--primary);
+      color: white;
+      box-shadow: var(--shadow-sm);
+      transform: translateY(-1px);
+    }
+
     .calendar-grid {
       display: grid;
       grid-template-columns: repeat(7, minmax(0, 1fr));
       gap: 12px;
+      grid-auto-rows: 1fr;
+    }
+
+    .calendar-month {
+      display: grid;
+      gap: 16px;
+    }
+
+    .calendar-weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 12px;
+      font-size: 0.85rem;
+      color: rgba(15, 23, 42, 0.6);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
     }
 
     .weekday {
@@ -193,6 +246,12 @@
       min-height: 120px;
       position: relative;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .day--empty {
+      min-height: 72px;
+      padding: 10px;
+      background: rgba(248, 250, 252, 0.65);
     }
 
     .day:hover {
@@ -249,6 +308,11 @@
       border: 1px solid rgba(124, 58, 237, 0.16);
     }
 
+    .event__body {
+      display: grid;
+      gap: 6px;
+    }
+
     .event__title {
       margin: 0;
       font-size: 0.95rem;
@@ -262,6 +326,54 @@
       gap: 4px;
       color: rgba(15, 23, 42, 0.72);
       font-size: 0.85rem;
+    }
+
+    .event__flyer {
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      background: rgba(124, 58, 237, 0.08);
+      aspect-ratio: 4 / 3;
+      position: relative;
+    }
+
+    .event__flyer img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .agenda-view {
+      display: grid;
+      gap: 20px;
+    }
+
+    .agenda-day {
+      background: rgba(124, 58, 237, 0.08);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      border: 1px solid rgba(124, 58, 237, 0.2);
+      display: grid;
+      gap: 12px;
+    }
+
+    .agenda-day__header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+
+    .agenda-day__title {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .agenda-events {
+      display: grid;
+      gap: 12px;
     }
 
     .event__meta strong {
@@ -309,6 +421,10 @@
       .day {
         min-height: 110px;
       }
+
+      .agenda-day {
+        padding: 14px;
+      }
     }
 
     @media (max-width: 640px) {
@@ -320,7 +436,13 @@
         align-items: stretch;
       }
 
-      .calendar-controls {
+      .calendar-card__actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .calendar-controls,
+      .view-toggle {
         width: 100%;
         justify-content: space-between;
       }
@@ -329,12 +451,20 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
+      .calendar-weekdays {
+        display: none;
+      }
+
       .weekday {
         display: none;
       }
 
       .day {
         min-height: auto;
+      }
+
+      .agenda-day__header {
+        align-items: flex-start;
       }
     }
   </style>
@@ -359,46 +489,112 @@
     <main>
       <div class="wrap">
         <section class="calendar-card">
+          <!--
+            Nota interna: La vista mensual descarta semanas vacías, la agenda agrupa solo días con eventos y se reserva proporción 4:3 para los flyers para evitar saltos de diseño.
+          -->
           <div class="calendar-card__header">
             <div class="calendar-card__title">
-              <h2>{{ mesActualLabel }}</h2>
-              <span v-if="visibleEventosMes === 1">Un evento en este mes</span>
-              <span v-else>{{ visibleEventosMes }} eventos en este mes</span>
+              <h2 id="calendar-title">{{ mesActualLabel }}</h2>
+              <span role="status" aria-live="polite">
+                <template v-if="visibleEventosMes === 1">1 evento visible este mes</template>
+                <template v-else>{{ visibleEventosMes }} eventos visibles este mes</template>
+              </span>
             </div>
-            <div class="calendar-controls">
-              <button type="button" @click="cambiarMes(-1)" aria-label="Mes anterior">← Anterior</button>
-              <div>{{ mesActualCorto }}</div>
-              <button type="button" @click="cambiarMes(1)" aria-label="Mes siguiente">Siguiente →</button>
+            <div class="calendar-card__actions">
+              <div class="calendar-controls" role="group" aria-label="Cambiar de mes">
+                <button type="button" @click="cambiarMes(-1)" aria-label="Ir al mes anterior">←</button>
+                <span aria-hidden="true">{{ mesActualCorto }}</span>
+                <button type="button" @click="cambiarMes(1)" aria-label="Ir al mes siguiente">→</button>
+              </div>
+              <div class="view-toggle" role="group" aria-label="Cambiar vista del calendario">
+                <button
+                  type="button"
+                  :aria-pressed="vista === 'month'"
+                  @click="vista = 'month'"
+                >Vista mensual</button>
+                <button
+                  type="button"
+                  :aria-pressed="vista === 'agenda'"
+                  @click="vista = 'agenda'"
+                >Vista agenda</button>
+              </div>
             </div>
           </div>
 
           <div v-if="error" class="empty">{{ error }}</div>
           <div v-else-if="cargando" class="loading">Cargando eventos…</div>
           <template v-else>
-            <div v-if="dias.length" class="calendar-grid">
-              <div class="weekday" v-for="dia in encabezados" :key="dia">{{ dia }}</div>
-              <article
-                v-for="day in dias"
-                :key="day.iso"
-                class="day"
-                :class="{ 'day--muted': !day.mesActual, 'day--today': day.esHoy }"
+            <div v-if="vista === 'month'" class="calendar-month">
+              <div class="calendar-weekdays" aria-hidden="true">
+                <div class="weekday" v-for="dia in encabezados" :key="`weekday-${dia}`">{{ dia }}</div>
+              </div>
+              <div
+                v-if="semanas.length"
+                class="calendar-grid"
+                role="grid"
+                aria-labelledby="calendar-title"
+                id="calendar-grid"
               >
-                <header class="day__header">
-                  <span class="day__number">{{ day.numero }}</span>
-                  <span v-if="day.eventos.length" class="day__badge">{{ day.eventos.length }} · {{ day.eventos.length === 1 ? 'evento' : 'eventos' }}</span>
+                <template v-for="(week, index) in semanas" :key="`week-${index}`">
+                  <article
+                    v-for="day in week"
+                    :key="day.iso"
+                    class="day"
+                    :class="{ 'day--muted': !day.mesActual, 'day--today': day.esHoy, 'day--empty': !day.eventos.length }"
+                    role="gridcell"
+                    :aria-label="descripcionDia(day)"
+                  >
+                    <header class="day__header">
+                      <span class="day__number">{{ day.numero }}</span>
+                      <span v-if="day.eventos.length" class="day__badge">{{ day.eventos.length }} · {{ day.eventos.length === 1 ? 'evento' : 'eventos' }}</span>
+                    </header>
+                    <div v-if="day.eventos.length" class="day__events">
+                      <article v-for="evento in day.eventos" :key="evento.id" class="event" role="group" :aria-label="`Evento ${evento.nombre}`">
+                        <div v-if="evento.flyerUrl" class="event__flyer">
+                          <img :src="evento.flyerUrl" :alt="`Flyer del evento ${evento.nombre}`" loading="lazy" />
+                        </div>
+                        <div class="event__body">
+                          <h3 class="event__title">{{ evento.nombre }}</h3>
+                          <div class="event__meta">
+                            <span><strong>{{ evento.horaLabel }}</strong> · {{ evento.lugarLabel }}</span>
+                            <span>{{ evento.ciudadLabel }}</span>
+                          </div>
+                        </div>
+                      </article>
+                    </div>
+                  </article>
+                </template>
+              </div>
+              <p v-else class="empty">No hay eventos programados para este mes.</p>
+            </div>
+            <div v-else class="agenda-view" role="list" aria-labelledby="calendar-title">
+              <article
+                v-for="day in agendaDias"
+                :key="day.iso"
+                class="agenda-day"
+                role="listitem"
+              >
+                <header class="agenda-day__header">
+                  <h3 class="agenda-day__title">{{ day.label }}</h3>
+                  <span class="day__badge">{{ day.eventos.length }} · {{ day.eventos.length === 1 ? 'evento' : 'eventos' }}</span>
                 </header>
-                <div v-if="day.eventos.length" class="day__events">
-                  <article v-for="evento in day.eventos" :key="evento.id" class="event">
-                    <h3 class="event__title">{{ evento.nombre }}</h3>
-                    <div class="event__meta">
-                      <span><strong>{{ evento.horaLabel }}</strong> · {{ evento.lugarLabel }}</span>
-                      <span>{{ evento.ciudadLabel }}</span>
+                <div class="agenda-events">
+                  <article v-for="evento in day.eventos" :key="evento.id" class="event" role="group" :aria-label="`Evento ${evento.nombre}`">
+                    <div v-if="evento.flyerUrl" class="event__flyer">
+                      <img :src="evento.flyerUrl" :alt="`Flyer del evento ${evento.nombre}`" loading="lazy" />
+                    </div>
+                    <div class="event__body">
+                      <h3 class="event__title">{{ evento.nombre }}</h3>
+                      <div class="event__meta">
+                        <span><strong>{{ evento.horaLabel }}</strong> · {{ evento.lugarLabel }}</span>
+                        <span>{{ evento.ciudadLabel }}</span>
+                      </div>
                     </div>
                   </article>
                 </div>
               </article>
+              <p v-if="!agendaDias.length" class="empty">No hay eventos programados para este mes.</p>
             </div>
-            <p v-else class="empty">No hay eventos programados para este mes.</p>
           </template>
         </section>
       </div>
@@ -459,6 +655,14 @@
       ciudadLabel: val(ev.Ciudad) || val(ev.Pais) || val(ev["País"]) || "",
       lugarLabel: val(ev.Lugar) || "Ubicación por confirmar",
       pais: val(ev.Pais) || val(ev["País"]),
+      flyerUrl:
+        val(ev.FlyerURL) ||
+        val(ev.Flyer) ||
+        val(ev.FlyerWeb) ||
+        val(ev.Poster) ||
+        val(ev.Imagen) ||
+        val(ev.ImagenFlyer) ||
+        "",
       estado: val(ev.Estado) || "Publicado",
     };
   }
@@ -474,6 +678,7 @@
       const hoyISO = new Date(hoy.getTime() - hoy.getTimezoneOffset() * 60000).toISOString().split("T")[0];
       const mesActual = ref(new Date(hoy.getFullYear(), hoy.getMonth(), 1));
       const ultimaActualizacion = ref(new Date().toLocaleDateString("es-ES", { dateStyle: "long" }));
+      const vista = ref("month");
 
       const encabezados = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
@@ -517,6 +722,35 @@
         return celdas;
       });
 
+      const semanas = computed(() => {
+        const resultado = [];
+        const total = dias.value;
+        for (let i = 0; i < total.length; i += 7) {
+          const bloque = total.slice(i, i + 7);
+          if (bloque.some((day) => day.eventos.length)) {
+            resultado.push(bloque);
+          }
+        }
+        return resultado;
+      });
+
+      const agendaDias = computed(() =>
+        dias.value
+          .filter((day) => day.mesActual && day.eventos.length)
+          .map((day) => {
+            const fecha = new Date(`${day.iso}T00:00:00`);
+            const labelRaw = fecha.toLocaleDateString("es-ES", {
+              weekday: "long",
+              day: "numeric",
+              month: "long",
+            });
+            return {
+              ...day,
+              label: labelRaw.charAt(0).toUpperCase() + labelRaw.slice(1),
+            };
+          })
+      );
+
       const visibleEventosMes = computed(() => {
         return dias.value
           .filter((day) => day.mesActual)
@@ -535,6 +769,21 @@
         const nuevo = new Date(mesActual.value.getTime());
         nuevo.setMonth(nuevo.getMonth() + delta, 1);
         mesActual.value = nuevo;
+      }
+
+      function descripcionDia(day) {
+        const fecha = new Date(`${day.iso}T00:00:00`);
+        const baseRaw = fecha.toLocaleDateString("es-ES", {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+        });
+        const base = baseRaw.charAt(0).toUpperCase() + baseRaw.slice(1);
+        if (!day.eventos.length) {
+          return `${base}. Sin eventos.`;
+        }
+        const cantidad = day.eventos.length === 1 ? "Un evento" : `${day.eventos.length} eventos`;
+        return `${base}. ${cantidad}.`;
       }
 
       async function cargar() {
@@ -564,7 +813,6 @@
       return {
         cargando,
         error,
-        dias,
         encabezados,
         cambiarMes,
         mesActualLabel,
@@ -572,6 +820,10 @@
         visibleEventosMes,
         totalEventos,
         ultimaActualizacion,
+        vista,
+        semanas,
+        agendaDias,
+        descripcionDia,
       };
     }
   }).mount("#app");
