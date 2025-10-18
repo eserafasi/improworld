@@ -1125,8 +1125,8 @@
                     </select>
                   </label>
                   <label for="fFecha">
-                    Fecha
-                    <input id="fFecha" type="date" v-model="filters.fecha" />
+                    Fecha desde
+                    <input id="fFecha" type="date" v-model="filters.fecha" :min="hoyISO" />
                   </label>
                   <label for="fSearch">
                     Búsqueda
@@ -1250,8 +1250,8 @@
                     </select>
                   </label>
                   <label for="fFecha">
-                    Fecha
-                    <input id="fFecha" type="date" v-model="filters.fecha" />
+                    Fecha desde
+                    <input id="fFecha" type="date" v-model="filters.fecha" :min="hoyISO" />
                   </label>
                   <label for="fSearch">
                     Búsqueda
@@ -1599,7 +1599,7 @@
         pais: "",
         ciudad: "",
         compania: "",
-        fecha: "",
+        fecha: hoyISO,
       });
       const filtersExpanded = ref(false);
       const downloadingAgendaPdf = ref(false);
@@ -1619,7 +1619,7 @@
           const okP = !p || normalizeText(ev.pais) === p;
           const okC = !c || normalizeText(ev.ciudad) === c;
           const okCo = !co || normalizeText(ev.compania) === co;
-          const okF = !f || ev.fechaISO === f;
+          const okF = !f || (ev.fechaISO && ev.fechaISO >= f);
           return okQ && okP && okC && okCo && okF;
         });
       });
@@ -1762,7 +1762,7 @@
             month: "short",
             year: "numeric",
           });
-          chips.push({ key: "fecha", label: "Fecha", value: formatted });
+          chips.push({ key: "fecha", label: "Desde", value: formatted });
         }
         if (filters.search) {
           chips.push({ key: "search", label: "Búsqueda", value: filters.search });
@@ -2065,6 +2065,7 @@
         removeFilter,
         downloadAgendaPdf,
         downloadingAgendaPdf,
+        hoyISO,
         fechaLarga,
         diaSemanaCorta,
         descripcionFila,
