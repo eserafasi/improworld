@@ -1010,16 +1010,6 @@
   <div id="app" class="page" v-cloak>
     <header class="hero">
       <div class="hero__inner">
-        <div>
-          <h1>Agenda ImproWorld · Calendario</h1>
-          <p>
-            Visualiza todos los eventos de improvisación en un calendario mensual. Filtramos los datos publicados en la agenda y los agrupamos automáticamente por día para que planifiques tus asistencias de un vistazo.
-          </p>
-        </div>
-        <div class="hero__meta">
-          <span><strong>{{ totalEventos }}</strong> eventos publicados</span>
-          <span>Actualizado el <strong>{{ ultimaActualizacion }}</strong></span>
-        </div>
       </div>
     </header>
 
@@ -1236,20 +1226,11 @@
                 </div>
               </section>
               <section class="agenda-footer">
-                <div class="agenda-footer__metrics">
-                  <article class="metric">
-                    <span class="metric__value">{{ totalEventosAgenda }}</span>
-                    <span class="metric__label">Eventos activos en ImproWorld</span>
-                  </article>
-                  <article class="metric">
-                    <span class="metric__value">{{ totalPaisesAgenda }}</span>
-                    <span class="metric__label">Países representados</span>
-                  </article>
-                  <article class="metric">
-                    <span class="metric__value">{{ eventosMesAgenda }}</span>
-                    <span class="metric__label">Eventos este mes</span>
-                  </article>
-                </div>
+                 <div class="hero__meta">
+          <span><strong>{{ totalEventos }}</strong> eventos publicados</span>
+          <span>Actualizado el <strong>{{ ultimaActualizacion }}</strong></span>
+          <span>Países representados <strong>{{ totalPaisesAgenda }}</strong></span>
+        </div>
                 <div class="agenda-footer__download">
                   <button
                     type="button"
