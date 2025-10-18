@@ -710,6 +710,13 @@
                         <span>{{ evento.lugarLabel }}</span>
                         <span v-if="evento.ciudadLabel">{{ evento.ciudadLabel }}</span>
                       </div>
+                      <a
+                        v-if="evento.boleteria"
+                        class="show-card__cta"
+                        :href="evento.boleteria"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >Comprar boletas</a>
                     </div>
                   </article>
                 </div>
@@ -769,6 +776,8 @@
   <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
   <script>
   const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwoCLUfEiRjnmzumQ-Qs82vLUMpfTWHuemY8W6NODHVhGskbdQQHh-rIHKJUpS0cPCSxQ/exec";
+  const PLACEHOLDER_IMAGE =
+    "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA4MDAgNDUwJz4KPHJlY3QgZmlsbD0nI2VkZTlmZScgd2lkdGg9JzgwMCcgaGVpZ2h0PSc0NTAnLz4KPHRleHQgeD0nNTAlJyB5PSc1MCUnIGZpbGw9JyM3YzNhZWQnIGZvbnQtZmFtaWx5PSdJbnRlciwgQXJpYWwsIHNhbnMtc2VyaWYnIGZvbnQtc2l6ZT0nNDgnIHRleHQtYW5jaG9yPSdtaWRkbGUnIGRvbWluYW50LWJhc2VsaW5lPSdtaWRkbGUnPlNpbiBpbWFnZW48L3RleHQ+Cjwvc3ZnPg==";
 
   function val(x) {
     return x === undefined || x === null ? "" : String(x).trim();
@@ -808,9 +817,113 @@
     return { label, minutes: hours * 60 + minutes };
   }
 
+  function extractDriveId(u) {
+    if (!u) return "";
+    let match;
+    if ((match = String(u).match(/[?&]id=([-\w]+)/))) return match[1];
+    if ((match = String(u).match(/\/d\/([-\w]+)/))) return match[1];
+    return "";
+  }
+
+  function driveImageCandidates(u) {
+    const id = extractDriveId(u);
+    if (!id) {
+      return u ? [u] : [];
+    }
+    return [
+      `https://drive.google.com/uc?export=view&id=${id}`,
+      `https://drive.google.com/thumbnail?id=${id}&sz=w1200`,
+      `https://lh3.googleusercontent.com/d/${id}=w1200`,
+    ];
+  }
+
+  function uniqueNonEmpty(list) {
+    const set = new Set();
+    const result = [];
+    for (const item of list) {
+      const value = val(item);
+      if (!value || set.has(value)) continue;
+      set.add(value);
+      result.push(value);
+    }
+    return result;
+  }
+
+  function buildImageCandidates(ev) {
+    const directFlyers = [
+      ev.FlyerURL,
+      ev.Flyer,
+      ev.FlyerWeb,
+      ev.Poster,
+      ev.Imagen,
+      ev.ImagenFlyer,
+      ev.ImagenEvento,
+      ev.ImagenDestacada,
+    ];
+    const promotional = [
+      ...driveImageCandidates(val(ev.PiezaPromocional)),
+      ...driveImageCandidates(val(ev.PiezaPromo)),
+      ...driveImageCandidates(val(ev.ImagenPromocional)),
+    ];
+    return uniqueNonEmpty([...promotional, ...directFlyers]);
+  }
+
+  function resolveImageConfig(value) {
+    if (!value) return { sources: [], alt: "" };
+    if (Array.isArray(value)) return { sources: value, alt: "" };
+    if (typeof value === "string") return { sources: [value], alt: "" };
+    if (typeof value === "object") {
+      const src = Array.isArray(value.sources)
+        ? value.sources
+        : Array.isArray(value.candidates)
+        ? value.candidates
+        : [];
+      return {
+        sources: src,
+        alt: val(value.alt || value.altText),
+      };
+    }
+    return { sources: [], alt: "" };
+  }
+
+  function createImgWithFallback(config) {
+    const { sources, alt } = config;
+    const candidates = Array.isArray(sources) ? sources : [];
+    const img = document.createElement("img");
+    img.loading = "lazy";
+    img.decoding = "async";
+    if (alt) img.alt = alt;
+    let index = 0;
+
+    const tryNext = () => {
+      if (index >= candidates.length) {
+        img.onerror = null;
+        img.src = PLACEHOLDER_IMAGE;
+        return;
+      }
+      img.src = candidates[index];
+      index += 1;
+    };
+
+    img.addEventListener("error", tryNext);
+    img.addEventListener("load", () => {
+      img.onerror = null;
+    });
+
+    tryNext();
+    return img;
+  }
+
+  function mountImageWithFallback(el, value) {
+    const config = resolveImageConfig(value);
+    el.innerHTML = "";
+    el.appendChild(createImgWithFallback(config));
+  }
+
   function norm(ev) {
     const fechaISO = formatFecha(ev.FechaFuncion || ev.fecha || ev.fechaRaw);
     const horaInfo = parseHora(val(ev.HoraFuncionTexto) || val(ev.HoraFuncion));
+    const imageCandidates = buildImageCandidates(ev);
     return {
       id: val(ev.Id) || val(ev.ID) || createFallbackId(),
       nombre: val(ev.NombreFormato) || val(ev["Nombre de la Obra"]) || "Evento sin nombre",
@@ -820,13 +933,14 @@
       ciudadLabel: val(ev.Ciudad) || val(ev.Pais) || val(ev["País"]) || "",
       lugarLabel: val(ev.Lugar) || "Ubicación por confirmar",
       pais: val(ev.Pais) || val(ev["País"]),
-      flyerUrl:
-        val(ev.FlyerURL) ||
-        val(ev.Flyer) ||
-        val(ev.FlyerWeb) ||
-        val(ev.Poster) ||
-        val(ev.Imagen) ||
-        val(ev.ImagenFlyer) ||
+      flyerUrl: imageCandidates[0] || "",
+      imageCandidates,
+      formato: val(ev.Formato) || val(ev.FormatoObra) || val(ev["Formato de la Obra"]) || "",
+      boleteria:
+        val(ev.Boleteria) ||
+        val(ev.LinkBoleteria) ||
+        val(ev["Link Boleteria"]) ||
+        val(ev["Link boletos"]) ||
         "",
       formato: val(ev.Formato) || val(ev.FormatoObra) || val(ev["Formato de la Obra"]) || "",
       boleteria:
@@ -1005,7 +1119,16 @@
         descripcionFila,
       };
     }
-  }).mount("#app");
+  })
+    .directive("img-fallback", {
+      mounted(el, binding) {
+        mountImageWithFallback(el, binding.value);
+      },
+      updated(el, binding) {
+        mountImageWithFallback(el, binding.value);
+      },
+    })
+    .mount("#app");
   </script>
 </body>
 </html>
