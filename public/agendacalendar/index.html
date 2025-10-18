@@ -329,6 +329,20 @@
       display: block;
     }
 
+    .show-card__thumb--empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(124, 58, 237, 0.65);
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .show-card__thumb--empty::after {
+      content: "Sin imagen";
+    }
+
     .show-card__body {
       display: grid;
       gap: 6px;
@@ -1049,8 +1063,8 @@
                 Vista mensual tipo carrusel: cada fila representa un día del mes, mantiene ancho estable para las tarjetas y usa
                 scroll horizontal con snap para minimizar saltos de diseño. Se reutiliza el mapa de eventos existente sin
                 alterar la fuente de datos ni dependencias adicionales. Las jornadas vacías muestran un CTA para registrar
-                shows, mientras que los días con actividades mantienen foco y hover para accesibilidad. Limitación actual:
-                los eventos sin flyer muestran un bloque de color sólido, se puede mejorar con placeholders personalizados.
+                shows, mientras que los días con actividades mantienen foco y hover para accesibilidad. Los eventos sin flyer
+                muestran ahora un placeholder textual "Sin imagen".
               -->
               <article
                 v-for="day in diasDelMes"
@@ -1075,10 +1089,12 @@
                     role="group"
                     :aria-label="`Evento ${evento.nombre}`"
                   >
-                    <div class="show-card__thumb" v-if="evento.flyerUrl">
-                      <img :src="evento.flyerUrl" :alt="`Flyer del evento ${evento.nombre}`" loading="lazy" />
-                    </div>
-                    <div class="show-card__thumb" v-else aria-hidden="true"></div>
+                    <div
+                      class="show-card__thumb"
+                      v-if="evento.imageCandidates.length"
+                      v-img-fallback="{ sources: evento.imageCandidates, alt: `Flyer del evento ${evento.nombre}` }"
+                    ></div>
+                    <div class="show-card__thumb show-card__thumb--empty" v-else aria-hidden="true"></div>
                     <div class="show-card__body">
                       <h3 class="show-card__title">{{ evento.nombre }}</h3>
                       <div class="show-card__meta">
