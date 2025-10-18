@@ -1590,6 +1590,9 @@
       const lista = ref([]);
       const hoy = new Date();
       const hoyISO = new Date(hoy.getTime() - hoy.getTimezoneOffset() * 60000).toISOString().split("T")[0];
+      const hoySinHora = new Date(hoy.getTime());
+      hoySinHora.setHours(0, 0, 0, 0);
+      const hoyTimestamp = hoySinHora.getTime();
       const mesActual = ref(new Date(hoy.getFullYear(), hoy.getMonth(), 1));
       const ultimaActualizacion = ref(new Date().toLocaleDateString("es-ES", { dateStyle: "long" }));
       const vista = ref("month");
@@ -1671,7 +1674,14 @@
         return celdas;
       });
 
-      const diasDelMes = computed(() => dias.value.filter((day) => day.mesActual));
+      const diasDelMes = computed(() =>
+        dias.value.filter((day) => {
+          if (!day.mesActual) return false;
+          const dayDate = new Date(`${day.iso}T00:00:00`);
+          dayDate.setHours(0, 0, 0, 0);
+          return dayDate.getTime() >= hoyTimestamp;
+        })
+      );
 
       const visibleEventosMes = computed(() => {
         return diasDelMes.value.reduce((acc, day) => acc + day.eventos.length, 0);
