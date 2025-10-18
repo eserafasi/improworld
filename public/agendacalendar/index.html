@@ -205,159 +205,41 @@
       transform: translateY(-1px);
     }
 
-    .calendar-grid {
-      display: grid;
-      grid-template-columns: repeat(7, minmax(0, 1fr));
-      gap: 12px;
-      grid-auto-rows: 1fr;
-    }
-
     .calendar-month {
-      display: grid;
-      gap: 16px;
-    }
-
-    .calendar-weekdays {
-      display: grid;
-      grid-template-columns: repeat(7, minmax(0, 1fr));
-      gap: 12px;
-      font-size: 0.85rem;
-      color: rgba(15, 23, 42, 0.6);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
-
-    .weekday {
-      text-align: center;
-      font-weight: 600;
-      color: rgba(16, 24, 40, 0.68);
-      font-size: 0.9rem;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-    }
-
-    .day {
-      background: rgba(255, 255, 255, 0.82);
-      border-radius: var(--radius-md);
-      border: 1px solid rgba(226, 232, 240, 0.9);
-      padding: 12px;
-      display: grid;
-      gap: 10px;
-      min-height: 120px;
-      position: relative;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .day--empty {
-      min-height: 72px;
-      padding: 10px;
-      background: rgba(248, 250, 252, 0.65);
-    }
-
-    .day:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
-      z-index: 2;
-    }
-
-    .day--muted {
-      background: rgba(248, 250, 252, 0.7);
-      color: rgba(100, 116, 139, 0.92);
-    }
-
-    .day--today {
-      border-color: rgba(124, 58, 237, 0.5);
-      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.18);
-    }
-
-    .day__header {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 8px;
-    }
-
-    .day__number {
-      font-weight: 700;
-      font-size: 1.05rem;
-    }
-
-    .day__badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      border-radius: 999px;
-      font-size: 0.75rem;
-      padding: 4px 8px;
-      background: var(--accent-soft);
-      color: var(--accent);
-      font-weight: 600;
-    }
-
-    .day__events {
-      display: grid;
-      gap: 8px;
-    }
-
-    .event {
-      display: grid;
-      gap: 6px;
-      background: rgba(124, 58, 237, 0.08);
-      border-radius: var(--radius-sm);
-      padding: 10px 12px;
-      border: 1px solid rgba(124, 58, 237, 0.16);
-    }
-
-    .event__body {
-      display: grid;
-      gap: 6px;
-    }
-
-    .event__title {
-      margin: 0;
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: var(--ink);
-    }
-
-    .event__meta {
       display: flex;
       flex-direction: column;
-      gap: 4px;
-      color: rgba(15, 23, 42, 0.72);
-      font-size: 0.85rem;
-    }
-
-    .event__flyer {
-      border-radius: var(--radius-sm);
-      overflow: hidden;
-      background: rgba(124, 58, 237, 0.08);
-      aspect-ratio: 4 / 3;
-      position: relative;
-    }
-
-    .event__flyer img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    .agenda-view {
-      display: grid;
       gap: 20px;
     }
 
-    .agenda-day {
-      background: rgba(124, 58, 237, 0.08);
-      border-radius: var(--radius-md);
-      padding: 16px;
-      border: 1px solid rgba(124, 58, 237, 0.2);
-      display: grid;
-      gap: 12px;
+    .netflix-month {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
     }
 
-    .agenda-day__header {
+    .month-row {
+      background: rgba(255, 255, 255, 0.88);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      padding: 18px 20px 20px;
+      display: grid;
+      gap: 16px;
+      box-shadow: 0 10px 32px rgba(15, 23, 42, 0.08);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .month-row:hover,
+    .month-row:focus-within {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 44px rgba(15, 23, 42, 0.16);
+    }
+
+    .month-row--today {
+      border-color: rgba(124, 58, 237, 0.45);
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.18);
+    }
+
+    .month-row__header {
       display: flex;
       flex-wrap: wrap;
       gap: 12px;
@@ -365,19 +247,271 @@
       justify-content: space-between;
     }
 
-    .agenda-day__title {
+    .month-row__title {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .month-row__day {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .month-row__date {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .month-row__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      padding: 6px 12px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .month-row__scroller {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .month-row__scroller::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .month-row__scroller::-webkit-scrollbar-thumb {
+      background: rgba(124, 58, 237, 0.24);
+      border-radius: 999px;
+    }
+
+    .show-card {
+      flex: 0 0 clamp(220px, 26vw, 280px);
+      display: grid;
+      gap: 10px;
+      background: rgba(124, 58, 237, 0.08);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      border: 1px solid rgba(124, 58, 237, 0.16);
+      scroll-snap-align: start;
+      box-shadow: 0 10px 28px rgba(124, 58, 237, 0.16);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .show-card:hover,
+    .show-card:focus-within {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(124, 58, 237, 0.22);
+    }
+
+    .show-card__thumb {
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      background: rgba(124, 58, 237, 0.16);
+      aspect-ratio: 16 / 9;
+      position: relative;
+    }
+
+    .show-card__thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .show-card__body {
+      display: grid;
+      gap: 6px;
+    }
+
+    .show-card__title {
       margin: 0;
       font-size: 1rem;
       font-weight: 600;
+      color: var(--ink);
     }
 
-    .agenda-events {
+    .show-card__meta {
       display: grid;
-      gap: 12px;
+      gap: 4px;
+      font-size: 0.85rem;
+      color: rgba(15, 23, 42, 0.76);
     }
 
-    .event__meta strong {
+    .month-row__empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(248, 250, 252, 0.75);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      text-align: center;
+      gap: 16px;
+    }
+
+    .month-row__cta {
+      appearance: none;
+      border: none;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 10px 18px;
+      border-radius: 999px;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .month-row__cta:hover,
+    .month-row__cta:focus-visible {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+      outline: none;
+    }
+
+    .month-row__summary {
+      font-size: 0.9rem;
+      color: rgba(16, 24, 40, 0.7);
+    }
+
+    .agenda-view {
+      display: grid;
+      gap: 20px;
+    }
+
+    .agenda-list {
+      display: grid;
+      gap: 20px;
+    }
+
+    .agenda-card {
+      display: grid;
+      grid-template-columns: clamp(140px, 30vw, 200px) minmax(0, 1fr);
+      gap: 18px;
+      background: rgba(255, 255, 255, 0.82);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(124, 58, 237, 0.16);
+      box-shadow: 0 12px 28px rgba(79, 70, 229, 0.15);
+      padding: 18px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .agenda-card:hover,
+    .agenda-card:focus-within {
+      transform: translateY(-3px);
+      box-shadow: 0 20px 44px rgba(79, 70, 229, 0.22);
+    }
+
+    .agenda-card__thumb {
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: rgba(124, 58, 237, 0.18);
+      aspect-ratio: 3 / 4;
+    }
+
+    .agenda-card__thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .agenda-card__body {
+      display: grid;
+      gap: 10px;
+    }
+
+    .agenda-card__heading {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .agenda-card__title {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .agenda-card__meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 16px;
+      font-size: 0.9rem;
+      color: rgba(15, 23, 42, 0.76);
+    }
+
+    .agenda-card__meta strong {
       color: var(--primary);
+    }
+
+    .agenda-card__footer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .agenda-card__tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      background: rgba(124, 58, 237, 0.12);
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .agenda-card__cta {
+      appearance: none;
+      border: none;
+      background: var(--primary);
+      color: white;
+      font-weight: 600;
+      border-radius: 999px;
+      padding: 8px 16px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .agenda-card__cta:hover,
+    .agenda-card__cta:focus-visible {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+      outline: none;
+    }
+
+    .agenda-card__description {
+      font-size: 0.95rem;
+      color: rgba(16, 24, 40, 0.74);
+    }
+
+    .day__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      padding: 6px 10px;
+      background: var(--accent-soft);
+      color: var(--accent);
       font-weight: 600;
     }
 
@@ -414,16 +548,24 @@
     }
 
     @media (max-width: 960px) {
-      .calendar-grid {
-        gap: 8px;
+      .month-row {
+        padding: 16px;
       }
 
-      .day {
-        min-height: 110px;
+      .month-row__scroller {
+        gap: 12px;
       }
 
-      .agenda-day {
-        padding: 14px;
+      .show-card {
+        flex-basis: clamp(200px, 48vw, 240px);
+      }
+
+      .agenda-card {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .agenda-card__thumb {
+        aspect-ratio: 16 / 9;
       }
     }
 
@@ -447,23 +589,28 @@
         justify-content: space-between;
       }
 
-      .calendar-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+      .month-row {
+        padding: 14px;
       }
 
-      .calendar-weekdays {
-        display: none;
+      .month-row__header {
+        align-items: flex-start;
       }
 
-      .weekday {
-        display: none;
+      .month-row__badge {
+        margin-top: 8px;
       }
 
-      .day {
-        min-height: auto;
+      .show-card {
+        flex-basis: clamp(200px, 72vw, 260px);
       }
 
-      .agenda-day__header {
+      .agenda-card {
+        padding: 16px;
+      }
+
+      .agenda-card__footer {
+        flex-direction: column;
         align-items: flex-start;
       }
     }
@@ -489,9 +636,6 @@
     <main>
       <div class="wrap">
         <section class="calendar-card">
-          <!--
-            Nota interna: La vista mensual descarta semanas vacías, la agenda agrupa solo días con eventos y se reserva proporción 4:3 para los flyers para evitar saltos de diseño.
-          -->
           <div class="calendar-card__header">
             <div class="calendar-card__title">
               <h2 id="calendar-title">{{ mesActualLabel }}</h2>
@@ -511,12 +655,12 @@
                   type="button"
                   :aria-pressed="vista === 'month'"
                   @click="vista = 'month'"
-                >Vista mensual</button>
+                >Vista mensual (estilo Netflix)</button>
                 <button
                   type="button"
                   :aria-pressed="vista === 'agenda'"
                   @click="vista = 'agenda'"
-                >Vista agenda</button>
+                >Vista agenda (lista)</button>
               </div>
             </div>
           </div>
@@ -524,76 +668,97 @@
           <div v-if="error" class="empty">{{ error }}</div>
           <div v-else-if="cargando" class="loading">Cargando eventos…</div>
           <template v-else>
-            <div v-if="vista === 'month'" class="calendar-month">
-              <div class="calendar-weekdays" aria-hidden="true">
-                <div class="weekday" v-for="dia in encabezados" :key="`weekday-${dia}`">{{ dia }}</div>
-              </div>
-              <div
-                v-if="semanas.length"
-                class="calendar-grid"
-                role="grid"
-                aria-labelledby="calendar-title"
-                id="calendar-grid"
-              >
-                <template v-for="(week, index) in semanas" :key="`week-${index}`">
-                  <article
-                    v-for="day in week"
-                    :key="day.iso"
-                    class="day"
-                    :class="{ 'day--muted': !day.mesActual, 'day--today': day.esHoy, 'day--empty': !day.eventos.length }"
-                    role="gridcell"
-                    :aria-label="descripcionDia(day)"
-                  >
-                    <header class="day__header">
-                      <span class="day__number">{{ day.numero }}</span>
-                      <span v-if="day.eventos.length" class="day__badge">{{ day.eventos.length }} · {{ day.eventos.length === 1 ? 'evento' : 'eventos' }}</span>
-                    </header>
-                    <div v-if="day.eventos.length" class="day__events">
-                      <article v-for="evento in day.eventos" :key="evento.id" class="event" role="group" :aria-label="`Evento ${evento.nombre}`">
-                        <div v-if="evento.flyerUrl" class="event__flyer">
-                          <img :src="evento.flyerUrl" :alt="`Flyer del evento ${evento.nombre}`" loading="lazy" />
-                        </div>
-                        <div class="event__body">
-                          <h3 class="event__title">{{ evento.nombre }}</h3>
-                          <div class="event__meta">
-                            <span><strong>{{ evento.horaLabel }}</strong> · {{ evento.lugarLabel }}</span>
-                            <span>{{ evento.ciudadLabel }}</span>
-                          </div>
-                        </div>
-                      </article>
-                    </div>
-                  </article>
-                </template>
-              </div>
-              <p v-else class="empty">No hay eventos programados para este mes.</p>
-            </div>
-            <div v-else class="agenda-view" role="list" aria-labelledby="calendar-title">
+            <div v-if="vista === 'month'" class="calendar-month netflix-month" role="list" aria-labelledby="calendar-title">
+              <!--
+                Vista mensual tipo carrusel: cada fila representa un día del mes, mantiene ancho estable para las tarjetas y usa
+                scroll horizontal con snap para minimizar saltos de diseño. Se reutiliza el mapa de eventos existente sin
+                alterar la fuente de datos ni dependencias adicionales. Las jornadas vacías muestran un CTA para registrar
+                shows, mientras que los días con actividades mantienen foco y hover para accesibilidad. Limitación actual:
+                los eventos sin flyer muestran un bloque de color sólido, se puede mejorar con placeholders personalizados.
+              -->
               <article
-                v-for="day in agendaDias"
+                v-for="day in diasDelMes"
                 :key="day.iso"
-                class="agenda-day"
+                class="month-row"
+                :class="{ 'month-row--today': day.esHoy }"
                 role="listitem"
+                :aria-label="descripcionFila(day)"
               >
-                <header class="agenda-day__header">
-                  <h3 class="agenda-day__title">{{ day.label }}</h3>
-                  <span class="day__badge">{{ day.eventos.length }} · {{ day.eventos.length === 1 ? 'evento' : 'eventos' }}</span>
+                <header class="month-row__header">
+                  <div class="month-row__title">
+                    <span class="month-row__day">{{ diaSemanaCorta(day.iso) }} · {{ day.numero }}</span>
+                    <span class="month-row__date">{{ fechaLarga(day.iso) }}</span>
+                  </div>
+                  <span class="month-row__badge">{{ day.eventos.length }} · {{ day.eventos.length === 1 ? 'evento' : 'eventos' }}</span>
                 </header>
-                <div class="agenda-events">
-                  <article v-for="evento in day.eventos" :key="evento.id" class="event" role="group" :aria-label="`Evento ${evento.nombre}`">
-                    <div v-if="evento.flyerUrl" class="event__flyer">
+                <div v-if="day.eventos.length" class="month-row__scroller" role="group" :aria-label="`Eventos del ${fechaLarga(day.iso)}`">
+                  <article
+                    v-for="evento in day.eventos"
+                    :key="evento.id"
+                    class="show-card"
+                    role="group"
+                    :aria-label="`Evento ${evento.nombre}`"
+                  >
+                    <div class="show-card__thumb" v-if="evento.flyerUrl">
                       <img :src="evento.flyerUrl" :alt="`Flyer del evento ${evento.nombre}`" loading="lazy" />
                     </div>
-                    <div class="event__body">
-                      <h3 class="event__title">{{ evento.nombre }}</h3>
-                      <div class="event__meta">
-                        <span><strong>{{ evento.horaLabel }}</strong> · {{ evento.lugarLabel }}</span>
-                        <span>{{ evento.ciudadLabel }}</span>
+                    <div class="show-card__thumb" v-else aria-hidden="true"></div>
+                    <div class="show-card__body">
+                      <h3 class="show-card__title">{{ evento.nombre }}</h3>
+                      <div class="show-card__meta">
+                        <span><strong>{{ evento.horaLabel }}</strong></span>
+                        <span>{{ evento.lugarLabel }}</span>
+                        <span v-if="evento.ciudadLabel">{{ evento.ciudadLabel }}</span>
                       </div>
                     </div>
                   </article>
                 </div>
+                <div v-else class="month-row__empty">
+                  <span class="month-row__summary">No hay eventos para este día.</span>
+                  <a class="month-row__cta" href="../registro.html">¿Tienes un show? Regístralo</a>
+                </div>
               </article>
-              <p v-if="!agendaDias.length" class="empty">No hay eventos programados para este mes.</p>
+              <p v-if="!diasDelMes.length" class="empty">No hay eventos programados para este mes.</p>
+            </div>
+            <div v-else class="agenda-view" role="list" aria-labelledby="calendar-title">
+              <div v-if="agendaEventos.length" class="agenda-list">
+                <article
+                  v-for="evento in agendaEventos"
+                  :key="`agenda-${evento.id}-${evento.diaISO}`"
+                  class="agenda-card"
+                  role="listitem"
+                  :aria-label="`Evento ${evento.nombre} el ${evento.resumenFecha}`"
+                >
+                  <div class="agenda-card__thumb" v-if="evento.flyerUrl">
+                    <img :src="evento.flyerUrl" :alt="`Flyer del evento ${evento.nombre}`" loading="lazy" />
+                  </div>
+                  <div class="agenda-card__thumb" v-else aria-hidden="true"></div>
+                  <div class="agenda-card__body">
+                    <div class="agenda-card__heading">
+                      <h3 class="agenda-card__title">{{ evento.nombre }}</h3>
+                      <div class="agenda-card__meta">
+                        <span><strong>{{ evento.resumenFecha }}</strong></span>
+                        <span>{{ evento.horaLabel }}</span>
+                        <span>{{ evento.lugarLabel }}</span>
+                        <span v-if="evento.ciudadLabel">{{ evento.ciudadLabel }}</span>
+                      </div>
+                    </div>
+                    <div class="agenda-card__footer">
+                      <span class="agenda-card__tag" v-if="evento.formato">{{ evento.formato }}</span>
+                      <span class="agenda-card__tag" v-if="!evento.formato && evento.pais">{{ evento.pais }}</span>
+                      <a
+                        v-if="evento.boleteria"
+                        class="agenda-card__cta"
+                        :href="evento.boleteria"
+                        target="_blank"
+                        rel="noopener"
+                      >Comprar boletas</a>
+                    </div>
+                    <p v-if="evento.descripcion" class="agenda-card__description">{{ evento.descripcion }}</p>
+                  </div>
+                </article>
+              </div>
+              <p v-else class="empty">No hay eventos programados para este mes.</p>
             </div>
           </template>
         </section>
@@ -663,6 +828,14 @@
         val(ev.Imagen) ||
         val(ev.ImagenFlyer) ||
         "",
+      formato: val(ev.Formato) || val(ev.FormatoObra) || val(ev["Formato de la Obra"]) || "",
+      boleteria:
+        val(ev.Boleteria) ||
+        val(ev.LinkBoleteria) ||
+        val(ev["Link Boleteria"]) ||
+        val(ev["Link boletos"]) ||
+        "",
+      descripcion: val(ev.Descripcion) || val(ev.Descripción) || "",
       estado: val(ev.Estado) || "Publicado",
     };
   }
@@ -679,8 +852,6 @@
       const mesActual = ref(new Date(hoy.getFullYear(), hoy.getMonth(), 1));
       const ultimaActualizacion = ref(new Date().toLocaleDateString("es-ES", { dateStyle: "long" }));
       const vista = ref("month");
-
-      const encabezados = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
       const eventosPorDia = computed(() => {
         const map = new Map();
@@ -710,6 +881,10 @@
           const d = new Date(inicio.getTime());
           d.setDate(inicio.getDate() + i);
           const iso = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().split("T")[0];
+          const fechaLocal = new Date(`${iso}T00:00:00`);
+          const weekdayLongRaw = fechaLocal.toLocaleDateString("es-ES", { weekday: "long" });
+          const weekdayShortRaw = fechaLocal.toLocaleDateString("es-ES", { weekday: "short" });
+          const monthLongRaw = fechaLocal.toLocaleDateString("es-ES", { day: "numeric", month: "long" });
           const eventos = eventosPorDia.value.get(iso) || [];
           celdas.push({
             iso,
@@ -717,44 +892,37 @@
             mesActual: d.getMonth() === mesActual.value.getMonth(),
             esHoy: iso === hoyISO,
             eventos,
+            weekdayLong: weekdayLongRaw.charAt(0).toUpperCase() + weekdayLongRaw.slice(1),
+            weekdayShort: weekdayShortRaw.charAt(0).toUpperCase() + weekdayShortRaw.slice(1),
+            fechaLabel: monthLongRaw.charAt(0).toUpperCase() + monthLongRaw.slice(1),
           });
         }
         return celdas;
       });
 
-      const semanas = computed(() => {
-        const resultado = [];
-        const total = dias.value;
-        for (let i = 0; i < total.length; i += 7) {
-          const bloque = total.slice(i, i + 7);
-          if (bloque.some((day) => day.eventos.length)) {
-            resultado.push(bloque);
+      const diasDelMes = computed(() => dias.value.filter((day) => day.mesActual));
+
+      const agendaEventos = computed(() => {
+        const items = [];
+        for (const day of diasDelMes.value) {
+          for (const evento of day.eventos) {
+            items.push({
+              ...evento,
+              resumenFecha: `${day.weekdayLong} · ${day.fechaLabel}`,
+              diaISO: day.iso,
+            });
           }
         }
-        return resultado;
+        return items.sort((a, b) => {
+          if (a.fechaISO !== b.fechaISO) {
+            return a.fechaISO.localeCompare(b.fechaISO);
+          }
+          return a.horaValue - b.horaValue;
+        });
       });
 
-      const agendaDias = computed(() =>
-        dias.value
-          .filter((day) => day.mesActual && day.eventos.length)
-          .map((day) => {
-            const fecha = new Date(`${day.iso}T00:00:00`);
-            const labelRaw = fecha.toLocaleDateString("es-ES", {
-              weekday: "long",
-              day: "numeric",
-              month: "long",
-            });
-            return {
-              ...day,
-              label: labelRaw.charAt(0).toUpperCase() + labelRaw.slice(1),
-            };
-          })
-      );
-
       const visibleEventosMes = computed(() => {
-        return dias.value
-          .filter((day) => day.mesActual)
-          .reduce((acc, day) => acc + day.eventos.length, 0);
+        return diasDelMes.value.reduce((acc, day) => acc + day.eventos.length, 0);
       });
 
       const mesActualLabel = computed(() =>
@@ -771,14 +939,24 @@
         mesActual.value = nuevo;
       }
 
-      function descripcionDia(day) {
-        const fecha = new Date(`${day.iso}T00:00:00`);
+      function fechaLarga(iso) {
+        const fecha = new Date(`${iso}T00:00:00`);
         const baseRaw = fecha.toLocaleDateString("es-ES", {
           weekday: "long",
           day: "numeric",
           month: "long",
         });
-        const base = baseRaw.charAt(0).toUpperCase() + baseRaw.slice(1);
+        return baseRaw.charAt(0).toUpperCase() + baseRaw.slice(1);
+      }
+
+      function diaSemanaCorta(iso) {
+        const fecha = new Date(`${iso}T00:00:00`);
+        const raw = fecha.toLocaleDateString("es-ES", { weekday: "short" });
+        return raw.charAt(0).toUpperCase() + raw.slice(1);
+      }
+
+      function descripcionFila(day) {
+        const base = fechaLarga(day.iso);
         if (!day.eventos.length) {
           return `${base}. Sin eventos.`;
         }
@@ -813,7 +991,6 @@
       return {
         cargando,
         error,
-        encabezados,
         cambiarMes,
         mesActualLabel,
         mesActualCorto,
@@ -821,9 +998,11 @@
         totalEventos,
         ultimaActualizacion,
         vista,
-        semanas,
-        agendaDias,
-        descripcionDia,
+        diasDelMes,
+        agendaEventos,
+        fechaLarga,
+        diaSemanaCorta,
+        descripcionFila,
       };
     }
   }).mount("#app");
