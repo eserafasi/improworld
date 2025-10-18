@@ -1048,22 +1048,85 @@
           <div v-if="error" class="empty">{{ error }}</div>
           <div v-else-if="cargando" class="loading">Cargando eventos…</div>
           <template v-else>
-            <div v-if="vista === 'month'" class="calendar-month netflix-month" role="list" aria-labelledby="calendar-title">
-              <!--
-                Vista mensual tipo carrusel: cada fila representa un día del mes, mantiene ancho estable para las tarjetas y usa
-                scroll horizontal con snap para minimizar saltos de diseño. Se reutiliza el mapa de eventos existente sin
-                alterar la fuente de datos ni dependencias adicionales. Las jornadas vacías muestran un CTA para registrar
-                shows, mientras que los días con actividades mantienen foco y hover para accesibilidad. Los eventos sin flyer
-                muestran ahora un placeholder textual "Sin imagen".
-              -->
-              <article
-                v-for="day in diasDelMes"
-                :key="day.iso"
-                class="month-row"
-                :class="{ 'month-row--today': day.esHoy }"
-                role="listitem"
-                :aria-label="descripcionFila(day)"
-              >
+            <template v-if="vista === 'month'">
+              <section class="filters-card" :class="{ 'is-collapsed': !filtersExpanded }">
+                <header class="filters-card__header">
+                  <h2 class="filters-card__title"><span>🎟️</span> Filtrar agenda</h2>
+                  <div class="filters-card__meta">
+                    <div class="filter-summary">
+                      <span class="filter-summary__count">{{ monthResultsLabel }}</span>
+                      <template v-for="chip in activeFilters" :key="chip.key">
+                        <span class="chip">
+                          {{ chip.label }}: {{ chip.value }}
+                          <button type="button" @click="removeFilter(chip.key)" aria-label="Quitar filtro">&times;</button>
+                        </span>
+                      </template>
+                    </div>
+                    <button
+                      type="button"
+                      class="filters-toggle"
+                      @click="toggleFilters"
+                      :aria-expanded="filtersExpanded"
+                      aria-controls="filters-panel"
+                    >
+                      <span aria-hidden="true">▾</span>
+                      {{ filtersToggleLabel }}
+                    </button>
+                  </div>
+                </header>
+                <div class="filters" id="filters-panel" :aria-hidden="!filtersExpanded">
+                  <label for="fPais">
+                    País
+                    <select id="fPais" v-model="filters.pais">
+                      <option value="">Todos los países</option>
+                      <option v-for="opt in paisOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                    </select>
+                  </label>
+                  <label for="fCiudad">
+                    Ciudad
+                    <select id="fCiudad" v-model="filters.ciudad">
+                      <option value="">Todas las ciudades</option>
+                      <option v-for="opt in ciudadOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                    </select>
+                  </label>
+                  <label for="fCompania">
+                    Compañía
+                    <select id="fCompania" v-model="filters.compania">
+                      <option value="">Todas las compañías</option>
+                      <option v-for="opt in companiaOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                    </select>
+                  </label>
+                  <label for="fFecha">
+                    Fecha
+                    <input id="fFecha" type="date" v-model="filters.fecha" />
+                  </label>
+                  <label for="fSearch">
+                    Búsqueda
+                    <input
+                      id="fSearch"
+                      type="text"
+                      v-model="filters.search"
+                      placeholder="Buscar por título, lugar o compañía"
+                    />
+                  </label>
+                </div>
+              </section>
+              <div class="calendar-month netflix-month" role="list" aria-labelledby="calendar-title">
+                <!--
+                  Vista mensual tipo carrusel: cada fila representa un día del mes, mantiene ancho estable para las tarjetas y usa
+                  scroll horizontal con snap para minimizar saltos de diseño. Se reutiliza el mapa de eventos existente sin
+                  alterar la fuente de datos ni dependencias adicionales. Las jornadas vacías muestran un CTA para registrar
+                  shows, mientras que los días con actividades mantienen foco y hover para accesibilidad. Los eventos sin flyer
+                  muestran ahora un placeholder textual "Sin imagen".
+                -->
+                <article
+                  v-for="day in diasDelMes"
+                  :key="day.iso"
+                  class="month-row"
+                  :class="{ 'month-row--today': day.esHoy }"
+                  role="listitem"
+                  :aria-label="descripcionFila(day)"
+                >
                 <header class="month-row__header">
                   <div class="month-row__title">
                     <span class="month-row__day">{{ diaSemanaCorta(day.iso) }} · {{ day.numero }}</span>
@@ -1108,7 +1171,8 @@
                 </div>
               </article>
               <p v-if="!diasDelMes.length" class="empty">No hay eventos programados para este mes.</p>
-            </div>
+              </div>
+            </template>
             <div v-else class="agenda-view" aria-labelledby="calendar-title">
               <section class="filters-card" :class="{ 'is-collapsed': !filtersExpanded }">
                 <header class="filters-card__header">
@@ -1515,9 +1579,26 @@
 
       const eventosPublicados = computed(() => lista.value.filter((ev) => ev.estado !== "Despublicado"));
 
+      const eventosFiltrados = computed(() => {
+        const q = normalizeText(filters.search);
+        const p = filters.pais;
+        const c = filters.ciudad;
+        const co = filters.compania;
+        const f = filters.fecha;
+
+        return eventosPublicados.value.filter((ev) => {
+          const okQ = !q || ev.searchText.includes(q);
+          const okP = !p || normalizeText(ev.pais) === p;
+          const okC = !c || normalizeText(ev.ciudad) === c;
+          const okCo = !co || normalizeText(ev.compania) === co;
+          const okF = !f || ev.fechaISO === f;
+          return okQ && okP && okC && okCo && okF;
+        });
+      });
+
       const eventosPorDia = computed(() => {
         const map = new Map();
-        for (const item of eventosPublicados.value) {
+        for (const item of eventosFiltrados.value) {
           if (!item.fechaISO) continue;
           if (!map.has(item.fechaISO)) {
             map.set(item.fechaISO, []);
@@ -1662,24 +1743,15 @@
       });
 
       const agendaEventosFiltrados = computed(() => {
-        const q = normalizeText(filters.search);
-        const p = filters.pais;
-        const c = filters.ciudad;
-        const co = filters.compania;
         const f = filters.fecha;
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const todayTime = today.getTime();
-        return eventosPublicados.value
+        return eventosFiltrados.value
           .filter((ev) => {
-            const okQ = !q || ev.searchText.includes(q);
-            const okP = !p || normalizeText(ev.pais) === p;
-            const okC = !c || normalizeText(ev.ciudad) === c;
-            const okCo = !co || normalizeText(ev.compania) === co;
-            const okF = !f || ev.fechaISO === f;
             const isPastEvent = typeof ev.fechaTime === "number" && ev.fechaTime < todayTime;
             const okPast = !isPastEvent || (f && ev.fechaISO === f);
-            return okQ && okP && okC && okCo && okF && okPast;
+            return okPast;
           })
           .sort((a, b) => {
             const timeA = typeof a.fechaTime === "number" ? a.fechaTime : Number.POSITIVE_INFINITY;
@@ -1694,6 +1766,13 @@
         if (cargando.value) return "Cargando…";
         const count = agendaEventosFiltrados.value.length;
         return `${count} ${count === 1 ? "resultado" : "resultados"}`;
+      });
+
+      const monthResultsLabel = computed(() => {
+        if (cargando.value) return "Cargando…";
+        const count = visibleEventosMes.value;
+        const suffix = count === 1 ? "evento visible" : "eventos visibles";
+        return `${count} ${suffix}`;
       });
 
       const totalEventosAgenda = totalEventos;
@@ -1950,6 +2029,7 @@
         companiaOptions,
         activeFilters,
         agendaResultsLabel,
+        monthResultsLabel,
         agendaEventosFiltrados,
         totalEventosAgenda,
         totalPaisesAgenda,
