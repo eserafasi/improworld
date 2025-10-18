@@ -320,11 +320,9 @@
       background: rgba(124, 58, 237, 0.16);
       aspect-ratio: 16 / 9;
       position: relative;
-      display: block;
     }
 
-    .show-card__thumb img,
-    .agenda-card__thumb img {
+    .show-card__thumb img {
       width: 100%;
       height: 100%;
       object-fit: cover;
@@ -348,31 +346,6 @@
       gap: 4px;
       font-size: 0.85rem;
       color: rgba(15, 23, 42, 0.76);
-    }
-
-    .show-card__cta {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      margin-top: 6px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      text-decoration: none;
-      background: rgba(124, 58, 237, 0.16);
-      color: var(--primary);
-      border: 1px solid rgba(124, 58, 237, 0.24);
-      transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .show-card__cta:hover,
-    .show-card__cta:focus-visible {
-      background: var(--primary);
-      color: #fff;
-      box-shadow: 0 12px 32px rgba(124, 58, 237, 0.25);
-      outline: none;
     }
 
     .month-row__empty {
@@ -446,7 +419,12 @@
       overflow: hidden;
       background: rgba(124, 58, 237, 0.18);
       aspect-ratio: 3 / 4;
-      position: relative;
+    }
+
+    .agenda-card__thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
       display: block;
     }
 
@@ -695,8 +673,8 @@
                 Vista mensual tipo carrusel: cada fila representa un día del mes, mantiene ancho estable para las tarjetas y usa
                 scroll horizontal con snap para minimizar saltos de diseño. Se reutiliza el mapa de eventos existente sin
                 alterar la fuente de datos ni dependencias adicionales. Las jornadas vacías muestran un CTA para registrar
-                shows, mientras que los días con actividades mantienen foco y hover para accesibilidad. Las imágenes hacen
-                fallback automático a enlaces de Drive o un placeholder cuando no hay pieza promocional disponible.
+                shows, mientras que los días con actividades mantienen foco y hover para accesibilidad. Limitación actual:
+                los eventos sin flyer muestran un bloque de color sólido, se puede mejorar con placeholders personalizados.
               -->
               <article
                 v-for="day in diasDelMes"
@@ -721,10 +699,10 @@
                     role="group"
                     :aria-label="`Evento ${evento.nombre}`"
                   >
-                    <div
-                      class="show-card__thumb"
-                      v-img-fallback="{ sources: evento.imageCandidates, alt: `Flyer del evento ${evento.nombre}` }"
-                    ></div>
+                    <div class="show-card__thumb" v-if="evento.flyerUrl">
+                      <img :src="evento.flyerUrl" :alt="`Flyer del evento ${evento.nombre}`" loading="lazy" />
+                    </div>
+                    <div class="show-card__thumb" v-else aria-hidden="true"></div>
                     <div class="show-card__body">
                       <h3 class="show-card__title">{{ evento.nombre }}</h3>
                       <div class="show-card__meta">
@@ -758,10 +736,10 @@
                   role="listitem"
                   :aria-label="`Evento ${evento.nombre} el ${evento.resumenFecha}`"
                 >
-                  <div
-                    class="agenda-card__thumb"
-                    v-img-fallback="{ sources: evento.imageCandidates, alt: `Flyer del evento ${evento.nombre}` }"
-                  ></div>
+                  <div class="agenda-card__thumb" v-if="evento.flyerUrl">
+                    <img :src="evento.flyerUrl" :alt="`Flyer del evento ${evento.nombre}`" loading="lazy" />
+                  </div>
+                  <div class="agenda-card__thumb" v-else aria-hidden="true"></div>
                   <div class="agenda-card__body">
                     <div class="agenda-card__heading">
                       <h3 class="agenda-card__title">{{ evento.nombre }}</h3>
@@ -780,7 +758,7 @@
                         class="agenda-card__cta"
                         :href="evento.boleteria"
                         target="_blank"
-                        rel="noopener noreferrer"
+                        rel="noopener"
                       >Comprar boletas</a>
                     </div>
                     <p v-if="evento.descripcion" class="agenda-card__description">{{ evento.descripcion }}</p>
@@ -957,6 +935,13 @@
       pais: val(ev.Pais) || val(ev["País"]),
       flyerUrl: imageCandidates[0] || "",
       imageCandidates,
+      formato: val(ev.Formato) || val(ev.FormatoObra) || val(ev["Formato de la Obra"]) || "",
+      boleteria:
+        val(ev.Boleteria) ||
+        val(ev.LinkBoleteria) ||
+        val(ev["Link Boleteria"]) ||
+        val(ev["Link boletos"]) ||
+        "",
       formato: val(ev.Formato) || val(ev.FormatoObra) || val(ev["Formato de la Obra"]) || "",
       boleteria:
         val(ev.Boleteria) ||
