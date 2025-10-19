@@ -1195,6 +1195,10 @@
         aria-describedby="suggestionCounter"
       ></textarea>
       <input type="hidden" name="entry.1381094280" id="suggestionHidden" />
+      <input type="hidden" name="fvv" value="1" />
+      <input type="hidden" name="draftResponse" value="[]" />
+      <input type="hidden" name="pageHistory" value="0" />
+      <input type="hidden" name="fbzx" id="suggestionFbzx" />
       <label class="visually-hidden" for="suggestionHoneypot">Deja este campo vacío</label>
       <input type="text" id="suggestionHoneypot" name="entry.999999999" tabindex="-1" autocomplete="off" class="visually-hidden" />
       <div class="suggestion-counter" id="suggestionCounter">0 / 200</div>
@@ -1214,6 +1218,7 @@
       const dialog = document.getElementById('suggestionDialog');
       const textarea = document.getElementById('suggestionTextarea');
       const hiddenInput = document.getElementById('suggestionHidden');
+      const fbzxInput = document.getElementById('suggestionFbzx');
       const status = document.getElementById('suggestionStatus');
       const cancelButton = document.getElementById('suggestionCancel');
       const form = document.getElementById('suggestionForm');
@@ -1228,6 +1233,19 @@
       if (!button || !dialog) {
         return;
       }
+
+      const generateFbzx = () => {
+        if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+          return window.crypto.randomUUID();
+        }
+        return `${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
+      };
+
+      const refreshFbzx = () => {
+        if (fbzxInput) {
+          fbzxInput.value = generateFbzx();
+        }
+      };
 
       const resetStatus = () => {
         status.textContent = '';
@@ -1257,6 +1275,7 @@
         resetTimers();
         awaitingResponse = false;
         hiddenInput.value = '';
+        refreshFbzx();
         dialog.showModal();
         requestAnimationFrame(() => textarea.focus());
         updateCounter();
@@ -1277,6 +1296,9 @@
         resetStatus();
         form.reset();
         hiddenInput.value = '';
+        if (fbzxInput) {
+          fbzxInput.value = '';
+        }
         updateCounter();
         button.focus();
       });
@@ -1288,6 +1310,7 @@
           event.preventDefault();
           return;
         }
+        refreshFbzx();
         updateCounter();
         awaitingResponse = true;
         resetStatus();
