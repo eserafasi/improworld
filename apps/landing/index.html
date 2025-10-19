@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agenda ImproWorld · Calendario</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="./assets/css/base.css" />
+
+</head>
+<body>
+  <div class="suggestion-trigger">
+    <button type="button" class="suggestion-button" id="suggestionButton">Tengo una idea!!!</button>
+    <button
+      type="button"
+      class="suggestion-info-button"
+      id="suggestionInfoButton"
+      aria-expanded="false"
+      aria-controls="suggestionInfo"
+      aria-label="¿Cómo usamos tus ideas?"
+    >?</button>
+  </div>
+  <div class="suggestion-info" id="suggestionInfo" hidden>
+    ¿Un problema en la impro que te gustaría resolver? Cuéntanoslo — podríamos convertirlo en una solución
+    abierta para todos. Leemos las ideas/problemas y ejecutamos/resolvemos las más pedidas.
+  </div>
+
+  <dialog class="suggestion-dialog" id="suggestionDialog" aria-labelledby="suggestionDialogTitle">
+    <form
+      class="suggestion-dialog__inner"
+      method="POST"
+      action="https://docs.google.com/forms/d/e/1FAIpQLScCdkRzlzCz5LYI-UWOafbBLKZJ5oHd4Ah32JTmB8_TfV5PJg/formResponse"
+      target="suggestionFrame"
+      id="suggestionForm"
+    >
+      <h2 id="suggestionDialogTitle">Envía tu sugerencia</h2>
+      <p>Cuéntanos qué te gustaría mejorar o agregar.</p>
+      <label class="visually-hidden" for="suggestionTextarea">Tu sugerencia</label>
+      <textarea
+        id="suggestionTextarea"
+        name="sugerencia-visible"
+        maxlength="200"
+        placeholder="Ej.: Agregar modo oscuro, filtrar por categoría..."
+        required
+        aria-describedby="suggestionCounter"
+      ></textarea>
+      <input type="hidden" name="entry.1381094280" id="suggestionHidden" />
+      <input type="hidden" name="fvv" value="1" />
+      <input type="hidden" name="draftResponse" value="[]" />
+      <input type="hidden" name="pageHistory" value="0" />
+      <input type="hidden" name="fbzx" id="suggestionFbzx" />
+      <label class="visually-hidden" for="suggestionHoneypot">Deja este campo vacío</label>
+      <input type="text" id="suggestionHoneypot" name="entry.999999999" tabindex="-1" autocomplete="off" class="visually-hidden" />
+      <div class="suggestion-counter" id="suggestionCounter">0 / 200</div>
+      <div class="suggestion-status" id="suggestionStatus" role="status" aria-live="polite"></div>
+      <div class="suggestion-dialog__actions">
+        <button type="button" class="cancel-button" id="suggestionCancel">Cancelar</button>
+        <input type="submit" value="Enviar" class="submit-button" />
+      </div>
+    </form>
+  </dialog>
+
+  <iframe title="Envío de sugerencias" name="suggestionFrame" id="suggestionFrame" class="visually-hidden"></iframe>
+
+
+  <div id="app" class="page" v-cloak>
+    <header class="hero">
+      <div class="hero__inner">
+      </div>
+    </header>
+
+    <main>
+      <div class="wrap">
+        <section class="calendar-card">
+          <div class="calendar-card__header">
+            <div class="calendar-card__title">
+              <h2 id="calendar-title">{{ mesActualLabel }}</h2>
+            </div>
+            <div class="calendar-card__actions">
+              <div class="calendar-controls" role="group" aria-label="Cambiar de mes">
+                <button type="button" @click="cambiarMes(-1)" aria-label="Ir al mes anterior">←</button>
+                <span aria-hidden="true">{{ mesActualCorto }}</span>
+                <button type="button" @click="cambiarMes(1)" aria-label="Ir al mes siguiente">→</button>
+              </div>
+              <div class="view-toggle" role="group" aria-label="Cambiar vista del calendario">
+                <button
+                  type="button"
+                  :aria-pressed="vista === 'month'"
+                  @click="vista = 'month'"
+                >Vista mensual</button>
+                <button
+                  type="button"
+                  :aria-pressed="vista === 'agenda'"
+                  @click="vista = 'agenda'"
+                >Vista agenda</button>
+              </div>
+            </div>
+          </div>
+
+          <div v-if="error" class="empty">{{ error }}</div>
+          <div v-else-if="cargando" class="loading">Cargando eventos…</div>
+          <template v-else>
+            <template v-if="vista === 'month'">
+              <section class="filters-card" :class="{ 'is-collapsed': !filtersExpanded }">
+                <header class="filters-card__header">
+                  <h2 class="filters-card__title"><span>🎟️</span> Filtrar agenda</h2>
+                  <div class="filters-card__meta">
+                    <div class="filter-summary">
+                      <template v-for="chip in activeFilters" :key="chip.key">
+                        <span class="chip">
+                          {{ chip.label }}: {{ chip.value }}
+                          <button type="button" @click="removeFilter(chip.key)" aria-label="Quitar filtro">&times;</button>
+                        </span>
+                      </template>
+                    </div>
+                    <button
+                      type="button"
+                      class="filters-toggle"
+                      @click="toggleFilters"
+                      :aria-expanded="filtersExpanded"
+                      aria-controls="filters-panel"
+                    >
+                      <span aria-hidden="true">▾</span>
+                      {{ filtersToggleLabel }}
+                    </button>
+                  </div>
+                </header>
+                <div class="filters" id="filters-panel" :aria-hidden="!filtersExpanded">
+                  <label for="fPais">
+                    País
+                    <select id="fPais" v-model="filters.pais">
+                      <option value="">Todos los países</option>
+                      <option v-for="opt in paisOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                    </select>
+                  </label>
+                  <label for="fCiudad">
+                    Ciudad
+                    <select id="fCiudad" v-model="filters.ciudad">
+                      <option value="">Todas las ciudades</option>
+                      <option v-for="opt in ciudadOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                    </select>
+                  </label>
+                  <label for="fCompania">
+                    Compañía
+                    <select id="fCompania" v-model="filters.compania">
+                      <option value="">Todas las compañías</option>
+                      <option v-for="opt in companiaOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                    </select>
+                  </label>
+                  <label for="fFecha">
+                    Fecha desde
+                    <input id="fFecha" type="date" v-model="filters.fecha" :min="hoyISO" />
+                  </label>
+                  <label for="fSearch">
+                    Búsqueda
+                    <input
+                      id="fSearch"
+                      type="text"
+                      v-model="filters.search"
+                      placeholder="Buscar por título, lugar o compañía"
+                    />
+                  </label>
+                </div>
+              </section>
+              <div class="calendar-month netflix-month" role="list" aria-labelledby="calendar-title">
+                <!--
+                  Vista mensual tipo carrusel: cada fila representa un día del mes, mantiene ancho estable para las tarjetas y usa
+                  scroll horizontal con snap para minimizar saltos de diseño. Se reutiliza el mapa de eventos existente sin
+                  alterar la fuente de datos ni dependencias adicionales. Las jornadas vacías muestran un CTA para registrar
+                  shows, mientras que los días con actividades mantienen foco y hover para accesibilidad. Los eventos sin flyer
+                  muestran ahora un placeholder textual "Sin imagen".
+                -->
+                <article
+                  v-for="day in diasDelMes"
+                  :key="day.iso"
+                  class="month-row"
+                  :class="{ 'month-row--today': day.esHoy }"
+                  role="listitem"
+                  :aria-label="descripcionFila(day)"
+                >
+                <header class="month-row__header">
+                  <div class="month-row__title">
+                    <span class="month-row__day">{{ diaSemanaCorta(day.iso) }} · {{ day.numero }}</span>
+                    <span class="month-row__date">{{ fechaLarga(day.iso) }}</span>
+                  </div>
+                  <span class="month-row__badge">{{ day.eventos.length }} · {{ day.eventos.length === 1 ? 'evento' : 'eventos' }}</span>
+                </header>
+                <div v-if="day.eventos.length" class="month-row__scroller" role="group" :aria-label="`Eventos del ${fechaLarga(day.iso)}`">
+                  <article
+                    v-for="evento in day.eventos"
+                    :key="evento.id"
+                    class="show-card"
+                    role="group"
+                    :aria-label="`Evento ${evento.nombre}`"
+                  >
+                    <button
+                      v-if="evento.imageCandidates.length"
+                      type="button"
+                      class="show-card__thumb-button"
+                      @click="openFlyer(evento, $event)"
+                      :aria-label="`Ver flyer completo de ${evento.nombre}`"
+                      aria-haspopup="dialog"
+                    >
+                      <span class="visually-hidden">Ver flyer completo de {{ evento.nombre }}</span>
+                      <div
+                        class="show-card__thumb"
+                        v-img-fallback="{ sources: evento.imageCandidates, alt: `Flyer del evento ${evento.nombre}` }"
+                      ></div>
+                    </button>
+                    <div class="show-card__thumb show-card__thumb--empty" v-else aria-hidden="true"></div>
+                    <div class="show-card__body">
+                      <h3 class="show-card__title">{{ evento.nombre }}</h3>
+                      <div class="show-card__meta">
+                        <span><strong>{{ evento.horaLabel }}</strong></span>
+                        <span>{{ evento.lugarLabel }}</span>
+                        <span v-if="evento.ciudadLabel">{{ evento.ciudadLabel }}</span>
+                      </div>
+                      <a
+                        v-if="evento.boleteria"
+                        class="show-card__cta"
+                        :href="evento.boleteria"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >Comprar boletas</a>
+                    </div>
+                  </article>
+                </div>
+                <div v-else class="month-row__empty">
+                  <span class="month-row__summary">No hay eventos para este día.</span>
+                  <a class="month-row__cta" href="registro.html">¿Tienes un show? Regístralo</a>
+                </div>
+              </article>
+              <p v-if="!diasDelMes.length" class="empty">No hay eventos programados para este mes.</p>
+              </div>
+            </template>
+            <div v-else class="agenda-view" aria-labelledby="calendar-title">
+              <section class="filters-card" :class="{ 'is-collapsed': !filtersExpanded }">
+                <header class="filters-card__header">
+                  <h2 class="filters-card__title"><span>🎟️</span> Filtrar agenda</h2>
+                  <div class="filters-card__meta">
+                    <div class="filter-summary">
+                      <span class="filter-summary__count">{{ agendaResultsLabel }}</span>
+                      <template v-for="chip in activeFilters" :key="chip.key">
+                        <span class="chip">
+                          {{ chip.label }}: {{ chip.value }}
+                          <button type="button" @click="removeFilter(chip.key)" aria-label="Quitar filtro">&times;</button>
+                        </span>
+                      </template>
+                    </div>
+                    <button
+                      type="button"
+                      class="filters-toggle"
+                      @click="toggleFilters"
+                      :aria-expanded="filtersExpanded"
+                      aria-controls="filters-panel"
+                    >
+                      <span aria-hidden="true">▾</span>
+                      {{ filtersToggleLabel }}
+                    </button>
+                  </div>
+                </header>
+                <div class="filters" id="filters-panel" :aria-hidden="!filtersExpanded">
+                  <label for="fPais">
+                    País
+                    <select id="fPais" v-model="filters.pais">
+                      <option value="">Todos los países</option>
+                      <option v-for="opt in paisOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                    </select>
+                  </label>
+                  <label for="fCiudad">
+                    Ciudad
+                    <select id="fCiudad" v-model="filters.ciudad">
+                      <option value="">Todas las ciudades</option>
+                      <option v-for="opt in ciudadOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                    </select>
+                  </label>
+                  <label for="fCompania">
+                    Compañía
+                    <select id="fCompania" v-model="filters.compania">
+                      <option value="">Todas las compañías</option>
+                      <option v-for="opt in companiaOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                    </select>
+                  </label>
+                  <label for="fFecha">
+                    Fecha desde
+                    <input id="fFecha" type="date" v-model="filters.fecha" :min="hoyISO" />
+                  </label>
+                  <label for="fSearch">
+                    Búsqueda
+                    <input
+                      id="fSearch"
+                      type="text"
+                      v-model="filters.search"
+                      placeholder="Buscar por título, lugar o compañía"
+                    />
+                  </label>
+                </div>
+              </section>
+              <section class="agenda-section">
+                <div class="agenda" id="agenda" role="region" aria-live="polite">
+                  <template v-if="cargando">
+                    <article v-for="n in 6" :key="`skeleton-${n}`" class="skeleton-card">
+                      <div class="skeleton-thumb"></div>
+                      <div class="skeleton-body">
+                        <span class="skeleton-line"></span>
+                        <span class="skeleton-line"></span>
+                        <span class="skeleton-line short"></span>
+                      </div>
+                    </article>
+                  </template>
+                  <template v-else>
+                    <transition-group name="scale" tag="div" class="agenda__list">
+                      <article v-for="event in agendaEventosFiltrados" :key="event.id" class="card">
+                        <div class="thumb" v-img-fallback="event.piezaCands">
+                          <div class="thumb__overlay">
+                            <span class="badge badge--format" v-if="event.formato">{{ event.formato }}</span>
+                            <span class="badge badge--country" v-if="event.pais">{{ event.pais }}</span>
+                          </div>
+                        </div>
+                        <div class="content">
+                          <h3>{{ event.nombre }}</h3>
+                          <p class="meta">
+                            <strong>Fecha</strong>
+                            <span>{{ event.fechaLabel || 'Por confirmar' }}</span>
+                          </p>
+                          <p class="meta">
+                            <strong>Hora</strong>
+                            <span>{{ event.horaLabel || 'Por definir' }}</span>
+                          </p>
+                          <p class="meta">
+                            <strong>Lugar</strong>
+                            <span>{{ event.lugarLabel || 'Pronto' }}</span>
+                          </p>
+                          <div class="actions" v-if="event.boleteria">
+                            <a
+                              :href="event.boleteria"
+                              target="_blank"
+                              rel="noopener"
+                              class="btn btn-primary"
+                            >Comprar boletas</a>
+                          </div>
+                        </div>
+                      </article>
+                    </transition-group>
+                    <div v-if="!agendaEventosFiltrados.length" class="empty-state">
+                      <strong>No encontramos eventos con esos filtros.</strong>
+                      <span>Prueba ajustando la búsqueda o borra los filtros activos para ver toda la programación.</span>
+                    </div>
+                  </template>
+                </div>
+              </section>
+              <section class="agenda-footer">
+                 <div class="hero__meta">
+          <span><strong>{{ totalEventos }}</strong> eventos publicados</span>
+          <span>Actualizado el <strong>{{ ultimaActualizacion }}</strong></span>
+          <span>Países representados <strong>{{ totalPaisesAgenda }}</strong></span>
+        </div>
+                <div class="agenda-footer__download">
+                  <button
+                    type="button"
+                    class="btn btn-secondary agenda-footer__button"
+                    @click="downloadAgendaPdf"
+                    :disabled="downloadingAgendaPdf || cargando"
+                  >
+                    {{ downloadingAgendaPdf ? 'Generando PDF…' : 'Descargar PDF' }}
+                  </button>
+                </div>
+              </section>
+            </div>
+          </template>
+        </section>
+      </div>
+    </main>
+    <dialog
+      class="flyer-dialog"
+      ref="flyerDialog"
+      @cancel.prevent="closeFlyer"
+      @click.self="closeFlyer"
+      aria-labelledby="flyerDialogTitle"
+    >
+      <div class="flyer-dialog__inner" role="document">
+        <button type="button" class="flyer-dialog__close" @click="closeFlyer" aria-label="Cerrar flyer">&times;</button>
+        <div
+          class="flyer-dialog__media"
+          v-if="flyerDialogData.candidates.length"
+          v-img-fallback="{ sources: flyerDialogData.candidates, alt: flyerDialogData.alt }"
+        ></div>
+        <div class="flyer-dialog__info">
+          <h2 id="flyerDialogTitle">{{ flyerDialogData.title }}</h2>
+          <p v-if="flyerDialogData.meta">{{ flyerDialogData.meta }}</p>
+        </div>
+      </div>
+    </dialog>
+  </div>
+
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
+    integrity="sha512-YcsIPbRS8WwtK+iMfGqvXHl5abZEWSIk2s9InMpqA0PXI5maomCvfJqMG9XNDnsKDH4uZ8j2TPp7T2E/pPhf0g=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  ></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+
+  <script type="module" src="./assets/js/main.js"></script>
+</body>
+</html>

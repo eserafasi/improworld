@@ -5,7 +5,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-AGENDA_PAGE = REPO_ROOT / "public" / "agendacalendar" / "index.html"
+AGENDA_PAGE = REPO_ROOT / "apps" / "landing" / "index.html"
 EXPECTED_FORM_ACTION = (
     "https://docs.google.com/forms/d/e/1FAIpQLScCdkRzlzCz5LYI-UWOafbBLKZJ5oHd4Ah32JTmB8_TfV5PJg/formResponse"
 )
