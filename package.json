@@ -4,6 +4,7 @@
   "description": "Ultra-simple inspiration collector with Vue and WebSocket backend.",
   "main": "server.js",
   "scripts": {
+    "build": "node scripts/build-netlify.js",
     "start": "node server.js",
     "test": "node --test tests/websocket-sync.test.js",
     "serve:landing": "node scripts/serve-static.js"
