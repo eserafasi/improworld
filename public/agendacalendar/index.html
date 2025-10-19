@@ -123,10 +123,15 @@
 
     .calendar-card__actions {
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       align-items: center;
       gap: 8px;
       justify-content: flex-end;
+    }
+
+    .calendar-card__actions > * {
+      flex: 0 1 auto;
+      white-space: nowrap;
     }
 
     .calendar-card__title {
@@ -1571,10 +1576,6 @@
           <div class="calendar-card__header">
             <div class="calendar-card__title">
               <h2 id="calendar-title">{{ mesActualLabel }}</h2>
-              <span role="status" aria-live="polite">
-                <template v-if="visibleEventosMes === 1">1 evento visible este mes</template>
-                <template v-else>{{ visibleEventosMes }} eventos visibles este mes</template>
-              </span>
             </div>
             <div class="calendar-card__actions">
               <div class="calendar-controls" role="group" aria-label="Cambiar de mes">
@@ -1606,7 +1607,6 @@
                   <h2 class="filters-card__title"><span>🎟️</span> Filtrar agenda</h2>
                   <div class="filters-card__meta">
                     <div class="filter-summary">
-                      <span class="filter-summary__count">{{ monthResultsLabel }}</span>
                       <template v-for="chip in activeFilters" :key="chip.key">
                         <span class="chip">
                           {{ chip.label }}: {{ chip.value }}
@@ -2317,10 +2317,6 @@
         })
       );
 
-      const visibleEventosMes = computed(() => {
-        return diasDelMes.value.reduce((acc, day) => acc + day.eventos.length, 0);
-      });
-
       const mesActualLabel = computed(() =>
         formatWithCapitalizedMonth(mesActual.value, { month: "long", year: "numeric" })
       );
@@ -2438,13 +2434,6 @@
         if (cargando.value) return "Cargando…";
         const count = agendaEventosFiltrados.value.length;
         return `${count} ${count === 1 ? "resultado" : "resultados"}`;
-      });
-
-      const monthResultsLabel = computed(() => {
-        if (cargando.value) return "Cargando…";
-        const count = visibleEventosMes.value;
-        const suffix = count === 1 ? "evento visible" : "eventos visibles";
-        return `${count} ${suffix}`;
       });
 
       const totalEventosAgenda = totalEventos;
@@ -2696,7 +2685,6 @@
         cambiarMes,
         mesActualLabel,
         mesActualCorto,
-        visibleEventosMes,
         totalEventos,
         ultimaActualizacion,
         vista,
@@ -2710,7 +2698,6 @@
         companiaOptions,
         activeFilters,
         agendaResultsLabel,
-        monthResultsLabel,
         agendaEventosFiltrados,
         totalEventosAgenda,
         totalPaisesAgenda,
