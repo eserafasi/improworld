@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "node --test tests/websocket-sync.test.js"
+    "test": "node --test tests/websocket-sync.test.js",
+    "serve:landing": "node scripts/serve-static.js"
   },
   "dependencies": {}
 }
