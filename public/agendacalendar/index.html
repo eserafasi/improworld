@@ -1059,6 +1059,9 @@
       top: 20px;
       right: 20px;
       z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
     .suggestion-button {
@@ -1083,6 +1086,58 @@
     .suggestion-button:hover {
       transform: translateY(-1px);
       box-shadow: var(--shadow-md);
+    }
+
+    .suggestion-info-button {
+      appearance: none;
+      border: none;
+      background: rgba(15, 23, 42, 0.08);
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 0.9rem;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    .suggestion-info-button:hover,
+    .suggestion-info-button:focus-visible {
+      background: rgba(124, 58, 237, 0.12);
+      transform: translateY(-1px);
+      outline: none;
+    }
+
+    .suggestion-info-button:focus-visible {
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.25);
+    }
+
+    .suggestion-info {
+      position: fixed;
+      top: 68px;
+      right: 20px;
+      max-width: min(280px, 80vw);
+      padding: 16px 18px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+      background: #ffffff;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.4;
+      transform-origin: top right;
+      transform: scale(0.95);
+      opacity: 0;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      pointer-events: none;
+    }
+
+    .suggestion-info.is-visible {
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
     }
 
     .suggestion-dialog::backdrop {
@@ -1276,7 +1331,19 @@
 </head>
 <body>
   <div class="suggestion-trigger">
-    <button type="button" class="suggestion-button" id="suggestionButton">Sugerir mejora</button>
+    <button type="button" class="suggestion-button" id="suggestionButton">Tengo una idea!!!</button>
+    <button
+      type="button"
+      class="suggestion-info-button"
+      id="suggestionInfoButton"
+      aria-expanded="false"
+      aria-controls="suggestionInfo"
+      aria-label="¿Cómo usamos tus ideas?"
+    >?</button>
+  </div>
+  <div class="suggestion-info" id="suggestionInfo" hidden>
+    ¿Un problema en la impro que te gustaría resolver? Cuéntanoslo — podríamos convertirlo en una solución
+    abierta para todos. Leemos las ideas/problemas y ejecutamos/resolvemos las más pedidas.
   </div>
 
   <dialog class="suggestion-dialog" id="suggestionDialog" aria-labelledby="suggestionDialogTitle">
@@ -1329,6 +1396,8 @@
       const counter = document.getElementById('suggestionCounter');
       const iframe = document.getElementById('suggestionFrame');
       const honeypot = document.getElementById('suggestionHoneypot');
+      const infoButton = document.getElementById('suggestionInfoButton');
+      const infoContainer = document.getElementById('suggestionInfo');
       let awaitingResponse = false;
       let timeoutId = null;
       let closeId = null;
@@ -1362,6 +1431,49 @@
         hiddenInput.value = textarea.value;
       };
 
+      const hideInfo = (immediate = false) => {
+        if (!infoContainer) {
+          return;
+        }
+        const removeHidden = () => {
+          infoContainer.setAttribute('hidden', '');
+          infoContainer.removeEventListener('transitionend', removeHidden);
+        };
+        infoContainer.classList.remove('is-visible');
+        if (immediate) {
+          removeHidden();
+          return;
+        }
+        if (window.getComputedStyle(infoContainer).transitionDuration === '0s') {
+          removeHidden();
+          return;
+        }
+        infoContainer.addEventListener('transitionend', removeHidden, { once: true });
+      };
+
+      const showInfo = () => {
+        if (!infoContainer) {
+          return;
+        }
+        infoContainer.removeAttribute('hidden');
+        requestAnimationFrame(() => {
+          infoContainer.classList.add('is-visible');
+        });
+      };
+
+      if (infoButton && infoContainer) {
+        infoButton.addEventListener('click', () => {
+          const expanded = infoButton.getAttribute('aria-expanded') === 'true';
+          if (expanded) {
+            infoButton.setAttribute('aria-expanded', 'false');
+            hideInfo();
+          } else {
+            infoButton.setAttribute('aria-expanded', 'true');
+            showInfo();
+          }
+        });
+      }
+
       const resetTimers = () => {
         if (timeoutId) {
           clearTimeout(timeoutId);
@@ -1383,6 +1495,10 @@
         dialog.showModal();
         requestAnimationFrame(() => textarea.focus());
         updateCounter();
+        if (infoButton) {
+          infoButton.setAttribute('aria-expanded', 'false');
+        }
+        hideInfo(true);
       });
 
       cancelButton.addEventListener('click', () => {
