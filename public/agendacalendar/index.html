@@ -322,6 +322,27 @@
       position: relative;
     }
 
+    .show-card__thumb-button {
+      appearance: none;
+      padding: 0;
+      border: none;
+      background: none;
+      display: block;
+      cursor: zoom-in;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      width: 100%;
+    }
+
+    .show-card__thumb-button:focus-visible {
+      outline: 3px solid rgba(124, 58, 237, 0.45);
+      outline-offset: 4px;
+    }
+
+    .show-card__thumb-button .show-card__thumb {
+      pointer-events: none;
+    }
+
     .show-card__thumb img {
       width: 100%;
       height: 100%;
@@ -1150,6 +1171,89 @@
       color: #dc2626;
     }
 
+    .flyer-dialog::backdrop {
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(2px);
+    }
+
+    .flyer-dialog {
+      border: none;
+      padding: 0;
+      border-radius: var(--radius-lg);
+      width: min(92vw, 680px);
+      max-width: 680px;
+      max-height: 92vh;
+      background: transparent;
+    }
+
+    .flyer-dialog__inner {
+      position: relative;
+      background: var(--card);
+      border-radius: inherit;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      display: grid;
+      gap: 0;
+      max-height: inherit;
+    }
+
+    .flyer-dialog__media {
+      background: rgba(124, 58, 237, 0.12);
+      display: block;
+      max-height: calc(92vh - 120px);
+      overflow: auto;
+    }
+
+    .flyer-dialog__media img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .flyer-dialog__info {
+      padding: 18px 22px 22px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .flyer-dialog__info h2 {
+      margin: 0;
+      font-size: 1.2rem;
+      letter-spacing: -0.01em;
+    }
+
+    .flyer-dialog__info p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .flyer-dialog__close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      border: none;
+      background: rgba(16, 24, 40, 0.65);
+      color: #fff;
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.4rem;
+      line-height: 1;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    .flyer-dialog__close:hover,
+    .flyer-dialog__close:focus-visible {
+      background: rgba(124, 58, 237, 0.85);
+      transform: scale(1.05);
+      outline: none;
+    }
+
     .visually-hidden {
       position: absolute !important;
       width: 1px;
@@ -1456,11 +1560,20 @@
                     role="group"
                     :aria-label="`Evento ${evento.nombre}`"
                   >
-                    <div
-                      class="show-card__thumb"
+                    <button
                       v-if="evento.imageCandidates.length"
-                      v-img-fallback="{ sources: evento.imageCandidates, alt: `Flyer del evento ${evento.nombre}` }"
-                    ></div>
+                      type="button"
+                      class="show-card__thumb-button"
+                      @click="openFlyer(evento, $event)"
+                      :aria-label="`Ver flyer completo de ${evento.nombre}`"
+                      aria-haspopup="dialog"
+                    >
+                      <span class="visually-hidden">Ver flyer completo de {{ evento.nombre }}</span>
+                      <div
+                        class="show-card__thumb"
+                        v-img-fallback="{ sources: evento.imageCandidates, alt: `Flyer del evento ${evento.nombre}` }"
+                      ></div>
+                    </button>
                     <div class="show-card__thumb show-card__thumb--empty" v-else aria-hidden="true"></div>
                     <div class="show-card__body">
                       <h3 class="show-card__title">{{ evento.nombre }}</h3>
@@ -1625,6 +1738,26 @@
         </section>
       </div>
     </main>
+    <dialog
+      class="flyer-dialog"
+      ref="flyerDialog"
+      @cancel.prevent="closeFlyer"
+      @click.self="closeFlyer"
+      aria-labelledby="flyerDialogTitle"
+    >
+      <div class="flyer-dialog__inner" role="document">
+        <button type="button" class="flyer-dialog__close" @click="closeFlyer" aria-label="Cerrar flyer">&times;</button>
+        <div
+          class="flyer-dialog__media"
+          v-if="flyerDialogData.candidates.length"
+          v-img-fallback="{ sources: flyerDialogData.candidates, alt: flyerDialogData.alt }"
+        ></div>
+        <div class="flyer-dialog__info">
+          <h2 id="flyerDialogTitle">{{ flyerDialogData.title }}</h2>
+          <p v-if="flyerDialogData.meta">{{ flyerDialogData.meta }}</p>
+        </div>
+      </div>
+    </dialog>
   </div>
 
   <script
@@ -1894,7 +2027,7 @@
     };
   }
 
-  const { createApp, ref, reactive, computed, onMounted, watch } = Vue;
+  const { createApp, ref, reactive, computed, onMounted, watch, onBeforeUnmount } = Vue;
 
   createApp({
     setup() {
@@ -1920,6 +2053,60 @@
       const filtersExpanded = ref(false);
       const downloadingAgendaPdf = ref(false);
       const detectedCountry = ref("");
+      const flyerDialog = ref(null);
+      const flyerDialogData = reactive({ title: "", alt: "", meta: "", candidates: [] });
+      let lastFlyerTrigger = null;
+
+      const resetFlyerDialog = () => {
+        flyerDialogData.title = "";
+        flyerDialogData.alt = "";
+        flyerDialogData.meta = "";
+        flyerDialogData.candidates = [];
+      };
+
+      const handleFlyerDialogClose = () => {
+        resetFlyerDialog();
+        if (lastFlyerTrigger && typeof lastFlyerTrigger.focus === "function") {
+          lastFlyerTrigger.focus();
+        }
+        lastFlyerTrigger = null;
+      };
+
+      const closeFlyer = () => {
+        const dialogEl = flyerDialog.value;
+        if (!dialogEl) return;
+        if (typeof dialogEl.close === "function" && dialogEl.open) {
+          dialogEl.close();
+        } else {
+          dialogEl.removeAttribute("open");
+          handleFlyerDialogClose();
+        }
+      };
+
+      const openFlyer = (evento, nativeEvent) => {
+        if (!evento || !Array.isArray(evento.imageCandidates) || !evento.imageCandidates.length) {
+          return;
+        }
+        const name = evento.nombre && String(evento.nombre).trim() ? String(evento.nombre).trim() : "Evento sin nombre";
+        flyerDialogData.title = name;
+        flyerDialogData.alt = `Flyer del evento ${name}`;
+        const details = [evento.fechaLabel, evento.horaLabel, evento.lugarLabel]
+          .map((part) => (part ? String(part).trim() : ""))
+          .filter(Boolean);
+        flyerDialogData.meta = details.join(" · ");
+        flyerDialogData.candidates = evento.imageCandidates.slice(0, 8);
+        const dialogEl = flyerDialog.value;
+        if (!dialogEl) {
+          return;
+        }
+        lastFlyerTrigger =
+          nativeEvent && nativeEvent.currentTarget instanceof HTMLElement ? nativeEvent.currentTarget : null;
+        if (typeof dialogEl.showModal === "function") {
+          dialogEl.showModal();
+        } else {
+          dialogEl.setAttribute("open", "");
+        }
+      };
 
       const eventosPublicados = computed(() => lista.value.filter((ev) => ev.estado !== "Despublicado"));
 
@@ -2358,6 +2545,15 @@
       onMounted(() => {
         cargar();
         detectCountry();
+        if (flyerDialog.value) {
+          flyerDialog.value.addEventListener("close", handleFlyerDialogClose);
+        }
+      });
+
+      onBeforeUnmount(() => {
+        if (flyerDialog.value) {
+          flyerDialog.value.removeEventListener("close", handleFlyerDialogClose);
+        }
       });
 
       return {
@@ -2392,6 +2588,10 @@
         fechaLarga,
         diaSemanaCorta,
         descripcionFila,
+        openFlyer,
+        closeFlyer,
+        flyerDialogData,
+        flyerDialog,
       };
     }
   })
