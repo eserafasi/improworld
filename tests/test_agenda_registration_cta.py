@@ -6,8 +6,8 @@ import re
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-AGENDA_PAGE = REPO_ROOT / "apps" / "landing" / "index.html"
-EXPECTED_TARGET = "apps/landing/registro.html"
+AGENDA_PAGE = REPO_ROOT / "public" / "agendacalendar" / "index.html"
+EXPECTED_TARGET = "public/agendacalendar/registro.html"
 
 
 def test_month_view_registration_button_points_to_registration() -> None:
@@ -25,7 +25,7 @@ def test_month_view_registration_button_points_to_registration() -> None:
     assert not href.startswith("javascript:"), "El enlace de registro no debe depender de JavaScript explícito."
     assert not href.startswith("#"), "El enlace de registro debe apuntar a una página válida."
 
-    resolved_target = posixpath.normpath(posixpath.join("apps/landing", href))
+    resolved_target = posixpath.normpath(posixpath.join("public/agendacalendar", href))
     assert (
         resolved_target == EXPECTED_TARGET
     ), f"El enlace debe dirigir a {EXPECTED_TARGET}, pero apunta a {resolved_target}."
