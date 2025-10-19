@@ -1,1 +1,4 @@
 dist/
+node_modules/
+apps/landing/dist/
+apps/landing/node_modules/
