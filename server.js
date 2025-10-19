@@ -12,7 +12,20 @@ const SESSION_PASSWORD =
 const RATE_LIMIT_MS = 2000;
 const MAX_LENGTH = 140;
 
-const publicDir = path.join(__dirname, 'apps', 'landing');
+const publicDir = path.join(__dirname, 'apps', 'landing', 'dist');
+const CONTENT_TYPES = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'application/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.svg': 'image/svg+xml; charset=utf-8',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.gif': 'image/gif',
+  '.webp': 'image/webp',
+  '.ico': 'image/x-icon',
+};
 const blocklist = [
   'fuck',
   'shit',
@@ -148,8 +161,7 @@ function createInspirationServer(options = {}) {
       }
 
       const ext = path.extname(filePath).toLowerCase();
-      const contentType =
-        ext === '.html' ? 'text/html; charset=utf-8' : 'text/plain; charset=utf-8';
+      const contentType = CONTENT_TYPES[ext] || 'application/octet-stream';
       res.writeHead(200, { 'Content-Type': contentType });
       res.end(data);
     });

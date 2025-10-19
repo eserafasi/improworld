@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 
 const rootDir = path.resolve(__dirname, '..');
 const outputDir = path.join(rootDir, 'dist');
@@ -25,6 +26,9 @@ function resetOutputDir() {
 }
 
 function copyEntry(srcPath, destPath) {
+  if (path.basename(srcPath) === 'node_modules') {
+    return;
+  }
   const stats = fs.statSync(srcPath);
 
   if (stats.isDirectory()) {
@@ -41,6 +45,16 @@ function copyEntry(srcPath, destPath) {
 }
 
 function buildBundle() {
+  try {
+    execSync('npm --prefix apps/landing run build', {
+      stdio: 'inherit',
+      cwd: rootDir,
+    });
+  } catch (err) {
+    console.warn('No se pudo compilar la landing con Vite. Asegúrate de instalar las dependencias en apps/landing.');
+    throw err;
+  }
+
   resetOutputDir();
 
   for (const entry of fs.readdirSync(rootDir)) {
