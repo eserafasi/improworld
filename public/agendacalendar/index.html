@@ -1401,7 +1401,6 @@
       let awaitingResponse = false;
       let timeoutId = null;
       let closeId = null;
-      let ignoreInitialLoad = true;
 
       if (!button || !dialog) {
         return;
@@ -1546,10 +1545,6 @@
       });
 
       iframe.addEventListener('load', () => {
-        if (ignoreInitialLoad) {
-          ignoreInitialLoad = false;
-          return;
-        }
         if (!awaitingResponse) {
           return;
         }
@@ -1559,7 +1554,7 @@
         status.className = 'suggestion-status suggestion-status--success';
         closeId = setTimeout(() => {
           dialog.close();
-        }, 1000);
+        }, 2000);
       });
     })();
   </script>
