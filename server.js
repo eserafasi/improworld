@@ -12,7 +12,7 @@ const SESSION_PASSWORD =
 const RATE_LIMIT_MS = 2000;
 const MAX_LENGTH = 140;
 
-const publicDir = path.join(__dirname, 'public');
+const publicDir = path.join(__dirname, 'apps', 'landing');
 const blocklist = [
   'fuck',
   'shit',
