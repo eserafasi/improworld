@@ -47,6 +47,24 @@ See the LICENSE file for more details.
       gap: 28px;
     }
 
+    .site-footer {
+      margin-top: 24px;
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .site-footer a {
+      color: var(--primary);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .site-footer a:hover,
+    .site-footer a:focus {
+      text-decoration: underline;
+    }
+
     .badge {
       display: inline-flex;
       align-items: center;
@@ -449,6 +467,9 @@ See the LICENSE file for more details.
       </div>
     </dialog>
   </main>
+  <footer class="site-footer">
+    <a href="https://www.netlify.com" target="_blank" rel="noopener">This site is powered by Netlify</a>
+  </footer>
   <script>
     (function () {
       const form = document.querySelector("#registro-form");

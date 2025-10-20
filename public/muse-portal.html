@@ -473,6 +473,17 @@ See the LICENSE file for more details.
         font-size: 0.9rem;
       }
 
+      .footer a {
+        color: var(--primary);
+        font-weight: 600;
+        text-decoration: none;
+      }
+
+      .footer a:hover,
+      .footer a:focus {
+        text-decoration: underline;
+      }
+
       @media (max-width: 768px) {
         .hero {
           padding-top: 48px;
@@ -645,8 +656,13 @@ See the LICENSE file for more details.
       </main>
 
       <footer class="footer">
-        Muse Portal · Un laboratorio imaginario para motores y motoras. Alimenta tu sesión compartiendo tus
-        hallazgos con un clic.
+        <p>
+          Muse Portal · Un laboratorio imaginario para motores y motoras. Alimenta tu sesión compartiendo tus
+          hallazgos con un clic.
+        </p>
+        <p>
+          <a href="https://www.netlify.com" target="_blank" rel="noopener">This site is powered by Netlify</a>
+        </p>
       </footer>
     </div>
 
