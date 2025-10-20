@@ -45,8 +45,10 @@ See the LICENSE file for more details.
       color: var(--ink);
       padding: 48px 18px;
       display: flex;
-      justify-content: center;
-      align-items: flex-start;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 32px;
     }
 
     [v-cloak] {
@@ -268,6 +270,23 @@ See the LICENSE file for more details.
         grid-template-columns: minmax(0, 1fr);
       }
     }
+
+    footer {
+      font-size: 0.9rem;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    footer a {
+      color: var(--primary);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    footer a:hover,
+    footer a:focus {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
@@ -348,6 +367,10 @@ See the LICENSE file for more details.
       </section>
     </template>
   </div>
+
+  <footer class="site-footer">
+    <a href="https://www.netlify.com" target="_blank" rel="noopener">This site is powered by Netlify</a>
+  </footer>
 
   <script>
     const { createApp, ref } = Vue;

@@ -64,6 +64,24 @@ See the LICENSE file for more details.
       width: 100%;
     }
 
+    .netlify-attribution {
+      margin-top: 24px;
+      text-align: center;
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    .netlify-attribution a {
+      color: var(--primary);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .netlify-attribution a:hover,
+    .netlify-attribution a:focus {
+      text-decoration: underline;
+    }
+
     .hero {
       padding: 72px 20px 40px;
       background: radial-gradient(120% 120% at 50% 0%, rgba(124, 58, 237, 0.16) 0%, rgba(124, 58, 237, 0) 60%),
@@ -1029,14 +1047,17 @@ See the LICENSE file for more details.
     <div class="download-footer">
       <button
         type="button"
-        class="btn btn-secondary download-footer__button"
-        @click="downloadAgendaPdf"
-        :disabled="downloadingPdf || loading"
-      >
-        {{ downloadingPdf ? 'Generando PDF…' : 'Descargar PDF' }}
-      </button>
-    </div>
-  </footer>
+      class="btn btn-secondary download-footer__button"
+      @click="downloadAgendaPdf"
+      :disabled="downloadingPdf || loading"
+    >
+      {{ downloadingPdf ? 'Generando PDF…' : 'Descargar PDF' }}
+    </button>
+  </div>
+  <p class="netlify-attribution">
+    <a href="https://www.netlify.com" target="_blank" rel="noopener">This site is powered by Netlify</a>
+  </p>
+</footer>
 
 </div>
 

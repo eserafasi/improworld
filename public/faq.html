@@ -64,6 +64,25 @@ See the LICENSE file for more details.
       min-height: 100vh;
     }
 
+    .site-footer {
+      margin-top: auto;
+      padding: 32px 20px 24px;
+      text-align: center;
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    .site-footer a {
+      color: var(--primary);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .site-footer a:hover,
+    .site-footer a:focus {
+      text-decoration: underline;
+    }
+
     .hero {
       padding: clamp(72px, 12vw, 120px) 20px 56px;
       position: relative;
@@ -343,6 +362,9 @@ See the LICENSE file for more details.
         </div>
       </div>
     </main>
-  </div>
-</body>
+    </div>
+    <footer class="site-footer">
+      <a href="https://www.netlify.com" target="_blank" rel="noopener">This site is powered by Netlify</a>
+    </footer>
+  </body>
 </html>
