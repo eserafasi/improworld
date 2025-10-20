@@ -10,6 +10,11 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
     rel="stylesheet"
   />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    crossorigin=""
+  />
   <style>
     :root {
       --ink: #101828;
@@ -209,6 +214,99 @@
       color: white;
       box-shadow: var(--shadow-sm);
       transform: translateY(-1px);
+    }
+
+    .map-section {
+      display: grid;
+      gap: 16px;
+    }
+
+    .map-container {
+      position: relative;
+      min-height: clamp(320px, 60vh, 520px);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid rgba(124, 58, 237, 0.18);
+    }
+
+    .map-root {
+      width: 100%;
+      height: 100%;
+    }
+
+    .map-container .leaflet-container {
+      width: 100%;
+      height: 100%;
+      font-family: inherit;
+    }
+
+    .map-fallback,
+    .map-warning {
+      background: rgba(124, 58, 237, 0.08);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      color: var(--muted);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .map-warning {
+      background: rgba(245, 158, 11, 0.14);
+      color: #b45309;
+    }
+
+    .map-popup {
+      display: grid;
+      gap: 8px;
+      max-width: 240px;
+    }
+
+    .map-popup__title {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .map-popup__address {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .map-popup__thumb {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid rgba(124, 58, 237, 0.3);
+    }
+
+    .map-popup__thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .map-popup__actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .map-popup__link {
+      color: var(--primary);
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-decoration: none;
+    }
+
+    .map-popup__content {
+      display: grid;
+      gap: 6px;
     }
 
     .calendar-month {
@@ -1595,6 +1693,11 @@
                   :aria-pressed="vista === 'agenda'"
                   @click="vista = 'agenda'"
                 >Vista agenda</button>
+                <button
+                  type="button"
+                  :aria-pressed="vista === 'map'"
+                  @click="vista = 'map'"
+                >Mapa</button>
               </div>
             </div>
           </div>
@@ -1734,6 +1837,35 @@
               </article>
               <p v-if="!diasDelMes.length" class="empty">No hay eventos programados para este mes.</p>
               </div>
+            </template>
+            <template v-else-if="vista === 'map'">
+              <section class="map-section" aria-labelledby="calendar-title">
+                <!-- Para nuevos shows: incluye title, address y flyerUrl. lat, lng y permalink son opcionales. -->
+                <!-- Usa direcciones de Bogotá para que se puedan geocodificar en este mapa. -->
+                <div v-if="mapError" class="map-fallback" role="alert">{{ mapError }}</div>
+                <div
+                  v-else
+                  class="map-container"
+                  role="region"
+                  aria-live="polite"
+                  aria-label="Mapa de shows de impro en Bogotá"
+                >
+                  <div ref="mapContainer" class="map-root" tabindex="0"></div>
+                </div>
+                <p v-if="!mapReady && !mapError" class="map-fallback" role="status">
+                  Cargando mapa de shows…
+                </p>
+                <p
+                  v-if="mapReady && !mapError && !bogotaEventos.length"
+                  class="map-fallback"
+                  role="status"
+                >
+                  No hay eventos de Bogotá con ubicación disponible en este momento.
+                </p>
+                <div v-if="mapWarnings.length" class="map-warning" role="status">
+                  Algunos shows no pudieron ubicarse: {{ mapWarnings.join(', ') }}.
+                </div>
+              </section>
             </template>
             <div v-else class="agenda-view" aria-labelledby="calendar-title">
               <section class="filters-card" :class="{ 'is-collapsed': !filtersExpanded }">
@@ -1901,11 +2033,16 @@
     crossorigin="anonymous"
     referrerpolicy="no-referrer"
   ></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
   <script>
   const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwoCLUfEiRjnmzumQ-Qs82vLUMpfTWHuemY8W6NODHVhGskbdQQHh-rIHKJUpS0cPCSxQ/exec";
   const PLACEHOLDER_IMAGE =
     "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA4MDAgNDUwJz4KPHJlY3QgZmlsbD0nI2VkZTlmZScgd2lkdGg9JzgwMCcgaGVpZ2h0PSc0NTAnLz4KPHRleHQgeD0nNTAlJyB5PSc1MCUnIGZpbGw9JyM3YzNhZWQnIGZvbnQtZmFtaWx5PSdJbnRlciwgQXJpYWwsIHNhbnMtc2VyaWYnIGZvbnQtc2l6ZT0nNDgnIHRleHQtYW5jaG9yPSdtaWRkbGUnIGRvbWluYW50LWJhc2VsaW5lPSdtaWRkbGUnPlNpbiBpbWFnZW48L3RleHQ+Cjwvc3ZnPg==";
+
+  const BOGOTA_COORDS = { lat: 4.711, lng: -74.0721 };
+  const GEOCODE_STORAGE_PREFIX = "agenda-geocode:";
+  const GEOCODE_INTERVAL = 1000;
 
   function val(x) {
     return x === undefined || x === null ? "" : String(x).trim();
@@ -1920,6 +2057,15 @@
     const d = new Date(v);
     if (isNaN(d)) return "";
     return d.toISOString().split("T")[0];
+  }
+
+  function escapeHtml(value) {
+    return String(value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
   }
 
   const monthFormatterCache = new Map();
@@ -2108,6 +2254,40 @@
     const lugar = val(ev.Lugar);
     const compania = val(ev.Compania) || val(ev["Compañía"]);
     const descripcion = val(ev.Descripcion) || val(ev.Descripción) || "";
+    const direccion =
+      val(ev.Direccion) ||
+      val(ev["Dirección"]) ||
+      val(ev.DireccionLugar) ||
+      val(ev.DireccionEvento) ||
+      val(ev.Address) ||
+      val(ev.Ubicacion) ||
+      val(ev["Ubicación"]) ||
+      "";
+    const permalink =
+      val(ev.Permalink) ||
+      val(ev.URL) ||
+      val(ev.Link) ||
+      val(ev.LinkEvento) ||
+      val(ev["Link evento"]) ||
+      val(ev.Enlace) ||
+      "";
+    const rawLat =
+      ev.Latitud ??
+      ev.latitud ??
+      ev.lat ??
+      ev.Latitude ??
+      (ev.latLng && (ev.latLng.lat ?? ev.latLng.Lat));
+    const rawLng =
+      ev.Longitud ??
+      ev.longitud ??
+      ev.lng ??
+      ev.Lng ??
+      ev.Longitude ??
+      (ev.latLng && (ev.latLng.lng ?? ev.latLng.Lng));
+    const parsedLat = Number.parseFloat(rawLat);
+    const parsedLng = Number.parseFloat(rawLng);
+    const lat = Number.isFinite(parsedLat) ? parsedLat : null;
+    const lng = Number.isFinite(parsedLng) ? parsedLng : null;
     const imageCandidates = buildImageCandidates(ev);
     const promoCandidates = driveImageCandidates(val(ev.PiezaPromocional));
     const piezaCands = promoCandidates.length ? promoCandidates : imageCandidates;
@@ -2132,6 +2312,7 @@
         val(ev.Director),
         val(ev.Sinopsis),
         descripcion,
+        direccion,
       ].join(" ")
     );
 
@@ -2159,10 +2340,14 @@
       imageCandidates,
       piezaCands,
       searchText,
+      direccion,
+      permalink,
+      lat,
+      lng,
     };
   }
 
-  const { createApp, ref, reactive, computed, onMounted, watch, onBeforeUnmount } = Vue;
+  const { createApp, ref, reactive, computed, onMounted, watch, onBeforeUnmount, nextTick } = Vue;
 
   createApp({
     setup() {
@@ -2191,6 +2376,18 @@
       const flyerDialog = ref(null);
       const flyerDialogData = reactive({ title: "", alt: "", meta: "", candidates: [] });
       let lastFlyerTrigger = null;
+      const mapContainer = ref(null);
+      const mapReady = ref(false);
+      const mapError = ref("");
+      const mapWarnings = ref([]);
+      const eventLocations = reactive({});
+      const mapWarningEntries = new Map();
+      let mapInstance = null;
+      let mapMarkersLayer = null;
+      const geocodeQueue = [];
+      let geocodeProcessing = false;
+      let lastGeocodeTime = 0;
+      const geocodeFailedAddresses = new Set();
 
       const resetFlyerDialog = () => {
         flyerDialogData.title = "";
@@ -2244,6 +2441,278 @@
       };
 
       const eventosPublicados = computed(() => lista.value.filter((ev) => ev.estado !== "Despublicado"));
+
+      const bogotaEventos = computed(() =>
+        eventosPublicados.value.filter((ev) => {
+          const city = normalizeText(ev.ciudad);
+          const address = normalizeText(ev.direccion || ev.lugar || ev.lugarLabel);
+          return city.includes("bogota") || address.includes("bogota");
+        })
+      );
+
+      const syncMapWarnings = () => {
+        mapWarnings.value = Array.from(mapWarningEntries.values());
+      };
+
+      const setMapWarning = (key, message) => {
+        if (message) {
+          mapWarningEntries.set(key, message);
+        } else {
+          mapWarningEntries.delete(key);
+        }
+        syncMapWarnings();
+      };
+
+      const hasValidCoords = (lat, lng) => Number.isFinite(lat) && Number.isFinite(lng);
+
+      const geocodeCacheKey = (address) => `${GEOCODE_STORAGE_PREFIX}${address}`;
+
+      const readGeocodeCache = (address) => {
+        if (!address || typeof localStorage === "undefined") return null;
+        try {
+          const raw = localStorage.getItem(geocodeCacheKey(address));
+          if (!raw) return null;
+          const parsed = JSON.parse(raw);
+          const lat = Number(parsed.lat);
+          const lng = Number(parsed.lng);
+          if (hasValidCoords(lat, lng)) {
+            return { lat, lng };
+          }
+        } catch (err) {
+          console.warn("No se pudo leer la caché de geocodificación", err);
+        }
+        return null;
+      };
+
+      const writeGeocodeCache = (address, coords) => {
+        if (!address || typeof localStorage === "undefined") return;
+        try {
+          localStorage.setItem(
+            geocodeCacheKey(address),
+            JSON.stringify({ lat: coords.lat, lng: coords.lng })
+          );
+        } catch (err) {
+          console.warn("No se pudo guardar la caché de geocodificación", err);
+        }
+      };
+
+      const getEventAddress = (ev) => {
+        const base = val(ev.direccion) || val(ev.lugar) || val(ev.lugarLabel);
+        return base ? base : "";
+      };
+
+      const geocodeAddress = async (address) => {
+        const query = `${address}, Bogotá, Colombia`;
+        const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(
+          query
+        )}`;
+        const response = await fetch(url, {
+          headers: {
+            "Accept-Language": "es",
+          },
+        });
+        if (!response.ok) {
+          return null;
+        }
+        const results = await response.json();
+        if (!Array.isArray(results) || !results.length) {
+          return null;
+        }
+        const first = results[0];
+        const lat = Number.parseFloat(first.lat);
+        const lng = Number.parseFloat(first.lon);
+        if (!hasValidCoords(lat, lng)) {
+          return null;
+        }
+        return { lat, lng };
+      };
+
+      const ensureMap = () => {
+        if (mapError.value) return;
+        const container = mapContainer.value;
+        if (!container) {
+          mapError.value = "No encontramos el contenedor del mapa.";
+          return;
+        }
+        if (typeof L === "undefined") {
+          mapError.value = "No pudimos cargar Leaflet. Revisa tu conexión.";
+          return;
+        }
+        if (!mapInstance) {
+          try {
+            mapInstance = L.map(container, { scrollWheelZoom: true, keyboard: true });
+            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+              maxZoom: 19,
+              attribution:
+                '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            }).addTo(mapInstance);
+            mapMarkersLayer = L.layerGroup().addTo(mapInstance);
+            mapInstance.setView([BOGOTA_COORDS.lat, BOGOTA_COORDS.lng], 12);
+            mapReady.value = true;
+          } catch (err) {
+            console.error("No fue posible inicializar el mapa", err);
+            mapError.value = "No fue posible inicializar el mapa en este navegador.";
+          }
+        } else {
+          mapReady.value = true;
+          mapInstance.invalidateSize();
+        }
+      };
+
+      const updateMapMarkers = () => {
+        if (!mapInstance || !mapMarkersLayer) return;
+        mapMarkersLayer.clearLayers();
+        const boundsPoints = [];
+        for (const ev of bogotaEventos.value) {
+          const coords = eventLocations[ev.id];
+          if (!coords || !hasValidCoords(coords.lat, coords.lng)) {
+            continue;
+          }
+          const marker = L.marker([coords.lat, coords.lng], { keyboard: true, title: ev.nombre });
+          const title = escapeHtml(ev.nombre);
+          const address = escapeHtml(getEventAddress(ev) || "Dirección por confirmar");
+          const imageSrc = escapeHtml(ev.flyerUrl || PLACEHOLDER_IMAGE);
+          const altText = escapeHtml(`Flyer de ${ev.nombre}`);
+          const permalink = val(ev.permalink);
+          const linkHtml = permalink
+            ? `<div class="map-popup__actions"><a class="map-popup__link" href="${escapeHtml(
+                permalink
+              )}" target="_blank" rel="noopener">Ver más</a></div>`
+            : "";
+          const popupHtml = `
+            <div class="map-popup">
+              <div class="map-popup__thumb"><img src="${imageSrc}" alt="${altText}" loading="lazy" decoding="async" /></div>
+              <div class="map-popup__content">
+                <h3 class="map-popup__title">${title}</h3>
+                <p class="map-popup__address">${address}</p>
+                ${linkHtml}
+              </div>
+            </div>
+          `;
+          marker.bindPopup(popupHtml, { maxWidth: 260, closeButton: true });
+          marker.on("add", () => {
+            const el = marker.getElement();
+            if (el) {
+              el.setAttribute("tabindex", "0");
+              el.setAttribute("role", "button");
+              el.setAttribute("aria-label", `Ver detalles de ${ev.nombre}`);
+            }
+          });
+          mapMarkersLayer.addLayer(marker);
+          boundsPoints.push(marker.getLatLng());
+        }
+        if (boundsPoints.length) {
+          const bounds = L.latLngBounds(boundsPoints);
+          mapInstance.fitBounds(bounds, { padding: [32, 32] });
+        } else {
+          mapInstance.setView([BOGOTA_COORDS.lat, BOGOTA_COORDS.lng], 12);
+        }
+      };
+
+      const processGeocodeQueue = () => {
+        if (geocodeProcessing) return;
+        if (vista.value !== "map") return;
+        if (!geocodeQueue.length) return;
+        geocodeProcessing = true;
+        const now = Date.now();
+        const delay = Math.max(0, GEOCODE_INTERVAL - (now - lastGeocodeTime));
+        setTimeout(async () => {
+          const item = geocodeQueue.shift();
+          if (!item) {
+            geocodeProcessing = false;
+            return;
+          }
+          try {
+            const coords = await geocodeAddress(item.address);
+            if (coords && hasValidCoords(coords.lat, coords.lng)) {
+              eventLocations[item.eventId] = coords;
+              writeGeocodeCache(item.address, coords);
+              geocodeFailedAddresses.delete(item.address);
+              setMapWarning(`geocode:${item.address}`, null);
+            } else {
+              geocodeFailedAddresses.add(item.address);
+              setMapWarning(`geocode:${item.address}`, item.label);
+              console.warn(`No se pudo geocodificar la dirección: ${item.address}`);
+            }
+          } catch (err) {
+            geocodeFailedAddresses.add(item.address);
+            setMapWarning(`geocode:${item.address}`, item.label);
+            console.warn(`No se pudo geocodificar la dirección: ${item.address}`, err);
+          } finally {
+            lastGeocodeTime = Date.now();
+            geocodeProcessing = false;
+            updateMapMarkers();
+            processGeocodeQueue();
+          }
+        }, delay);
+      };
+
+      const prepareMapLocations = () => {
+        const events = bogotaEventos.value;
+        const activeIds = new Set(events.map((ev) => ev.id));
+        const activeAddresses = new Set(events.map((ev) => getEventAddress(ev)).filter(Boolean));
+        const staleWarningKeys = [];
+        for (const key of mapWarningEntries.keys()) {
+          if (key.startsWith("address:")) {
+            const id = key.slice("address:".length);
+            if (!activeIds.has(id)) {
+              staleWarningKeys.push(key);
+            }
+          } else if (key.startsWith("geocode:")) {
+            const address = key.slice("geocode:".length);
+            if (address && !activeAddresses.has(address)) {
+              staleWarningKeys.push(key);
+            }
+          }
+        }
+        for (const key of staleWarningKeys) {
+          mapWarningEntries.delete(key);
+        }
+        syncMapWarnings();
+        for (const address of Array.from(geocodeFailedAddresses)) {
+          if (!activeAddresses.has(address)) {
+            geocodeFailedAddresses.delete(address);
+          }
+        }
+        for (const key of Object.keys(eventLocations)) {
+          if (!activeIds.has(key)) {
+            delete eventLocations[key];
+          }
+        }
+        for (const ev of events) {
+          const stored = eventLocations[ev.id];
+          if (stored && hasValidCoords(stored.lat, stored.lng)) {
+            continue;
+          }
+          if (hasValidCoords(ev.lat, ev.lng)) {
+            eventLocations[ev.id] = { lat: ev.lat, lng: ev.lng };
+            setMapWarning(`address:${ev.id}`, null);
+            continue;
+          }
+          const address = getEventAddress(ev);
+          if (!address) {
+            setMapWarning(`address:${ev.id}`, `${ev.nombre} (sin dirección)`);
+            continue;
+          }
+          setMapWarning(`address:${ev.id}`, null);
+          const cached = readGeocodeCache(address);
+          if (cached && hasValidCoords(cached.lat, cached.lng)) {
+            eventLocations[ev.id] = cached;
+            setMapWarning(`geocode:${address}`, null);
+            continue;
+          }
+          if (geocodeFailedAddresses.has(address)) {
+            setMapWarning(`geocode:${address}`, `${ev.nombre} (${address})`);
+            continue;
+          }
+          if (!geocodeQueue.some((item) => item.eventId === ev.id)) {
+            geocodeQueue.push({ eventId: ev.id, address, label: `${ev.nombre} (${address})` });
+          }
+        }
+        if (vista.value === "map") {
+          processGeocodeQueue();
+        }
+      };
 
       const eventosFiltrados = computed(() => {
         const q = normalizeText(filters.search);
@@ -2484,6 +2953,40 @@
 
       watch(paisOptions, applyDetectedCountry);
 
+      watch(
+        bogotaEventos,
+        () => {
+          if (vista.value !== "map") return;
+          prepareMapLocations();
+          nextTick(() => {
+            ensureMap();
+            updateMapMarkers();
+          });
+        },
+        { deep: true }
+      );
+
+      watch(
+        eventLocations,
+        () => {
+          if (vista.value === "map") {
+            updateMapMarkers();
+          }
+        },
+        { deep: true }
+      );
+
+      watch(vista, (value) => {
+        if (value === "map") {
+          nextTick(() => {
+            ensureMap();
+            prepareMapLocations();
+            updateMapMarkers();
+            processGeocodeQueue();
+          });
+        }
+      });
+
       const downloadAgendaPdf = async () => {
         if (typeof window === "undefined") return;
         if (typeof html2pdf === "undefined") {
@@ -2714,6 +3217,11 @@
         closeFlyer,
         flyerDialogData,
         flyerDialog,
+        mapContainer,
+        mapReady,
+        mapError,
+        mapWarnings,
+        bogotaEventos,
       };
     }
   })
