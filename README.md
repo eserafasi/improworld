@@ -30,6 +30,17 @@ Esto iniciará un servidor local en `http://127.0.0.1:8000` con los siguientes r
 
 Ambas páginas se comunican con el backend vía WebSockets y peticiones HTTP para mantenerse sincronizadas entre todos los participantes.
 
+### Código de conducta
+
+Inspirado por la filosofía de la [GNU GPLv3](LICENSE) y por el objetivo de **Motores** de facilitar la improvisación colectiva, esperamos que todas las personas que colaboren con el proyecto mantengan un entorno abierto, seguro y respetuoso. En particular:
+
+- **Respeto y colaboración.** Escucha y valora las ideas de las demás personas. Aporta comentarios constructivos y evita cualquier forma de discriminación, acoso o lenguaje ofensivo.
+- **Compartir y atribuir.** El proyecto es software libre; cualquier mejora o redistribución debe mantener la misma licencia y reconocer el trabajo previo. Cita adecuadamente a quienes contribuyan con código, documentación o contenido creativo.
+- **Privacidad y consentimiento.** Las sesiones de improvisación pueden incluir ideas sensibles. No compartas contenidos generados por otras personas sin su autorización explícita y gestiona cualquier dato personal con cuidado.
+- **Responsabilidad colectiva.** Si observas un comportamiento que vulnere este código, comunícalo mediante los canales disponibles en el repositorio (issues, discusiones o contacto directo) para que podamos abordarlo conjuntamente.
+
+Al participar en el proyecto aceptas seguir este código de conducta. La infracción de estas pautas puede derivar en advertencias, limitaciones de participación o expulsión de la comunidad, según la gravedad de la situación.
+
 ### Despliegue en Netlify
 
 El sitio puede servirse como un _static site_ desde Netlify. La carpeta `public/` contiene todas las páginas HTML y recursos necesarios, mientras que el WebSocket se ejecuta como una Edge Function en `netlify/edge-functions/socket.js`.
