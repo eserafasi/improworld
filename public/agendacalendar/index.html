@@ -2052,6 +2052,37 @@
     return t ? t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : "";
   }
 
+  function sanitizeAddressPart(value) {
+    const raw = val(value);
+    if (!raw) return "";
+    const replacements = [
+      [/\bCra\.?\b/gi, "Carrera"],
+      [/\bCr\.?\b/gi, "Carrera"],
+      [/\bCrr\.?\b/gi, "Carrera"],
+      [/\bCl\.?\b/gi, "Calle"],
+      [/\bCll\.?\b/gi, "Calle"],
+      [/\bAv\.?\b/gi, "Avenida"],
+      [/\bTv\.?\b/gi, "Transversal"],
+      [/\bTrv\.?\b/gi, "Transversal"],
+      [/\bTrans\.?\b/gi, "Transversal"],
+      [/\bDiag\.?\b/gi, "Diagonal"],
+      [/\bDg\.?\b/gi, "Diagonal"],
+      [/\bAk\.?\b/gi, "Avenida"],
+      [/\bNo\.?\s*/gi, "# "],
+    ];
+    let clean = raw.replace(/[()]/g, " ");
+    for (const [pattern, replacement] of replacements) {
+      clean = clean.replace(pattern, replacement);
+    }
+    clean = clean
+      .replace(/\s*#\s*/g, " #")
+      .replace(/\s+-\s+/g, " - ")
+      .replace(/\s*,\s*/g, ", ")
+      .replace(/\s+/g, " ")
+      .trim();
+    return clean;
+  }
+
   function formatIsoDate(v) {
     if (!v) return "";
     const d = new Date(v);
@@ -2496,13 +2527,52 @@
         }
       };
 
-      const getEventAddress = (ev) => {
-        const base = val(ev.direccion) || val(ev.lugar) || val(ev.lugarLabel);
-        return base ? base : "";
+      const buildEventAddressParts = (ev) => {
+        const parts = [];
+        const seen = new Set();
+        const placeholder = normalizeText("Ubicación por confirmar");
+        const sameValue = (a, b) => normalizeText(val(a)) === normalizeText(val(b));
+        const pushPart = (value) => {
+          const clean = sanitizeAddressPart(value);
+          if (!clean) return;
+          const normalized = normalizeText(clean);
+          if (!normalized || normalized === placeholder || seen.has(normalized)) return;
+          seen.add(normalized);
+          parts.push(clean);
+        };
+
+        pushPart(ev.lugar);
+        pushPart(ev.direccion);
+        if (!sameValue(ev.lugarLabel, ev.lugar)) {
+          pushPart(ev.lugarLabel);
+        }
+
+        if (!parts.length) {
+          return [];
+        }
+
+        pushPart(ev.ciudad);
+        pushPart(ev.pais);
+
+        return parts;
       };
 
+      const getEventAddress = (ev) => buildEventAddressParts(ev).join(", ");
+
       const geocodeAddress = async (address) => {
-        const query = `${address}, Bogotá, Colombia`;
+        const cleanAddress = sanitizeAddressPart(address);
+        const parts = [];
+        if (cleanAddress) {
+          parts.push(cleanAddress);
+        }
+        const normalized = normalizeText(cleanAddress);
+        if (!normalized.includes("bogota")) {
+          parts.push("Bogotá");
+        }
+        if (!normalized.includes("colombia")) {
+          parts.push("Colombia");
+        }
+        const query = parts.join(", ");
         const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(
           query
         )}`;
